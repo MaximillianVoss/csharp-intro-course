@@ -1,0 +1,222 @@
+{
+  "schema_version": 1,
+  "status": "course_content_verified",
+  "verified_at_utc": "2026-10-17T17:45:48.954298+00:00",
+  "repository_url": "https://github.com/MaximillianVoss/csharp-intro-course",
+  "visibility": "public",
+  "verified_course_content_commit": "db48d4ed29ad39f8ff91fb9d20879c3c9eff5e8c",
+  "scope": {
+    "modules": 16,
+    "tasks": 240,
+    "levels": {
+      "1": 80,
+      "2": 80,
+      "3": 80
+    },
+    "target_framework": "net10.0",
+    "language": "C# 14"
+  },
+  "anonymous_clean_clone": {
+    "commit": "db48d4ed29ad39f8ff91fb9d20879c3c9eff5e8c",
+    "https_without_credentials": true,
+    "tracked_files_unchanged_after_checks": true,
+    "verification": {
+      "sdk": "10.0.402",
+      "platform": "Microsoft Windows 10.0.26300",
+      "release_build": "passed_with_warnings_as_errors",
+      "mstest": {
+        "total": 49,
+        "passed": 49,
+        "failed": 0
+      },
+      "lessons": [
+        {
+          "lesson": 1,
+          "tasks": 15,
+          "assertions": 73,
+          "example": "passed",
+          "templates": "compiled_and_listed_only"
+        },
+        {
+          "lesson": 2,
+          "tasks": 15,
+          "assertions": 108,
+          "example": "passed",
+          "templates": "compiled_and_listed_only"
+        },
+        {
+          "lesson": 3,
+          "tasks": 15,
+          "assertions": 88,
+          "example": "passed",
+          "templates": "compiled_and_listed_only"
+        },
+        {
+          "lesson": 4,
+          "tasks": 15,
+          "assertions": 125,
+          "example": "passed",
+          "templates": "compiled_and_listed_only"
+        },
+        {
+          "lesson": 5,
+          "tasks": 15,
+          "assertions": 113,
+          "example": "passed",
+          "templates": "compiled_and_listed_only"
+        },
+        {
+          "lesson": 6,
+          "tasks": 15,
+          "assertions": 73,
+          "example": "passed",
+          "templates": "compiled_and_listed_only"
+        },
+        {
+          "lesson": 7,
+          "tasks": 15,
+          "assertions": 72,
+          "example": "passed",
+          "templates": "compiled_and_listed_only"
+        },
+        {
+          "lesson": 8,
+          "tasks": 15,
+          "assertions": 120,
+          "example": "passed",
+          "templates": "compiled_and_listed_only"
+        },
+        {
+          "lesson": 9,
+          "tasks": 15,
+          "assertions": 68,
+          "example": "passed",
+          "templates": "compiled_and_listed_only"
+        },
+        {
+          "lesson": 10,
+          "tasks": 15,
+          "assertions": 87,
+          "example": "passed",
+          "templates": "compiled_and_listed_only"
+        },
+        {
+          "lesson": 11,
+          "tasks": 15,
+          "assertions": 146,
+          "example": "passed",
+          "templates": "compiled_and_listed_only"
+        },
+        {
+          "lesson": 12,
+          "tasks": 15,
+          "assertions": 118,
+          "example": "passed",
+          "templates": "compiled_and_listed_only"
+        },
+        {
+          "lesson": 13,
+          "tasks": 15,
+          "assertions": 126,
+          "example": "passed",
+          "templates": "compiled_and_listed_only"
+        },
+        {
+          "lesson": 14,
+          "tasks": 15,
+          "assertions": 88,
+          "example": "passed",
+          "templates": "compiled_and_listed_only"
+        },
+        {
+          "lesson": 15,
+          "tasks": 15,
+          "assertions": 120,
+          "example": "passed",
+          "templates": "compiled_and_listed_only"
+        },
+        {
+          "lesson": 16,
+          "tasks": 15,
+          "assertions": 110,
+          "example": "passed",
+          "templates": "compiled_and_listed_only"
+        }
+      ],
+      "tasks": 240,
+      "assertions": 1635,
+      "examples": 16,
+      "template_projects": 16,
+      "templates_claimed_solved": false
+    },
+    "cli_scenarios": 15,
+    "content_audit_passed": true
+  },
+  "github_actions": {
+    "url": "https://github.com/MaximillianVoss/csharp-intro-course/actions/runs/39054980068",
+    "run_id": 39054980068,
+    "commit": "db48d4ed29ad39f8ff91fb9d20879c3c9eff5e8c",
+    "conclusion": "success",
+    "platforms": [
+      {
+        "job": "evidence-ubuntu-latest",
+        "sdk": "10.0.402",
+        "platform": "Ubuntu 24.04.5 LTS",
+        "tasks": 240,
+        "assertions": 1635,
+        "examples": 16,
+        "mstest": {
+          "total": 49,
+          "passed": 49,
+          "failed": 0
+        }
+      },
+      {
+        "job": "evidence-windows-latest",
+        "sdk": "10.0.402",
+        "platform": "Microsoft Windows 10.0.26100",
+        "tasks": 240,
+        "assertions": 1635,
+        "examples": 16,
+        "mstest": {
+          "total": 49,
+          "passed": 49,
+          "failed": 0
+        }
+      }
+    ]
+  },
+  "semantic_audit": {
+    "review_complete": true,
+    "candidates": 3,
+    "unreviewed": 0,
+    "report": "docs/DIVERSITY_REPORT.md",
+    "decisions": "docs/SEMANTIC_REVIEW.json"
+  },
+  "independent_review": {
+    "report": "docs/INDEPENDENT_REVIEW.md",
+    "open_findings": 0
+  },
+  "browser_review": {
+    "commit": "db48d4ed29ad39f8ff91fb9d20879c3c9eff5e8c",
+    "pages": [
+      "README.md",
+      "lessons/lesson_15_async/TASKS.md#15-13",
+      "lessons/lesson_12_generics/SOLUTIONS.md#12-07"
+    ],
+    "generic_type_names_and_anchor_navigation": "verified"
+  },
+  "not_claimed": [
+    "Visual Studio GUI/F5/Test Explorer run",
+    "macOS execution",
+    "solved student template bodies",
+    "multi-writer or power-loss durability guarantees"
+  ],
+  "reproduce": [
+    "python tools/render_course.py --check --strict",
+    "pwsh -NoProfile -File tools/Verify.ps1",
+    "python tools/cli_smoke.py",
+    "python tools/audit_course.py"
+  ],
+  "receipt_note": "Этот файл и дополненный отчёт проверки добавлены следующим коммитом. Проверенный SHA учебного содержимого указан выше; окончательный SHA публикации и архива сохранён в RESULT.json комплекта сдачи вне репозитория."
+}
