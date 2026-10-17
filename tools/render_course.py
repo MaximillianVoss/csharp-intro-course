@@ -1,6 +1,6 @@
 """Render docs/project scaffolds. Teaching C# sources are never generated."""
 from pathlib import Path
-import argparse, json, html
+import argparse, json, html, re
 ROOT = Path(__file__).resolve().parents[1]
 FORMATS = {"implementation":"Реализация", "reading":"Чтение кода", "debugging":"Поиск ошибки",
 "refactoring":"Рефакторинг", "testing":"Проектирование тестов", "mini-project":"Прикладная задача"}
@@ -11,6 +11,13 @@ args=parser.parse_args()
 differences=[]; projects=[]; learner_projects=[]; lessons=[]
 def cell(value):
     return str(value).replace('|','\\|').replace('\n',' ')
+
+def prose(value):
+    # Markdown treats bare <int> and <T> in C# signatures as HTML tags.
+    # Keep fenced/inline code literal, protect angle brackets in ordinary prose.
+    parts=re.split(r"(```[\s\S]*?```|`[^`\n]*`)",str(value))
+    return ''.join(part if i%2 else part.replace('<','&lt;').replace('>','&gt;')
+                   for i,part in enumerate(parts))
 def write(path,content):
     path=ROOT/path; content=content.rstrip()+"\n"
     if args.check:
@@ -43,20 +50,20 @@ for source in sorted((ROOT/"lessons").glob("lesson_*/tasks.json")):
         assert t["format"] in FORMATS,t
         ident=t["id"]; table.append(f'| {ident} | {t["level"]} | {FORMATS[t["format"]]} | [{cell(t["title"])}](#{ident}) |')
         conditions += [f'<a id="{ident}"></a>',f'## {ident}. {t["title"]}',"",
-        f'Уровень {t["level"]} · {FORMATS[t["format"]]} · Навык: {t["skill"]}',"",
-        t["statement"],"","**Пример и ожидаемое поведение**","",t["example"],""]
+        f'Уровень {t["level"]} · {FORMATS[t["format"]]} · Навык: {prose(t["skill"])}',"",
+        prose(t["statement"]),"","**Пример и ожидаемое поведение**","",prose(t["example"]),""]
         src=f"solutions/Task{i:02}.cs"
         if (args.strict or args.check) and not (ROOT/folder/src).exists():
             raise FileNotFoundError(ROOT/folder/src)
         code=(ROOT/folder/src).read_text(encoding="utf-8-sig") if (ROOT/folder/src).exists() else "// Source is being authored."
-        answers += [f'<a id="{ident}"></a>',f'## {ident}. {t["title"]}',"",t["solution"],"",
-        "**Ход решения**","",t["reasoning"],"","**Частая ошибка**","",t["pitfalls"],"",
+        answers += [f'<a id="{ident}"></a>',f'## {ident}. {t["title"]}',"",prose(t["solution"]),"",
+        "**Ход решения**","",prose(t["reasoning"]),"","**Частая ошибка**","",prose(t["pitfalls"]),"",
         f"Полный исходник: [{src}]({src}).","","```csharp",code.rstrip(),"```","",
-        "**Исполняемые проверки**",""]+["- "+s for s in t["checks"]]+[""]
+        "**Исполняемые проверки**",""]+["- "+prose(s) for s in t["checks"]]+[""]
     conditions[8:8]=table+[""]
     write(folder/"TASKS.md","\n".join(conditions)); write(folder/"SOLUTIONS.md","\n".join(answers))
     prereqs=", ".join(str(p) for p in lesson["prerequisites"]) or "не требуются"
-    outcomes="\n".join("- "+x for x in lesson["outcomes"])
+    outcomes="\n".join("- "+prose(x) for x in lesson["outcomes"])
     readme=f"""# Урок {n}. {title}
 
 Предыдущие модули: {prereqs}. Рекомендуемый объём: 2–3 встречи по 90 минут и самостоятельная практика.

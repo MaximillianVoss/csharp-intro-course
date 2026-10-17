@@ -27,20 +27,20 @@
 <a id="15-01"></a>
 ## 15-01. Ожидание результата функции
 
-Уровень 1 · Реализация · Навык: await разворачивает Task<T> и сохраняет ошибки
+Уровень 1 · Реализация · Навык: await разворачивает Task&lt;T&gt; и сохраняет ошибки
 
-Реализуйте async Task<int> TransformAsync(int value,Func<int,Task<int>> transform). Вызовите transform ровно один раз и верните его результат после завершения. null transform — ArgumentNullException при await результата метода. Ошибки зависимости распространяются; работа метода не считается завершённой до завершения зависимости. В тестах не используйте задержки и сеть.
+Реализуйте async Task&lt;int&gt; TransformAsync(int value,Func&lt;int,Task&lt;int&gt;&gt; transform). Вызовите transform ровно один раз и верните его результат после завершения. null transform — ArgumentNullException при await результата метода. Ошибки зависимости распространяются; работа метода не считается завершённой до завершения зависимости. В тестах не используйте задержки и сеть.
 
 **Пример и ожидаемое поведение**
 
-value=3, transform=x=>Task.FromResult(x*2) → await даёт 6; незавершённый Task оставляет внешний Task незавершённым.
+value=3, transform=x=&gt;Task.FromResult(x*2) → await даёт 6; незавершённый Task оставляет внешний Task незавершённым.
 
 <a id="15-02"></a>
 ## 15-02. Асинхронный файловый round trip
 
 Уровень 1 · Реализация · Навык: Асинхронное I/O и токен отмены
 
-Реализуйте Task<string> RoundTripAsync(string path,string text,CancellationToken token=default). Запишите text в path в UTF-8 и после завершения записи прочитайте тот же файл асинхронно. null text — ArgumentNullException, null/пустой/пробельный path — ArgumentException. Заранее отменённый token должен прервать операцию до записи. Прочие ошибки файловой системы распространяются. Вызывающий владеет путём; тест создаёт уникальный временный каталог и удаляет в finally. Никаких реальных документов пользователя.
+Реализуйте Task&lt;string&gt; RoundTripAsync(string path,string text,CancellationToken token=default). Запишите text в path в UTF-8 и после завершения записи прочитайте тот же файл асинхронно. null text — ArgumentNullException, null/пустой/пробельный path — ArgumentException. Заранее отменённый token должен прервать операцию до записи. Прочие ошибки файловой системы распространяются. Вызывающий владеет путём; тест создаёт уникальный временный каталог и удаляет в finally. Никаких реальных документов пользователя.
 
 **Пример и ожидаемое поведение**
 
@@ -52,7 +52,7 @@ value=3, transform=x=>Task.FromResult(x*2) → await даёт 6; незавер�
 
 Уровень 1 · Чтение кода · Навык: Синхронное начало async-метода
 
-Определите порядок trace и реализуйте async Task<string[]> ObserveAsync(), воспроизводящий фрагмент:
+Определите порядок trace и реализуйте async Task&lt;string[]&gt; ObserveAsync(), воспроизводящий фрагмент:
 ```csharp
 var trace = new List<string>();
 var gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -71,9 +71,9 @@ ObserveAsync → массив из трёх фактических записе�
 <a id="15-04"></a>
 ## 15-04. Исправление блокирующего чтения результата
 
-Уровень 1 · Поиск ошибки · Навык: Task<int> и int — разные типы; ожидание через await
+Уровень 1 · Поиск ошибки · Навык: Task&lt;int&gt; и int — разные типы; ожидание через await
 
-Исправьте метод с сигнатурой Task<int> DoubleAsync(Task<int> input). Исходник не компилируется:
+Исправьте метод с сигнатурой Task&lt;int&gt; DoubleAsync(Task&lt;int&gt; input). Исходник не компилируется:
 ```csharp
 static Task<int> DoubleAsync(Task<int> input)
 {
@@ -91,7 +91,7 @@ Task.FromResult(4) → await DoubleAsync даёт 8; int.MaxValue → OverflowEx
 
 Уровень 1 · Реализация · Навык: Кооперативная отмена и передача токена
 
-Реализуйте Task<int> LengthAsync(Func<CancellationToken,Task<string>> load,CancellationToken token=default). Если token уже отменён, load не вызывается. Иначе передайте ему тот же token, дождитесь строки, снова проверьте отмену и верните Length. null load — ArgumentNullException, null-результат — InvalidOperationException; другие ошибки распространяются. Отмена, произошедшая внутри load даже при успешной строке, должна наблюдаться после await.
+Реализуйте Task&lt;int&gt; LengthAsync(Func&lt;CancellationToken,Task&lt;string&gt;&gt; load,CancellationToken token=default). Если token уже отменён, load не вызывается. Иначе передайте ему тот же token, дождитесь строки, снова проверьте отмену и верните Length. null load — ArgumentNullException, null-результат — InvalidOperationException; другие ошибки распространяются. Отмена, произошедшая внутри load даже при успешной строке, должна наблюдаться после await.
 
 **Пример и ожидаемое поведение**
 
@@ -102,7 +102,7 @@ load возвращает "abc" → 3; load сначала отменяет пе
 
 Уровень 2 · Реализация · Навык: WhenAll не сортирует по времени завершения
 
-Реализуйте Task<int[]> RunAllAsync(Func<Task<int>>[] factories). Проверьте весь массив до первого запуска: null массив/элемент — ArgumentException. Запустите каждую фабрику ровно один раз в порядке массива, затем ожидайте все. Возвращаемые значения расположены в порядке фабрик, даже если задачи завершились наоборот. Синхронное исключение фабрики должно стать ошибкой соответствующей задачи и не препятствовать запуску следующих фабрик. null Task фабрики — InvalidOperationException; пустой набор даёт [].
+Реализуйте Task&lt;int[]&gt; RunAllAsync(Func&lt;Task&lt;int&gt;&gt;[] factories). Проверьте весь массив до первого запуска: null массив/элемент — ArgumentException. Запустите каждую фабрику ровно один раз в порядке массива, затем ожидайте все. Возвращаемые значения расположены в порядке фабрик, даже если задачи завершились наоборот. Синхронное исключение фабрики должно стать ошибкой соответствующей задачи и не препятствовать запуску следующих фабрик. null Task фабрики — InvalidOperationException; пустой набор даёт [].
 
 **Пример и ожидаемое поведение**
 
@@ -113,7 +113,7 @@ load возвращает "abc" → 3; load сначала отменяет пе
 
 Уровень 2 · Реализация · Навык: WhenAny выбирает задачу, затем нужен второй await
 
-Реализуйте Task<string> FirstAsync(Task<string> first,Task<string> second). Верните результат первой завершившейся задачи; если она ошибочна/отменена, распространяйте её ошибку/отмену, даже когда другая успешна. Если при вызове обе уже завершены, выбирайте first. Обе ссылки не null, иначе ArgumentNullException. Проигравшую задачу не отменяйте и не ожидайте. Вызвавший владеет обеими задачами.
+Реализуйте Task&lt;string&gt; FirstAsync(Task&lt;string&gt; first,Task&lt;string&gt; second). Верните результат первой завершившейся задачи; если она ошибочна/отменена, распространяйте её ошибку/отмену, даже когда другая успешна. Если при вызове обе уже завершены, выбирайте first. Обе ссылки не null, иначе ArgumentNullException. Проигравшую задачу не отменяйте и не ожидайте. Вызвавший владеет обеими задачами.
 
 **Пример и ожидаемое поведение**
 
@@ -124,7 +124,7 @@ first незавершён, second=Task.FromResult("B") → "B"; обе заве
 
 Уровень 2 · Реализация · Навык: catch работает вокруг await, а не только запуска
 
-Реализуйте Task<(bool Success,int Value)> TryReadAsync(Func<Task<int>> read). Успех возвращает (true,value), FormatException — (false,0). Только FormatException считается ожидаемой ошибкой; IOException, отмена и другие исключения распространяются. null read — ArgumentNullException. Перехватывайте и синхронную FormatException фабрики, и ошибку, возникшую после незавершённого await. Не используйте catch(Exception) с возвратом нуля.
+Реализуйте Task&lt;(bool Success,int Value)&gt; TryReadAsync(Func&lt;Task&lt;int&gt;&gt; read). Успех возвращает (true,value), FormatException — (false,0). Только FormatException считается ожидаемой ошибкой; IOException, отмена и другие исключения распространяются. null read — ArgumentNullException. Перехватывайте и синхронную FormatException фабрики, и ошибку, возникшую после незавершённого await. Не используйте catch(Exception) с возвратом нуля.
 
 **Пример и ожидаемое поведение**
 
@@ -135,7 +135,7 @@ Task.FromResult(0) → (true,0); FormatException после await → (false,0);
 
 Уровень 2 · Рефакторинг · Навык: ReadAsync читает часть буфера и не требует Length
 
-Реализуйте Task<long> CountBytesAsync(Stream input,CancellationToken token=default). Считайте оставшиеся байты от текущей позиции до EOF через ReadAsync и буфер из 4 байтов. Stream.Length и Seek использовать нельзя: поток может не поддерживать их. Не закрывайте input. null input — ArgumentNullException; предварительная отмена — OperationCanceledException до чтения. Суммируйте фактическое число прочитанных байтов, не размер буфера. Ошибки чтения распространяются.
+Реализуйте Task&lt;long&gt; CountBytesAsync(Stream input,CancellationToken token=default). Считайте оставшиеся байты от текущей позиции до EOF через ReadAsync и буфер из 4 байтов. Stream.Length и Seek использовать нельзя: поток может не поддерживать их. Не закрывайте input. null input — ArgumentNullException; предварительная отмена — OperationCanceledException до чтения. Суммируйте фактическое число прочитанных байтов, не размер буфера. Ошибки чтения распространяются.
 
 **Пример и ожидаемое поведение**
 
@@ -146,7 +146,7 @@ Task.FromResult(0) → (true,0); FormatException после await → (false,0);
 
 Уровень 2 · Проектирование тестов · Навык: Возвращаемый Task представляет сохранение и уведомление
 
-Реализуйте Task SaveThenNotifyAsync(Func<Task> save,Action notify): await save, затем notify один раз. null зависимости — ArgumentNullException до save. При ошибке save notify не вызывается; ошибка notify распространяется. Напишите тест с незавершённым TaskCompletionSource, который обнаруживает ошибку ниже без Task.Delay:
+Реализуйте Task SaveThenNotifyAsync(Func&lt;Task&gt; save,Action notify): await save, затем notify один раз. null зависимости — ArgumentNullException до save. При ошибке save notify не вызывается; ошибка notify распространяется. Напишите тест с незавершённым TaskCompletionSource, который обнаруживает ошибку ниже без Task.Delay:
 ```csharp
 save(); notify(); return Task.CompletedTask;
 ```
@@ -161,7 +161,7 @@ save(); notify(); return Task.CompletedTask;
 
 Уровень 3 · Реализация · Навык: SemaphoreSlim ограничивает число незавершённых work
 
-Реализуйте Task<int[]> MapBoundedAsync(int[] values,int maximum,Func<int,Task<int>> work,CancellationToken token=default). maximum от 1 до 100, длина values <=1000; неверные значения — ArgumentOutOfRangeException, null зависимости — ArgumentNullException. Одновременно выполняется не более maximum незавершённых work. Каждое значение обрабатывается один раз, результат по исходным индексам. Предварительно отменённый токен не запускает work. Ожидание слота учитывает token; work получает только число. После завершения любого work слот освобождается даже при ошибке. Дождитесь завершения всех созданных операций; ошибки распространяются.
+Реализуйте Task&lt;int[]&gt; MapBoundedAsync(int[] values,int maximum,Func&lt;int,Task&lt;int&gt;&gt; work,CancellationToken token=default). maximum от 1 до 100, длина values &lt;=1000; неверные значения — ArgumentOutOfRangeException, null зависимости — ArgumentNullException. Одновременно выполняется не более maximum незавершённых work. Каждое значение обрабатывается один раз, результат по исходным индексам. Предварительно отменённый токен не запускает work. Ожидание слота учитывает token; work получает только число. После завершения любого work слот освобождается даже при ошибке. Дождитесь завершения всех созданных операций; ошибки распространяются.
 
 **Пример и ожидаемое поведение**
 
@@ -172,7 +172,7 @@ values=[1,2,3], maximum=2: первые две work могут ждать gate, 
 
 Уровень 3 · Реализация · Навык: Retry фильтрует только ожидаемую временную ошибку
 
-Реализуйте Task<string> RetryAsync(Func<CancellationToken,Task<string>> load,int attempts,CancellationToken token=default). attempts от 1 до 5, иначе ArgumentOutOfRangeException; null load — ArgumentNullException. Перед каждой попыткой проверяйте token и передавайте его в load. Повторяйте только IOException, максимум attempts запусков; последняя IOException распространяется. Любая другая ошибка, включая отмену, немедленно прекращает попытки. Возвращается результат первого успеха. Задержек и сети в задаче нет; это алгоритм протокола retry, не настройка production-backoff.
+Реализуйте Task&lt;string&gt; RetryAsync(Func&lt;CancellationToken,Task&lt;string&gt;&gt; load,int attempts,CancellationToken token=default). attempts от 1 до 5, иначе ArgumentOutOfRangeException; null load — ArgumentNullException. Перед каждой попыткой проверяйте token и передавайте его в load. Повторяйте только IOException, максимум attempts запусков; последняя IOException распространяется. Любая другая ошибка, включая отмену, немедленно прекращает попытки. Возвращается результат первого успеха. Задержек и сети в задаче нет; это алгоритм протокола retry, не настройка production-backoff.
 
 **Пример и ожидаемое поведение**
 
@@ -183,7 +183,7 @@ values=[1,2,3], maximum=2: первые две work могут ждать gate, 
 
 Уровень 3 · Реализация · Навык: IAsyncEnumerable с отменой при продвижении
 
-Реализуйте async IAsyncEnumerable<string> NonBlankLinesAsync(TextReader reader,[EnumeratorCancellation] CancellationToken token=default). Читайте ReadLineAsync(token) до EOF, пропускайте пустые/пробельные строки, остальные отдавайте без Trim. reader не закрывайте. null reader — ArgumentNullException при начале перечисления, отмена — OperationCanceledException при очередном продвижении, в том числе перед чтением. Не материализуйте все строки заранее. Проверьте выдачу первой строки и последующую отмену вручную через GetAsyncEnumerator/MoveNextAsync.
+Реализуйте async IAsyncEnumerable&lt;string&gt; NonBlankLinesAsync(TextReader reader,[EnumeratorCancellation] CancellationToken token=default). Читайте ReadLineAsync(token) до EOF, пропускайте пустые/пробельные строки, остальные отдавайте без Trim. reader не закрывайте. null reader — ArgumentNullException при начале перечисления, отмена — OperationCanceledException при очередном продвижении, в том числе перед чтением. Не материализуйте все строки заранее. Проверьте выдачу первой строки и последующую отмену вручную через GetAsyncEnumerator/MoveNextAsync.
 
 **Пример и ожидаемое поведение**
 
@@ -194,7 +194,7 @@ values=[1,2,3], maximum=2: первые две work могут ждать gate, 
 
 Уровень 3 · Реализация · Навык: await using защищает все пути выхода
 
-Реализуйте Task<int> RunWithLeaseAsync(IAsyncDisposable lease,Func<CancellationToken,Task<int>> work,CancellationToken token=default). null зависимости — ArgumentNullException, при неверной конфигурации lease не освобождайте. После успешной проверки метод владеет lease: он должен вызвать и дождаться DisposeAsync ровно один раз при успехе work, ошибке и предварительной отмене. Перед work проверьте token, передайте тот же token. Для тестов DisposeAsync завершается успешно. Ошибка work распространяется после освобождения.
+Реализуйте Task&lt;int&gt; RunWithLeaseAsync(IAsyncDisposable lease,Func&lt;CancellationToken,Task&lt;int&gt;&gt; work,CancellationToken token=default). null зависимости — ArgumentNullException, при неверной конфигурации lease не освобождайте. После успешной проверки метод владеет lease: он должен вызвать и дождаться DisposeAsync ровно один раз при успехе work, ошибке и предварительной отмене. Перед work проверьте token, передайте тот же token. Для тестов DisposeAsync завершается успешно. Ошибка work распространяется после освобождения.
 
 **Пример и ожидаемое поведение**
 
@@ -205,7 +205,7 @@ work возвращает 7 → результат 7 и DisposeCount=1; work б�
 
 Уровень 3 · Прикладная задача · Навык: Интеграция JSON, валидации, последовательного await и отмены
 
-Объявите Item с int Id и string? Name. Реализуйте Task<int> ImportAsync(Stream source,Func<Item,CancellationToken,Task> save,CancellationToken token=default). JSON — массив Item; Id положительны и уникальны, Name непустое/непробельное; null-корень/элемент/неверные данные — JsonException. null source/save — ArgumentNullException. До любого save прочитайте JSON через DeserializeAsync и проверьте весь снимок. Затем сохраняйте по одному в исходном порядке с await, передавая token и проверяя отмену перед каждым save и после последнего. Успех возвращает число элементов. source не закрывайте. Ошибка save прекращает импорт; ранее сохранённые элементы не откатываются — это явно последовательный, нетранзакционный протокол.
+Объявите Item с int Id и string? Name. Реализуйте Task&lt;int&gt; ImportAsync(Stream source,Func&lt;Item,CancellationToken,Task&gt; save,CancellationToken token=default). JSON — массив Item; Id положительны и уникальны, Name непустое/непробельное; null-корень/элемент/неверные данные — JsonException. null source/save — ArgumentNullException. До любого save прочитайте JSON через DeserializeAsync и проверьте весь снимок. Затем сохраняйте по одному в исходном порядке с await, передавая token и проверяя отмену перед каждым save и после последнего. Успех возвращает число элементов. source не закрывайте. Ошибка save прекращает импорт; ранее сохранённые элементы не откатываются — это явно последовательный, нетранзакционный протокол.
 
 **Пример и ожидаемое поведение**
 

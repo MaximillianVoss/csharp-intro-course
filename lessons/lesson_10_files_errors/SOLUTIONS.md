@@ -477,7 +477,7 @@ public static class Task09
 
 **Частая ошибка**
 
-Использовать >=; прочитать весь документ, прежде чем вернуть; закрыть чужой reader.
+Использовать &gt;=; прочитать весь документ, прежде чем вернуть; закрыть чужой reader.
 
 Полный исходник: [solutions/Task10.cs](solutions/Task10.cs).
 
@@ -670,7 +670,7 @@ public static class Task13
 **Исполняемые проверки**
 
 - Успешный текст сохранён
-- Whitespace -> FormatException
+- Whitespace -&gt; FormatException
 - Доменный тип и сообщение
 - ReferenceEquals исходной InnerException
 - Непредусмотренная ошибка чтения проходит наружу

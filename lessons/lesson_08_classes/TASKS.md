@@ -29,11 +29,11 @@
 
 Уровень 1 · Реализация · Навык: Инкапсуляция состояния и запрет обхода инварианта
 
-Внутри Task01 создайте public sealed class BoundedCounter с конструктором BoundedCounter(int maximum), свойствами int Maximum и int Value только для чтения снаружи и методом bool TryIncrement(). maximum подаётся в 0..int.MaxValue; начальное Value=0. Если Value<Maximum, увеличьте на 1 и верните true; на границе верните false без изменения. Прямое присваивание Value извне недоступно.
+Внутри Task01 создайте public sealed class BoundedCounter с конструктором BoundedCounter(int maximum), свойствами int Maximum и int Value только для чтения снаружи и методом bool TryIncrement(). maximum подаётся в 0..int.MaxValue; начальное Value=0. Если Value&lt;Maximum, увеличьте на 1 и верните true; на границе верните false без изменения. Прямое присваивание Value извне недоступно.
 
 **Пример и ожидаемое поведение**
 
-maximum=2: TryIncrement -> true,true,false; Value -> 2. maximum=0: первая попытка false.
+maximum=2: TryIncrement -&gt; true,true,false; Value -&gt; 2. maximum=0: первая попытка false.
 
 <a id="08-02"></a>
 ## 08-02. Размеры меняются вместе
@@ -44,7 +44,7 @@ maximum=2: TryIncrement -> true,true,false; Value -> 2. maximum=0: первая 
 
 **Пример и ожидаемое поведение**
 
-Rectangle(2,3).Area -> 6; TryResize(4,-1) -> false, размеры остаются 2 и 3; TryResize(4,5) -> true, Area=20.
+Rectangle(2,3).Area -&gt; 6; TryResize(4,-1) -&gt; false, размеры остаются 2 и 3; TryResize(4,5) -&gt; true, Area=20.
 
 <a id="08-03"></a>
 ## 08-03. Объект и значение при присваивании
@@ -64,7 +64,7 @@ q = q with { X = 9 };
 
 **Пример и ожидаемое поведение**
 
-Replay() -> [8,8,2,9].
+Replay() -&gt; [8,8,2,9].
 
 <a id="08-04"></a>
 ## 08-04. Снятие без отрицательного баланса
@@ -75,18 +75,18 @@ Replay() -> [8,8,2,9].
 
 **Пример и ожидаемое поведение**
 
-Начальный баланс 10.50; TrySpend(3.25) -> true, баланс 7.25; TrySpend(8) -> false, баланс 7.25.
+Начальный баланс 10.50; TrySpend(3.25) -&gt; true, баланс 7.25; TrySpend(8) -&gt; false, баланс 7.25.
 
 <a id="08-05"></a>
 ## 08-05. Граница ёмкости под тестом
 
 Уровень 1 · Проектирование тестов · Навык: Тестирование допустимой границы и неизменности после отказа
 
-Создайте public sealed class Tank(int capacity) с get-only снаружи int Capacity и int Volume=0; capacity в 1..1000000. Метод bool TryFill(int amount) принимает любое int. Ноль разрешён, отрицательное и превышение свободного места дают false без изменения. Напишите исполняемые тесты, включая точное заполнение до Capacity. Отдельно выполните ошибочный предикат amount>=0 && amount < capacity-current и докажите, что тест точного заполнения его различает. Избегайте переполнения при большом amount.
+Создайте public sealed class Tank(int capacity) с get-only снаружи int Capacity и int Volume=0; capacity в 1..1000000. Метод bool TryFill(int amount) принимает любое int. Ноль разрешён, отрицательное и превышение свободного места дают false без изменения. Напишите исполняемые тесты, включая точное заполнение до Capacity. Отдельно выполните ошибочный предикат amount&gt;=0 && amount &lt; capacity-current и докажите, что тест точного заполнения его различает. Избегайте переполнения при большом amount.
 
 **Пример и ожидаемое поведение**
 
-Tank(10): TryFill(10) -> true, Volume=10; TryFill(1) -> false, Volume=10.
+Tank(10): TryFill(10) -&gt; true, Volume=10; TryFill(1) -&gt; false, Volume=10.
 
 <a id="08-06"></a>
 ## 08-06. Изменение записи через with
@@ -97,7 +97,7 @@ Tank(10): TryFill(10) -> true, Volume=10; TryFill(1) -> false, Volume=10.
 
 **Пример и ожидаемое поведение**
 
-Product("P1","Книга",100), newPrice=120 -> Product("P1","Книга",120); исходная Price=100.
+Product("P1","Книга",100), newPrice=120 -&gt; Product("P1","Книга",120); исходная Price=100.
 
 <a id="08-07"></a>
 ## 08-07. Корзина состоит из строк
@@ -108,7 +108,7 @@ Product("P1","Книга",100), newPrice=120 -> Product("P1","Книга",120); 
 
 **Пример и ожидаемое поведение**
 
-Добавить ("A",2.50,2), ("A",2.50,1) -> Count=2, Total=7.50; количество 0 -> false.
+Добавить ("A",2.50,2), ("A",2.50,1) -&gt; Count=2, Total=7.50; количество 0 -&gt; false.
 
 <a id="08-08"></a>
 ## 08-08. Одна температура, две шкалы
@@ -119,7 +119,7 @@ Product("P1","Книга",100), newPrice=120 -> Product("P1","Книга",120); 
 
 **Пример и ожидаемое поведение**
 
-Temperature(273.15): Celsius=0; TrySetCelsius(-273.15) -> true, Kelvin=0; -273.16 -> false.
+Temperature(273.15): Celsius=0; TrySetCelsius(-273.15) -&gt; true, Kelvin=0; -273.16 -&gt; false.
 
 <a id="08-09"></a>
 ## 08-09. Общее поле вместо состояния экземпляра
@@ -175,18 +175,18 @@ b.Values[0] = 99;
 
 **Пример и ожидаемое поведение**
 
-Replay() -> [1,2,99,99]; изменение Values копии DeepCopy не меняет источник.
+Replay() -&gt; [1,2,99,99]; изменение Values копии DeepCopy не меняет источник.
 
 <a id="08-12"></a>
 ## 08-12. Интервал создаётся корректным
 
 Уровень 3 · Реализация · Навык: Закрытый конструктор и фабрика с отказом
 
-Создайте public sealed class TimeSlot с закрытым конструктором, get-only DateTime Start/End, public static TimeSlot? Create(DateTime start, DateTime end) и bool Overlaps(TimeSlot other). Create возвращает null при start>=end, иначе корректный полуинтервал [start,end). other не null. Времена сравниваются напрямую, все входы одной шкалы DateTimeKind.Unspecified; часовые пояса не рассматриваются. Соприкасающиеся границы не пересекаются.
+Создайте public sealed class TimeSlot с закрытым конструктором, get-only DateTime Start/End, public static TimeSlot? Create(DateTime start, DateTime end) и bool Overlaps(TimeSlot other). Create возвращает null при start&gt;=end, иначе корректный полуинтервал [start,end). other не null. Времена сравниваются напрямую, все входы одной шкалы DateTimeKind.Unspecified; часовые пояса не рассматриваются. Соприкасающиеся границы не пересекаются.
 
 **Пример и ожидаемое поведение**
 
-[10:00,11:00) и [11:00,12:00) -> false; [10:00,11:00) и [10:30,11:30) -> true; Create(t,t) -> null.
+[10:00,11:00) и [11:00,12:00) -&gt; false; [10:00,11:00) и [10:30,11:30) -&gt; true; Create(t,t) -&gt; null.
 
 <a id="08-13"></a>
 ## 08-13. Заказ проходит разрешённые состояния
@@ -197,7 +197,7 @@ Replay() -> [1,2,99,99]; изменение Values копии DeepCopy не ме
 
 **Пример и ожидаемое поведение**
 
-Draft -> TrySubmit true -> Submitted -> TryCancel true -> Cancelled -> TrySubmit false.
+Draft -&gt; TrySubmit true -&gt; Submitted -&gt; TryCancel true -&gt; Cancelled -&gt; TrySubmit false.
 
 <a id="08-14"></a>
 ## 08-14. Нормализованная дробь
@@ -208,15 +208,15 @@ Draft -> TrySubmit true -> Submitted -> TryCancel true -> Cancelled -> TrySubmit
 
 **Пример и ожидаемое поведение**
 
-Create(6,-8) -> Numerator=-3, Denominator=4; Create(0,-5) -> 0/1; Create(1,0) -> null.
+Create(6,-8) -&gt; Numerator=-3, Denominator=4; Create(0,-5) -&gt; 0/1; Create(1,0) -&gt; null.
 
 <a id="08-15"></a>
 ## 08-15. Перенос между контейнерами
 
 Уровень 3 · Прикладная задача · Навык: Взаимодействие объектов и транзакционное сохранение инвариантов
 
-Создайте public sealed class Bin с конструктором Bin(int capacity,int quantity), get-only снаружи Capacity и Quantity и public static bool TryTransfer(Bin source,Bin target,int amount). Оба объекта не null; capacity в 0..1000000, quantity в 0..capacity. amount любой int. Отрицательный amount -> false. Ноль -> true без изменений. Перенос в тот же объект -> true без изменений, если amount не больше его Quantity, иначе false. Для разных объектов при нехватке товара/места false и оба сохраняются; при успехе количество уменьшается в source и увеличивается в target. Наружного setter нет.
+Создайте public sealed class Bin с конструктором Bin(int capacity,int quantity), get-only снаружи Capacity и Quantity и public static bool TryTransfer(Bin source,Bin target,int amount). Оба объекта не null; capacity в 0..1000000, quantity в 0..capacity. amount любой int. Отрицательный amount -&gt; false. Ноль -&gt; true без изменений. Перенос в тот же объект -&gt; true без изменений, если amount не больше его Quantity, иначе false. Для разных объектов при нехватке товара/места false и оба сохраняются; при успехе количество уменьшается в source и увеличивается в target. Наружного setter нет.
 
 **Пример и ожидаемое поведение**
 
-source=(10,7), target=(5,2), amount=3 -> true, количества 4 и 5; повтор amount=1 -> false и те же количества.
+source=(10,7), target=(5,2), amount=3 -&gt; true, количества 4 и 5; повтор amount=1 -&gt; false и те же количества.

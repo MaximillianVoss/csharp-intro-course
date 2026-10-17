@@ -29,7 +29,7 @@
 
 Уровень 1 · Реализация · Навык: Where изменяет набор, Select — значение элемента
 
-Реализуйте int[] EvenSquares(IEnumerable<int> source). Для чётных чисел верните их квадраты, сохранив порядок и повторы. Все значения должны быть в [-1000,1000]; иначе ArgumentOutOfRangeException, даже если неверное число нечётное. null source — ArgumentNullException. Исходник перечисляйте один раз, результат — готовый массив. Допускается сначала материализовать источник для проверки.
+Реализуйте int[] EvenSquares(IEnumerable&lt;int&gt; source). Для чётных чисел верните их квадраты, сохранив порядок и повторы. Все значения должны быть в [-1000,1000]; иначе ArgumentOutOfRangeException, даже если неверное число нечётное. null source — ArgumentNullException. Исходник перечисляйте один раз, результат — готовый массив. Допускается сначала материализовать источник для проверки.
 
 **Пример и ожидаемое поведение**
 
@@ -40,7 +40,7 @@
 
 Уровень 1 · Реализация · Навык: OrderByDescending и ThenBy вместо второго OrderBy
 
-Объявите record Student(string Name,int Score). Реализуйте Student[] Rank(IEnumerable<Student> students): Score по убыванию, затем Name по StringComparer.Ordinal, точные равенства сохраняют исходный порядок объектов. Score от 0 до 100; Name непустое/непробельное; null источник — ArgumentNullException, null элемент/неверные поля — ArgumentException. Имена сохраняйте без Trim. Вход не меняйте.
+Объявите record Student(string Name,int Score). Реализуйте Student[] Rank(IEnumerable&lt;Student&gt; students): Score по убыванию, затем Name по StringComparer.Ordinal, точные равенства сохраняют исходный порядок объектов. Score от 0 до 100; Name непустое/непробельное; null источник — ArgumentNullException, null элемент/неверные поля — ArgumentException. Имена сохраняйте без Trim. Вход не меняйте.
 
 **Пример и ожидаемое поведение**
 
@@ -71,7 +71,7 @@ Console.WriteLine(string.Join(",", snapshot));
 
 Уровень 1 · Поиск ошибки · Навык: All на пустом источнике возвращает true
 
-Исправьте bool AllPassed(IEnumerable<int> scores,int threshold), чтобы true означало: есть хотя бы одна оценка и каждая >=threshold. Оценки и threshold лежат в [0,100], иначе ArgumentOutOfRangeException; null scores — ArgumentNullException. Источник перечисляйте один раз. Исходник:
+Исправьте bool AllPassed(IEnumerable&lt;int&gt; scores,int threshold), чтобы true означало: есть хотя бы одна оценка и каждая &gt;=threshold. Оценки и threshold лежат в [0,100], иначе ArgumentOutOfRangeException; null scores — ArgumentNullException. Источник перечисляйте один раз. Исходник:
 ```csharp
 return scores.All(score => score >= threshold);
 ```
@@ -86,7 +86,7 @@ return scores.All(score => score >= threshold);
 
 Уровень 1 · Реализация · Навык: FirstOrDefault с nullable-проекцией
 
-Реализуйте int? FirstEven(IEnumerable<int> numbers): первое чётное значение либо null, если чётных нет. Ноль — полноценный найденный результат. Допустимы любые int, порядок источника сохраняется. null numbers — ArgumentNullException. Метод должен прекращать обход на первом совпадении, не обходя хвост.
+Реализуйте int? FirstEven(IEnumerable&lt;int&gt; numbers): первое чётное значение либо null, если чётных нет. Ноль — полноценный найденный результат. Допустимы любые int, порядок источника сохраняется. null numbers — ArgumentNullException. Метод должен прекращать обход на первом совпадении, не обходя хвост.
 
 **Пример и ожидаемое поведение**
 
@@ -97,7 +97,7 @@ return scores.All(score => score >= threshold);
 
 Уровень 2 · Реализация · Навык: GroupBy с нормализованным ключом
 
-Реализуйте WordCount[] Frequencies(IEnumerable<string> words), где record WordCount(string Word,int Count). null источник — ArgumentNullException, null элемент — ArgumentException. Нормализуйте Trim().ToLowerInvariant(), пустые после обрезки пропустите. Посчитайте частоты и верните группы по Word в StringComparer.Ordinal. Не разбивайте отдельные строки на слова: каждый элемент уже одно слово.
+Реализуйте WordCount[] Frequencies(IEnumerable&lt;string&gt; words), где record WordCount(string Word,int Count). null источник — ArgumentNullException, null элемент — ArgumentException. Нормализуйте Trim().ToLowerInvariant(), пустые после обрезки пропустите. Посчитайте частоты и верните группы по Word в StringComparer.Ordinal. Не разбивайте отдельные строки на слова: каждый элемент уже одно слово.
 
 **Пример и ожидаемое поведение**
 
@@ -108,7 +108,7 @@ return scores.All(score => score >= threshold);
 
 Уровень 2 · Реализация · Навык: Join сопоставляет элементы по ключу
 
-Даны record Customer(int Id,string Name), Order(int Id,int CustomerId), Row(int OrderId,string CustomerName). Реализуйте Row[] JoinOrders(IEnumerable<Customer> customers,IEnumerable<Order> orders). Customer.Id и Order.Id положительны и уникальны внутри своего набора; Name непустое/непробельное; CustomerId любой положительный int. null источники — ArgumentNullException, null элементы/неверные поля/дубликаты — ArgumentException. Заказы с неизвестным CustomerId пропускайте. Результат сортируйте по OrderId. Входы не меняйте.
+Даны record Customer(int Id,string Name), Order(int Id,int CustomerId), Row(int OrderId,string CustomerName). Реализуйте Row[] JoinOrders(IEnumerable&lt;Customer&gt; customers,IEnumerable&lt;Order&gt; orders). Customer.Id и Order.Id положительны и уникальны внутри своего набора; Name непустое/непробельное; CustomerId любой положительный int. null источники — ArgumentNullException, null элементы/неверные поля/дубликаты — ArgumentException. Заказы с неизвестным CustomerId пропускайте. Результат сортируйте по OrderId. Входы не меняйте.
 
 **Пример и ожидаемое поведение**
 
@@ -130,7 +130,7 @@ return scores.All(score => score >= threshold);
 
 Уровень 2 · Рефакторинг · Навык: Aggregate со структурой накопителя
 
-Объявите record Line(int Quantity,decimal UnitPrice). Реализуйте (long Units,decimal Total) Totals(IEnumerable<Line> lines) через Aggregate с начальным состоянием (0L,0m). Quantity 1..1000000; UnitPrice 0..1000000; null источник — ArgumentNullException, null/неверная строка — ArgumentException. Источник перечисляйте один раз. Проверяйте строку внутри свёртки. Переполнение суммы — OverflowException. Пустая корзина возвращает оба нуля. Не округляйте промежуточные значения.
+Объявите record Line(int Quantity,decimal UnitPrice). Реализуйте (long Units,decimal Total) Totals(IEnumerable&lt;Line&gt; lines) через Aggregate с начальным состоянием (0L,0m). Quantity 1..1000000; UnitPrice 0..1000000; null источник — ArgumentNullException, null/неверная строка — ArgumentException. Источник перечисляйте один раз. Проверяйте строку внутри свёртки. Переполнение суммы — OverflowException. Пустая корзина возвращает оба нуля. Не округляйте промежуточные значения.
 
 **Пример и ожидаемое поведение**
 
@@ -141,7 +141,7 @@ return scores.All(score => score >= threshold);
 
 Уровень 2 · Проектирование тестов · Навык: SingleOrDefault проверяет инвариант единственного совпадения
 
-Реализуйте User? FindUnique(IEnumerable<User> users,string name), где User — record(string Name). Сравнивайте StringComparer.OrdinalIgnoreCase. Нет совпадений — null; одно — исходный объект; два и более — InvalidOperationException. null источник/name — ArgumentNullException; null пользователь/Name — ArgumentException (все элементы проверьте заранее). Пустые имена допустимы. Напишите исполняемый тест, отличающий реализацию с FirstOrDefault, на входе с двумя совпадениями разного регистра.
+Реализуйте User? FindUnique(IEnumerable&lt;User&gt; users,string name), где User — record(string Name). Сравнивайте StringComparer.OrdinalIgnoreCase. Нет совпадений — null; одно — исходный объект; два и более — InvalidOperationException. null источник/name — ArgumentNullException; null пользователь/Name — ArgumentException (все элементы проверьте заранее). Пустые имена допустимы. Напишите исполняемый тест, отличающий реализацию с FirstOrDefault, на входе с двумя совпадениями разного регистра.
 
 **Пример и ожидаемое поведение**
 
@@ -152,7 +152,7 @@ return scores.All(score => score >= threshold);
 
 Уровень 3 · Реализация · Навык: Явная политика конфликта ключей
 
-Дан record Revision(string Key,int Version,string Value). Реализуйте Dictionary<string,Revision> Latest(IEnumerable<Revision> source). Key непустой/непробельный, Version>=0, Value не null; null источник — ArgumentNullException, null/неверный элемент — ArgumentException. Ключи сравниваются Ordinal. Из одинаковых Key берите максимальную Version; при равенстве версии — последнюю запись входа. Сохраните исходный объект Revision. Простой ToDictionary по исходнику с дубликатами не подходит.
+Дан record Revision(string Key,int Version,string Value). Реализуйте Dictionary&lt;string,Revision&gt; Latest(IEnumerable&lt;Revision&gt; source). Key непустой/непробельный, Version&gt;=0, Value не null; null источник — ArgumentNullException, null/неверный элемент — ArgumentException. Ключи сравниваются Ordinal. Из одинаковых Key берите максимальную Version; при равенстве версии — последнюю запись входа. Сохраните исходный объект Revision. Простой ToDictionary по исходнику с дубликатами не подходит.
 
 **Пример и ожидаемое поведение**
 
@@ -163,7 +163,7 @@ return scores.All(score => score >= threshold);
 
 Уровень 3 · Реализация · Навык: Skip/Take и безопасный расчёт смещения
 
-Реализуйте T[] Page<T>(IEnumerable<T> source,int page,int pageSize). Номер страницы начинается с 1, pageSize от 1 до 100; неверные параметры — ArgumentOutOfRangeException, null source — ArgumentNullException. Смещение checked((page-1)*pageSize), переполнение — OverflowException до перечисления. Страница за концом источника — пустой массив, последняя может быть неполной. Сохраняйте порядок и повторы. Вход уже имеет нужную сортировку.
+Реализуйте T[] Page&lt;T&gt;(IEnumerable&lt;T&gt; source,int page,int pageSize). Номер страницы начинается с 1, pageSize от 1 до 100; неверные параметры — ArgumentOutOfRangeException, null source — ArgumentNullException. Смещение checked((page-1)*pageSize), переполнение — OverflowException до перечисления. Страница за концом источника — пустой массив, последняя может быть неполной. Сохраняйте порядок и повторы. Вход уже имеет нужную сортировку.
 
 **Пример и ожидаемое поведение**
 
@@ -174,7 +174,7 @@ return scores.All(score => score >= threshold);
 
 Уровень 3 · Реализация · Навык: GroupJoin сохраняет внешний набор
 
-Даны Customer(int Id), Purchase(int CustomerId,decimal Amount), Summary(int CustomerId,int Orders,decimal Total). Реализуйте Summary[] CustomerTotals(Customer[] customers,Purchase[] purchases). Id клиентов положительны и уникальны; CustomerId покупки положителен, Amount>=0, повторы покупок разрешены. null массивы — ArgumentNullException, null/неверные элементы и дубликат клиента — ArgumentException. Каждый клиент присутствует, даже без покупок (Orders=0,Total=0). Покупки неизвестных клиентов игнорируются. Сортируйте по CustomerId.
+Даны Customer(int Id), Purchase(int CustomerId,decimal Amount), Summary(int CustomerId,int Orders,decimal Total). Реализуйте Summary[] CustomerTotals(Customer[] customers,Purchase[] purchases). Id клиентов положительны и уникальны; CustomerId покупки положителен, Amount&gt;=0, повторы покупок разрешены. null массивы — ArgumentNullException, null/неверные элементы и дубликат клиента — ArgumentException. Каждый клиент присутствует, даже без покупок (Orders=0,Total=0). Покупки неизвестных клиентов игнорируются. Сортируйте по CustomerId.
 
 **Пример и ожидаемое поведение**
 
@@ -185,7 +185,7 @@ return scores.All(score => score >= threshold);
 
 Уровень 3 · Рефакторинг · Навык: Число перечислений является частью контракта
 
-Исправьте (int Count,long Sum) Analyze(IEnumerable<int> source), чтобы исходный source перечислялся ровно один раз:
+Исправьте (int Count,long Sum) Analyze(IEnumerable&lt;int&gt; source), чтобы исходный source перечислялся ровно один раз:
 ```csharp
 return (source.Count(), source.Sum(x => (long)x));
 ```
@@ -200,7 +200,7 @@ return (source.Count(), source.Sum(x => (long)x));
 
 Уровень 3 · Прикладная задача · Навык: Композиция валидации, группировки, агрегирования и top-N
 
-Даны LogEntry(string Path,int Status,double Milliseconds) и Endpoint(string Path,int Requests,int Failures,double AverageMs). Реализуйте Endpoint[] Report(IEnumerable<LogEntry> entries,int top). top от 0 до 100 (иначе ArgumentOutOfRangeException); null источник — ArgumentNullException. Path непустой/непробельный, Status 100..599, Milliseconds конечное 0..1000000; неверный/null элемент — ArgumentException. Группируйте по точному Path (Ordinal). Для каждой группы посчитайте все запросы, ошибки Status>=500 и среднее время всех запросов. Сортируйте Failures↓, Path↑ Ordinal; возьмите top. Валидация обязательна и при top=0.
+Даны LogEntry(string Path,int Status,double Milliseconds) и Endpoint(string Path,int Requests,int Failures,double AverageMs). Реализуйте Endpoint[] Report(IEnumerable&lt;LogEntry&gt; entries,int top). top от 0 до 100 (иначе ArgumentOutOfRangeException); null источник — ArgumentNullException. Path непустой/непробельный, Status 100..599, Milliseconds конечное 0..1000000; неверный/null элемент — ArgumentException. Группируйте по точному Path (Ordinal). Для каждой группы посчитайте все запросы, ошибки Status&gt;=500 и среднее время всех запросов. Сортируйте Failures↓, Path↑ Ordinal; возьмите top. Валидация обязательна и при top=0.
 
 **Пример и ожидаемое поведение**
 

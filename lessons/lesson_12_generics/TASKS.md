@@ -29,7 +29,7 @@
 
 Уровень 1 · Реализация · Навык: Универсальный метод с ref
 
-Реализуйте void Swap<T>(ref T first,ref T second) без object, dynamic и приведений. Метод обменивает любые два значения одного типа, включая nullable-ссылки. Если обе ссылки ref обозначают одну переменную, значение сохраняется. Объясните, почему обмен ссылочными значениями не клонирует объекты.
+Реализуйте void Swap&lt;T&gt;(ref T first,ref T second) без object, dynamic и приведений. Метод обменивает любые два значения одного типа, включая nullable-ссылки. Если обе ссылки ref обозначают одну переменную, значение сохраняется. Объясните, почему обмен ссылочными значениями не клонирует объекты.
 
 **Пример и ожидаемое поведение**
 
@@ -40,7 +40,7 @@ a=2,b=7; Swap(ref a,ref b) → a=7,b=2; Swap(ref a,ref a) сохраняет a.
 
 Уровень 1 · Реализация · Навык: Default не является признаком пустой коллекции
 
-Реализуйте T FirstOr<T>(IReadOnlyList<T> items,T fallback). Для непустого списка верните именно первый элемент, даже если он равен default(T); иначе fallback. Коллекцию не меняйте и не перечисляйте целиком. null items — ArgumentNullException. Допустимы null-элементы при nullable T.
+Реализуйте T FirstOr&lt;T&gt;(IReadOnlyList&lt;T&gt; items,T fallback). Для непустого списка верните именно первый элемент, даже если он равен default(T); иначе fallback. Коллекцию не меняйте и не перечисляйте целиком. null items — ArgumentNullException. Допустимы null-элементы при nullable T.
 
 **Пример и ожидаемое поведение**
 
@@ -60,7 +60,7 @@ Console.WriteLine($"{Box<int>.Count},{Box<string>.Count}");
 
 public sealed class Box<T> { public static int Count; }
 ```
-Объясните, почему Box<int> и Box<string> не делят Count.
+Объясните, почему Box&lt;int&gt; и Box&lt;string&gt; не делят Count.
 
 **Пример и ожидаемое поведение**
 
@@ -71,7 +71,7 @@ public sealed class Box<T> { public static int Count; }
 
 Уровень 1 · Поиск ошибки · Навык: Нельзя вернуть string из метода произвольного T
 
-Исправьте некомпилируемый метод, сохранив сигнатуру T Head<T>(T[] items):
+Исправьте некомпилируемый метод, сохранив сигнатуру T Head&lt;T&gt;(T[] items):
 ```csharp
 static T Head<T>(T[] items)
 {
@@ -89,7 +89,7 @@ Head(new[]{42,1}) → 42; Head(new string?[]{null}) → null; [] → InvalidOper
 
 Уровень 1 · Реализация · Навык: where даёт доступ к общему интерфейсу
 
-Объявите интерфейс IHasKey { int Key { get; } }. Реализуйте T? Find<T>(IReadOnlyList<T> items,int key) where T:class,IHasKey. Верните первый объект с совпавшим Key либо null. Ключ может быть любым int, дубликаты разрешены. null список — ArgumentNullException, null элемент списка — ArgumentException (проверьте все элементы до поиска). Список не меняйте. Создайте два разных реализующих класса для тестирования.
+Объявите интерфейс IHasKey { int Key { get; } }. Реализуйте T? Find&lt;T&gt;(IReadOnlyList&lt;T&gt; items,int key) where T:class,IHasKey. Верните первый объект с совпавшим Key либо null. Ключ может быть любым int, дубликаты разрешены. null список — ArgumentNullException, null элемент списка — ArgumentException (проверьте все элементы до поиска). Список не меняйте. Создайте два разных реализующих класса для тестирования.
 
 **Пример и ожидаемое поведение**
 
@@ -100,7 +100,7 @@ Head(new[]{42,1}) → 42; Head(new string?[]{null}) → null; [] → InvalidOper
 
 Уровень 2 · Реализация · Навык: Try-метод отделяет успех от значения
 
-Создайте ArrayStack<T> с int Count, void Push(T value), bool TryPop(out T value). Элементы возвращаются LIFO. Для пустого стека TryPop возвращает false и default(T); для сохранённого default — true. Допустимы nullable-элементы. Встроенный Stack<T> использовать нельзя, List<T> можно. После снятия удаляйте ссылку из внутреннего списка.
+Создайте ArrayStack&lt;T&gt; с int Count, void Push(T value), bool TryPop(out T value). Элементы возвращаются LIFO. Для пустого стека TryPop возвращает false и default(T); для сохранённого default — true. Допустимы nullable-элементы. Встроенный Stack&lt;T&gt; использовать нельзя, List&lt;T&gt; можно. После снятия удаляйте ссылку из внутреннего списка.
 
 **Пример и ожидаемое поведение**
 
@@ -111,7 +111,7 @@ Push(0),Push(7),TryPop → (true,7), затем (true,0), затем (false,0).
 
 Уровень 2 · Реализация · Навык: out-источник и in-приёмник выражают направления передачи T
 
-Объявите ISource<out T> с bool HasNext { get; } и T Read(), а также ISink<in T> с void Write(T value). Реализуйте int CopyAtMost<T>(ISource<T> source,ISink<T> sink,int limit): перенесите не более limit элементов и верните точное число переносов. limit от 0 до 1000, иначе ArgumentOutOfRangeException; null source/sink — ArgumentNullException. Перед каждым Read проверяйте HasNext. При limit=0 не читайте ни одного элемента. HasNext сообщает наличие следующего; Read потребляет его и не бросает исключение, если HasNext=true. Write в данной задаче также успешен. EOF не является ошибкой. Покажите ISource<Dog> как ISource<Animal> и ISink<Animal> как ISink<Dog>; реальные объекты не копируются.
+Объявите ISource&lt;out T&gt; с bool HasNext { get; } и T Read(), а также ISink&lt;in T&gt; с void Write(T value). Реализуйте int CopyAtMost&lt;T&gt;(ISource&lt;T&gt; source,ISink&lt;T&gt; sink,int limit): перенесите не более limit элементов и верните точное число переносов. limit от 0 до 1000, иначе ArgumentOutOfRangeException; null source/sink — ArgumentNullException. Перед каждым Read проверяйте HasNext. При limit=0 не читайте ни одного элемента. HasNext сообщает наличие следующего; Read потребляет его и не бросает исключение, если HasNext=true. Write в данной задаче также успешен. EOF не является ошибкой. Покажите ISource&lt;Dog&gt; как ISource&lt;Animal&gt; и ISink&lt;Animal&gt; как ISink&lt;Dog&gt;; реальные объекты не копируются.
 
 **Пример и ожидаемое поведение**
 
@@ -122,29 +122,29 @@ Push(0),Push(7),TryPop → (true,7), затем (true,0), затем (false,0).
 
 Уровень 2 · Реализация · Навык: Ограничение class,new() даёт безопасное создание объекта
 
-Реализуйте T[] CreateMany<T>(int count) where T:class,new(). count от 0 до 1000, иначе ArgumentOutOfRangeException до любых конструкторов. Каждая ячейка должна содержать отдельный новый ненулевой экземпляр T, созданный вызовом публичного конструктора без параметров. Не возвращайте массив null и не заполняйте его одной общей ссылкой. count=0 не вызывает конструктор. Напишите класс с наблюдаемым счётчиком конструирований и изменяемым свойством; докажите числом созданий и изменением одной ячейки, что экземпляры независимы. Испытайте второй тип класса.
+Реализуйте T[] CreateMany&lt;T&gt;(int count) where T:class,new(). count от 0 до 1000, иначе ArgumentOutOfRangeException до любых конструкторов. Каждая ячейка должна содержать отдельный новый ненулевой экземпляр T, созданный вызовом публичного конструктора без параметров. Не возвращайте массив null и не заполняйте его одной общей ссылкой. count=0 не вызывает конструктор. Напишите класс с наблюдаемым счётчиком конструирований и изменяемым свойством; докажите числом созданий и изменением одной ячейки, что экземпляры независимы. Испытайте второй тип класса.
 
 **Пример и ожидаемое поведение**
 
-CreateMany<Widget>(3) → 3 вызова конструктора, попарно разные объекты; изменение result[0].Value не меняет result[1].Value.
+CreateMany&lt;Widget&gt;(3) → 3 вызова конструктора, попарно разные объекты; изменение result[0].Value не меняет result[1].Value.
 
 <a id="12-09"></a>
 ## 12-09. Типобезопасный результат
 
 Уровень 2 · Рефакторинг · Навык: Два состояния вместо object и флага без инварианта
 
-Замените схему object? Value + bool Success + string? Error обобщённым Result<T>. Нужны bool IsSuccess, T Value (доступ при ошибке бросает InvalidOperationException), string? Error; фабрики Ok(T value) и Fail(string error). Успех допускает default(T), Error у него null. Ошибка имеет непустой/непробельный текст, пустой текст — ArgumentException. Нельзя создать произвольную противоречивую комбинацию извне. Докажите работу с int и string?.
+Замените схему object? Value + bool Success + string? Error обобщённым Result&lt;T&gt;. Нужны bool IsSuccess, T Value (доступ при ошибке бросает InvalidOperationException), string? Error; фабрики Ok(T value) и Fail(string error). Успех допускает default(T), Error у него null. Ошибка имеет непустой/непробельный текст, пустой текст — ArgumentException. Нельзя создать произвольную противоречивую комбинацию извне. Докажите работу с int и string?.
 
 **Пример и ожидаемое поведение**
 
-Result<int>.Ok(0) → успешный 0; Result<int>.Fail("bad").Value → InvalidOperationException.
+Result&lt;int&gt;.Ok(0) → успешный 0; Result&lt;int&gt;.Fail("bad").Value → InvalidOperationException.
 
 <a id="12-10"></a>
 ## 12-10. Что означает копия T[]
 
 Уровень 2 · Проектирование тестов · Навык: Поверхностная копия массива обобщённых значений
 
-Реализуйте T[] Copy<T>(T[] source), создающий новый массив с теми же элементами, null source — ArgumentNullException. Это поверхностная копия: объекты не клонируются. Напишите тесты для int[], пустого массива и массива изменяемых объектов. Обнаружьте неправильную реализацию return source исполняемой проверкой. Отдельно покажите, что замена ячейки копии независима, а изменение поля общего объекта видно через оба массива.
+Реализуйте T[] Copy&lt;T&gt;(T[] source), создающий новый массив с теми же элементами, null source — ArgumentNullException. Это поверхностная копия: объекты не клонируются. Напишите тесты для int[], пустого массива и массива изменяемых объектов. Обнаружьте неправильную реализацию return source исполняемой проверкой. Отдельно покажите, что замена ячейки копии независима, а изменение поля общего объекта видно через оба массива.
 
 **Пример и ожидаемое поведение**
 
@@ -155,7 +155,7 @@ source=[Box(1)], copy=Copy(source): copy[0].Value=2 меняет общий Box;
 
 Уровень 3 · Реализация · Навык: Два параметра типа и ограничение notnull
 
-Создайте MultiMap<TKey,TValue> where TKey:notnull. Конструктор принимает необязательный IEqualityComparer<TKey>. Методы void Add(TKey key,TValue value) и TValue[] Get(TKey key). Значения одного ключа сохраняют порядок и повторы; отсутствующий ключ возвращает новый пустой массив. null ссылочный ключ — ArgumentNullException; null значения допустимы. Изменение возвращённого массива не должно менять контейнер. LINQ не используйте.
+Создайте MultiMap&lt;TKey,TValue&gt; where TKey:notnull. Конструктор принимает необязательный IEqualityComparer&lt;TKey&gt;. Методы void Add(TKey key,TValue value) и TValue[] Get(TKey key). Значения одного ключа сохраняют порядок и повторы; отсутствующий ключ возвращает новый пустой массив. null ссылочный ключ — ArgumentNullException; null значения допустимы. Изменение возвращённого массива не должно менять контейнер. LINQ не используйте.
 
 **Пример и ожидаемое поведение**
 
@@ -166,7 +166,7 @@ Add("A",1),Add("a",2) с OrdinalIgnoreCase; Get("A") → [1,2]; Get("B") → [].
 
 Уровень 3 · Реализация · Навык: Обобщённый поиск по CompareTo
 
-Реализуйте int FirstIndex<T>(IReadOnlyList<T> sorted,T target) where T:IComparable<T>. Вход уже отсортирован по возрастанию CompareTo и не содержит null; эти два свойства — предусловия, проверять их линейным проходом не надо. target не null. Верните первый индекс равного target либо -1, не изменяя список. null список/target — ArgumentNullException. Пустой список возвращает -1. Требуется O(log n) сравнений для списка с O(1)-индексатором.
+Реализуйте int FirstIndex&lt;T&gt;(IReadOnlyList&lt;T&gt; sorted,T target) where T:IComparable&lt;T&gt;. Вход уже отсортирован по возрастанию CompareTo и не содержит null; эти два свойства — предусловия, проверять их линейным проходом не надо. target не null. Верните первый индекс равного target либо -1, не изменяя список. null список/target — ArgumentNullException. Пустой список возвращает -1. Требуется O(log n) сравнений для списка с O(1)-индексатором.
 
 **Пример и ожидаемое поведение**
 
@@ -183,18 +183,18 @@ List<Cat> cats = new() { new Cat("Мур") };
 IReadOnlyList<Animal> view = cats; // A
 List<Animal> writable = cats;    // B
 ```
-Animal хранит readonly string Name, Cat наследует Animal. Реализуйте string[] Names(IReadOnlyList<Animal> animals), возвращающий имена в порядке списка. null список — ArgumentNullException, null элемент — ArgumentException. Создайте тест, передающий List<Cat> прямо в Names. Не используйте Cast, dynamic и копирование списка для обхода недопустимой строки B.
+Animal хранит readonly string Name, Cat наследует Animal. Реализуйте string[] Names(IReadOnlyList&lt;Animal&gt; animals), возвращающий имена в порядке списка. null список — ArgumentNullException, null элемент — ArgumentException. Создайте тест, передающий List&lt;Cat&gt; прямо в Names. Не используйте Cast, dynamic и копирование списка для обхода недопустимой строки B.
 
 **Пример и ожидаемое поведение**
 
-Names(new List<Cat>{new("Мур"),new("Барс")}) → ["Мур","Барс"].
+Names(new List&lt;Cat&gt;{new("Мур"),new("Барс")}) → ["Мур","Барс"].
 
 <a id="12-14"></a>
 ## 12-14. Кольцевой буфер последних значений
 
 Уровень 3 · Реализация · Навык: Обобщённое циклическое хранилище
 
-Создайте RingBuffer<T>(int capacity), void Add(T value), int Count и T[] Snapshot(). capacity > 0, иначе ArgumentOutOfRangeException. Буфер хранит только последние capacity добавленных значений, включая default/null. Snapshot возвращает новый массив от самого старого сохранённого к самому новому. Запись должна быть O(1); снимок O(Count). Не сдвигайте массив при каждом Add.
+Создайте RingBuffer&lt;T&gt;(int capacity), void Add(T value), int Count и T[] Snapshot(). capacity &gt; 0, иначе ArgumentOutOfRangeException. Буфер хранит только последние capacity добавленных значений, включая default/null. Snapshot возвращает новый массив от самого старого сохранённого к самому новому. Запись должна быть O(1); снимок O(Count). Не сдвигайте массив при каждом Add.
 
 **Пример и ожидаемое поведение**
 
@@ -205,8 +205,8 @@ capacity=3; Add(1),2,3,4 → Snapshot=[2,3,4]; Count=3.
 
 Уровень 3 · Прикладная задача · Навык: Обобщённый индексатор и инвариант размеров
 
-Создайте Grid<T>(int rows,int columns,T initial), свойства Rows/Columns, индексатор T this[int row,int column] {get;set;} и T[] CopyRow(int row). Размеры от 1 до 1000 включительно, иначе ArgumentOutOfRangeException; неверная координата тоже ArgumentOutOfRangeException. Все ячейки изначально содержат initial (для ссылок это общая ссылка, клонирование не требуется). Хранение — один T[] в порядке row-major. CopyRow независима от сетки. Проверьте прямоугольную сетку с rows != columns.
+Создайте Grid&lt;T&gt;(int rows,int columns,T initial), свойства Rows/Columns, индексатор T this[int row,int column] {get;set;} и T[] CopyRow(int row). Размеры от 1 до 1000 включительно, иначе ArgumentOutOfRangeException; неверная координата тоже ArgumentOutOfRangeException. Все ячейки изначально содержат initial (для ссылок это общая ссылка, клонирование не требуется). Хранение — один T[] в порядке row-major. CopyRow независима от сетки. Проверьте прямоугольную сетку с rows != columns.
 
 **Пример и ожидаемое поведение**
 
-Grid<int>(2,3,0); grid[1,2]=7; CopyRow(1) → [0,0,7]; grid[0,3] запрещён.
+Grid&lt;int&gt;(2,3,0); grid[1,2]=7; CopyRow(1) → [0,0,7]; grid[0,3] запрещён.

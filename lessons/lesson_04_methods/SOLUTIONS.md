@@ -582,7 +582,7 @@ public static class Task11
 <a id="04-12"></a>
 ## 04-12. Быстрая целая степень
 
-Хранить result, factor и remaining; после деления remaining пополам квадрат нужен только при remaining>0.
+Хранить result, factor и remaining; после деления remaining пополам квадрат нужен только при remaining&gt;0.
 
 **Ход решения**
 

@@ -29,22 +29,22 @@
 
 Уровень 1 · Реализация · Навык: Func как параметр поведения
 
-Реализуйте int Apply(int value,Func<int,int> operation). Верните operation(value), вызывая operation ровно один раз. null делегат — ArgumentNullException. Исключение operation должно распространяться без подмены и повторного вызова. Покажите две разные операции и счётчик вызовов.
+Реализуйте int Apply(int value,Func&lt;int,int&gt; operation). Верните operation(value), вызывая operation ровно один раз. null делегат — ArgumentNullException. Исключение operation должно распространяться без подмены и повторного вызова. Покажите две разные операции и счётчик вызовов.
 
 **Пример и ожидаемое поведение**
 
-Apply(4,x=>x+3) → 7; Apply(4,x=>x*x) → 16.
+Apply(4,x=&gt;x+3) → 7; Apply(4,x=&gt;x*x) → 16.
 
 <a id="13-02"></a>
 ## 13-02. Композиция в заданном порядке
 
 Уровень 1 · Реализация · Навык: Функция возвращает новую функцию
 
-Реализуйте Func<T,T> Compose<T>(Func<T,T> first,Func<T,T> second). Полученный делегат при каждом вызове сначала применяет first, затем second. Сами операции во время Compose не выполняйте. null любого аргумента — ArgumentNullException сразу при Compose. Ошибка first не должна запускать second.
+Реализуйте Func&lt;T,T&gt; Compose&lt;T&gt;(Func&lt;T,T&gt; first,Func&lt;T,T&gt; second). Полученный делегат при каждом вызове сначала применяет first, затем second. Сами операции во время Compose не выполняйте. null любого аргумента — ArgumentNullException сразу при Compose. Ошибка first не должна запускать second.
 
 **Пример и ожидаемое поведение**
 
-Compose<int>(x=>x+1,x=>x*2)(3) → 8, а не 7.
+Compose&lt;int&gt;(x=&gt;x+1,x=&gt;x*2)(3) → 8, а не 7.
 
 <a id="13-03"></a>
 ## 13-03. Когда читается захваченная переменная
@@ -71,7 +71,7 @@ Observe() возвращает два числа, совпадающие с фа
 
 Уровень 1 · Поиск ошибки · Навык: Отдельная переменная на итерацию
 
-Исправьте Func<int>[] Build(int count), чтобы возвращённые функции выдавали 0,1,...,count-1. Допустим count от 0 до 1000, иначе ArgumentOutOfRangeException. Исходная ошибка:
+Исправьте Func&lt;int&gt;[] Build(int count), чтобы возвращённые функции выдавали 0,1,...,count-1. Допустим count от 0 до 1000, иначе ArgumentOutOfRangeException. Исходная ошибка:
 ```csharp
 var result = new Func<int>[count];
 for (int i = 0; i < count; i++) result[i] = () => i;
@@ -88,7 +88,7 @@ Build(3) после исправления: вызовы функций → [0,1
 
 Уровень 1 · Реализация · Навык: Замыкание хранит конфигурацию правила
 
-Реализуйте Predicate<int> InRange(int minimum,int maximum). Возвращаемый предикат принимает x, если minimum <= x <= maximum. minimum > maximum — ArgumentException сразу при создании. Границы могут быть int.MinValue/int.MaxValue; не вычисляйте x-minimum для сравнения. Разные созданные предикаты независимы.
+Реализуйте Predicate&lt;int&gt; InRange(int minimum,int maximum). Возвращаемый предикат принимает x, если minimum &lt;= x &lt;= maximum. minimum &gt; maximum — ArgumentException сразу при создании. Границы могут быть int.MinValue/int.MaxValue; не вычисляйте x-minimum для сравнения. Разные созданные предикаты независимы.
 
 **Пример и ожидаемое поведение**
 
@@ -99,18 +99,18 @@ InRange(2,4): 1→false,2→true,4→true,5→false; InRange(3,3) принима
 
 Уровень 2 · Реализация · Навык: Предикат отделён от обхода
 
-Реализуйте T[] Filter<T>(IEnumerable<T> source,Predicate<T> accept), перечисляя source один раз. Сохраняйте порядок и повторы принятых элементов, вызывайте accept ровно один раз для каждого посещённого элемента. null source/accept — ArgumentNullException до обхода. Исключения предиката распространяются, после ошибки обход прекращается. LINQ не используйте.
+Реализуйте T[] Filter&lt;T&gt;(IEnumerable&lt;T&gt; source,Predicate&lt;T&gt; accept), перечисляя source один раз. Сохраняйте порядок и повторы принятых элементов, вызывайте accept ровно один раз для каждого посещённого элемента. null source/accept — ArgumentNullException до обхода. Исключения предиката распространяются, после ошибки обход прекращается. LINQ не используйте.
 
 **Пример и ожидаемое поведение**
 
-[3,2,2,1], x=>x%2==0 → [2,2].
+[3,2,2,1], x=&gt;x%2==0 → [2,2].
 
 <a id="13-07"></a>
 ## 13-07. Составное сравнение имён
 
-Уровень 2 · Реализация · Навык: Comparison<T> с детерминированным вторичным ключом
+Уровень 2 · Реализация · Навык: Comparison&lt;T&gt; с детерминированным вторичным ключом
 
-Реализуйте string[] SortNames(string[] names): создайте копию и отсортируйте сначала по длине строки по возрастанию, при равенстве — StringComparer.Ordinal. Пустые строки допустимы; null массив — ArgumentNullException, любой null элемент — ArgumentException. Вход не меняйте. Используйте Array.Sort и Comparison<string>, без LINQ и зависимости от текущей культуры.
+Реализуйте string[] SortNames(string[] names): создайте копию и отсортируйте сначала по длине строки по возрастанию, при равенстве — StringComparer.Ordinal. Пустые строки допустимы; null массив — ArgumentNullException, любой null элемент — ArgumentException. Вход не меняйте. Используйте Array.Sort и Comparison&lt;string&gt;, без LINQ и зависимости от текущей культуры.
 
 **Пример и ожидаемое поведение**
 
@@ -121,7 +121,7 @@ InRange(2,4): 1→false,2→true,4→true,5→false; InRange(3,3) принима
 
 Уровень 2 · Реализация · Навык: Action передаёт уведомление без результата
 
-Реализуйте long Accumulate(IReadOnlyList<int> values,Action<long> report). После каждого элемента сообщайте новую накопленную сумму, по окончании верните её. Пустой список даёт 0 и ни одного callback. Разрешены любые int; сумма считается checked long. null список/report — ArgumentNullException до обработки. Ошибка report распространяется, дальнейшие элементы не обрабатываются.
+Реализуйте long Accumulate(IReadOnlyList&lt;int&gt; values,Action&lt;long&gt; report). После каждого элемента сообщайте новую накопленную сумму, по окончании верните её. Пустой список даёт 0 и ни одного callback. Разрешены любые int; сумма считается checked long. null список/report — ArgumentNullException до обработки. Ошибка report распространяется, дальнейшие элементы не обрабатываются.
 
 **Пример и ожидаемое поведение**
 
@@ -132,18 +132,18 @@ InRange(2,4): 1→false,2→true,4→true,5→false; InRange(3,3) принима
 
 Уровень 2 · Рефакторинг · Навык: Отделение преобразования от побочного действия
 
-Реализуйте string Process(string text,Func<string,string> normalize,Action<string> log). Сначала проверьте все три аргумента на null (ArgumentNullException), затем вызовите normalize ровно один раз; его null-результат — InvalidOperationException, log при этом не вызывается. Ненулевой результат один раз передайте log и верните. Ошибки normalize/log распространяются. Исходная версия жёстко вызывала Trim и Console.WriteLine; замените зависимости параметрами.
+Реализуйте string Process(string text,Func&lt;string,string&gt; normalize,Action&lt;string&gt; log). Сначала проверьте все три аргумента на null (ArgumentNullException), затем вызовите normalize ровно один раз; его null-результат — InvalidOperationException, log при этом не вызывается. Ненулевой результат один раз передайте log и верните. Ошибки normalize/log распространяются. Исходная версия жёстко вызывала Trim и Console.WriteLine; замените зависимости параметрами.
 
 **Пример и ожидаемое поведение**
 
-" a ", s=>s.Trim().ToUpperInvariant(), запись в список → "A" и один элемент "A" в журнале.
+" a ", s=&gt;s.Trim().ToUpperInvariant(), запись в список → "A" и один элемент "A" в журнале.
 
 <a id="13-10"></a>
 ## 13-10. Тест числа вызовов предиката
 
 Уровень 2 · Проектирование тестов · Навык: Проверка протокола callback, а не только результата
 
-Реализуйте int CountPassing(int[] values,Predicate<int> accept), вызывая accept один раз на элемент; null аргументы — ArgumentNullException. Напишите тесты, отличающие реализацию от следующей ошибки, даже когда предикат чистый и итоговое число совпадает:
+Реализуйте int CountPassing(int[] values,Predicate&lt;int&gt; accept), вызывая accept один раз на элемент; null аргументы — ArgumentNullException. Напишите тесты, отличающие реализацию от следующей ошибки, даже когда предикат чистый и итоговое число совпадает:
 ```csharp
 foreach (var x in values)
     if (accept(x) && accept(x)) count++;
@@ -167,7 +167,7 @@ handlers += () => throw new FormatException("bad");
 handlers += () => trace.Add("B");
 try { handlers(); } catch (FormatException) { }
 ```
-Затем реализуйте List<Exception> InvokeAll(Action[] handlers): каждый ненулевой обработчик вызывается по порядку, его Exception добавляется в результат, остальные всё равно выполняются. null массив/любой null обработчик — ArgumentException (проверить до первого вызова). Пустой массив — пустой результат.
+Затем реализуйте List&lt;Exception&gt; InvokeAll(Action[] handlers): каждый ненулевой обработчик вызывается по порядку, его Exception добавляется в результат, остальные всё равно выполняются. null массив/любой null обработчик — ArgumentException (проверить до первого вызова). Пустой массив — пустой результат.
 
 **Пример и ожидаемое поведение**
 
@@ -178,7 +178,7 @@ InvokeAll для трёх действий A, ошибка, B должен да�
 
 Уровень 3 · Реализация · Навык: event ограничивает внешнее управление подписками
 
-Создайте Counter(int threshold) с int Value=0, event Action<int>? Reached и void Add(int delta). threshold > 0, иначе ArgumentOutOfRangeException. delta может быть отрицательным, но новый Value должен быть >=0 (иначе ArgumentOutOfRangeException); переполнение — OverflowException. Событие вызывайте только при переходе old<threshold и new>=threshold, уже после изменения Value. Повторное пересечение после спуска ниже порога снова уведомляет. Ошибка подписчика распространяется, новое Value сохраняется. Внешний код может только подписываться/отписываться.
+Создайте Counter(int threshold) с int Value=0, event Action&lt;int&gt;? Reached и void Add(int delta). threshold &gt; 0, иначе ArgumentOutOfRangeException. delta может быть отрицательным, но новый Value должен быть &gt;=0 (иначе ArgumentOutOfRangeException); переполнение — OverflowException. Событие вызывайте только при переходе old&lt;threshold и new&gt;=threshold, уже после изменения Value. Повторное пересечение после спуска ниже порога снова уведомляет. Ошибка подписчика распространяется, новое Value сохраняется. Внешний код может только подписываться/отписываться.
 
 **Пример и ожидаемое поведение**
 
@@ -189,29 +189,29 @@ threshold=5; Add(5),Add(1),Add(-4),Add(3) → уведомления [5,5].
 
 Уровень 3 · Реализация · Навык: Декоратор Func со своим состоянием
 
-Реализуйте Func<int,int> Memoize(Func<int,int> compute) для однопоточного использования. Одинаковый аргумент после первого успешного вызова берётся из кэша. Результат 0 тоже кэшируется. Исключения не кэшируются: повтор такого аргумента снова вызывает compute. null compute — ArgumentNullException при создании. Разные декораторы имеют независимые кэши. Многопоточность и ограничение размера в эту задачу не входят.
+Реализуйте Func&lt;int,int&gt; Memoize(Func&lt;int,int&gt; compute) для однопоточного использования. Одинаковый аргумент после первого успешного вызова берётся из кэша. Результат 0 тоже кэшируется. Исключения не кэшируются: повтор такого аргумента снова вызывает compute. null compute — ArgumentNullException при создании. Разные декораторы имеют независимые кэши. Многопоточность и ограничение размера в эту задачу не входят.
 
 **Пример и ожидаемое поведение**
 
-Два вызова memo(3) при compute=x=>x*x → оба 9, исходная функция вызвана один раз.
+Два вызова memo(3) при compute=x=&gt;x*x → оба 9, исходная функция вызвана один раз.
 
 <a id="13-14"></a>
 ## 13-14. Составное правило с коротким замыканием
 
-Уровень 3 · Реализация · Навык: Композиция Predicate<T> и защита конфигурации
+Уровень 3 · Реализация · Навык: Композиция Predicate&lt;T&gt; и защита конфигурации
 
-Реализуйте Predicate<T> All<T>(params Predicate<T>[] rules). При вызове результата правила выполняются по порядку до первого false; пустой набор возвращает true. null массив/любое null правило — ArgumentException при создании, до вызовов. После создания замена ячейки исходного массива не меняет состав правил. Исключение текущего правила распространяется; последующие не выполняются.
+Реализуйте Predicate&lt;T&gt; All&lt;T&gt;(params Predicate&lt;T&gt;[] rules). При вызове результата правила выполняются по порядку до первого false; пустой набор возвращает true. null массив/любое null правило — ArgumentException при создании, до вызовов. После создания замена ячейки исходного массива не меняет состав правил. Исключение текущего правила распространяется; последующие не выполняются.
 
 **Пример и ожидаемое поведение**
 
-All<int>(x=>x>0,x=>x%2==0): 2→true,-2→false; второе правило для -2 не вызывается.
+All&lt;int&gt;(x=&gt;x&gt;0,x=&gt;x%2==0): 2→true,-2→false; второе правило для -2 не вызывается.
 
 <a id="13-15"></a>
 ## 13-15. Реестр команд
 
 Уровень 3 · Прикладная задача · Навык: Хранение делегатов и контролируемая диспетчеризация
 
-Создайте CommandRouter с Register(string name,Action<IReadOnlyList<string>> handler) и bool Execute(string name,IReadOnlyList<string> args). Имя состоит только из латинских a-z/A-Z, длина 1..20; неверное — ArgumentException. Регистр при поиске незначим. Повторная регистрация — InvalidOperationException, null handler/args — ArgumentNullException. Неизвестная корректная команда возвращает false без действий; известная вызывает handler один раз и возвращает true. Ошибка handler распространяется. Аргументы передавайте без изменения; разбор командной строки не нужен.
+Создайте CommandRouter с Register(string name,Action&lt;IReadOnlyList&lt;string&gt;&gt; handler) и bool Execute(string name,IReadOnlyList&lt;string&gt; args). Имя состоит только из латинских a-z/A-Z, длина 1..20; неверное — ArgumentException. Регистр при поиске незначим. Повторная регистрация — InvalidOperationException, null handler/args — ArgumentNullException. Неизвестная корректная команда возвращает false без действий; известная вызывает handler один раз и возвращает true. Ошибка handler распространяется. Аргументы передавайте без изменения; разбор командной строки не нужен.
 
 **Пример и ожидаемое поведение**
 

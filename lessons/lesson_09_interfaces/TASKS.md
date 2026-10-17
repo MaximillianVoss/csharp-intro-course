@@ -33,7 +33,7 @@
 
 **Пример и ожидаемое поведение**
 
-[Rectangle(3,4), Triangle(3,4)] -> 18; [] -> 0.
+[Rectangle(3,4), Triangle(3,4)] -&gt; 18; [] -&gt; 0.
 
 <a id="09-02"></a>
 ## 09-02. Скрытие метода и переопределение
@@ -70,29 +70,29 @@ Printer parent = derived;
 
 **Пример и ожидаемое поведение**
 
-Invoice(new RateTax(0.2m)).Total(100) -> 120; NoTax -> 100.
+Invoice(new RateTax(0.2m)).Total(100) -&gt; 120; NoTax -&gt; 100.
 
 <a id="09-04"></a>
 ## 09-04. Одинаковая команда разным устройствам
 
 Уровень 1 · Реализация · Навык: Сбор результатов полиморфных операций
 
-Создайте public interface ICommand { string Execute(); }, public sealed class EchoCommand(string text), возвращающий text, и public sealed class SumCommand(int left,int right), возвращающий сумму в инвариантной десятичной записи. Слагаемые в -1000000..1000000, text не null. Реализуйте public static string[] ExecuteAll(ICommand[] commands), массив и элементы не null, длина 0..1000. Каждую команду выполнить ровно один раз в порядке массива, результаты вернуть в новом массиве. Пустой ввод -> пустой результат.
+Создайте public interface ICommand { string Execute(); }, public sealed class EchoCommand(string text), возвращающий text, и public sealed class SumCommand(int left,int right), возвращающий сумму в инвариантной десятичной записи. Слагаемые в -1000000..1000000, text не null. Реализуйте public static string[] ExecuteAll(ICommand[] commands), массив и элементы не null, длина 0..1000. Каждую команду выполнить ровно один раз в порядке массива, результаты вернуть в новом массиве. Пустой ввод -&gt; пустой результат.
 
 **Пример и ожидаемое поведение**
 
-[EchoCommand("готово"),SumCommand(2,3)] -> ["готово","5"].
+[EchoCommand("готово"),SumCommand(2,3)] -&gt; ["готово","5"].
 
 <a id="09-05"></a>
 ## 09-05. Часы для повторяемого теста
 
 Уровень 1 · Проектирование тестов · Навык: Замена изменчивой зависимости фиксированными часами
 
-Создайте IClock { DateTime Now { get; } }, FixedClock(DateTime now) и Greeting(IClock clock) с string Get(): для Hour<12 возвращать "утро", иначе "день". clock не null. Используйте только внедрённое время. Напишите тесты на 00:00, 11:59, 12:00, 23:59. Отдельно выполните ошибочный вариант Hour<=12 и покажите расхождение ровно в 12:00. Реальные часы и ожидания времени не использовать.
+Создайте IClock { DateTime Now { get; } }, FixedClock(DateTime now) и Greeting(IClock clock) с string Get(): для Hour&lt;12 возвращать "утро", иначе "день". clock не null. Используйте только внедрённое время. Напишите тесты на 00:00, 11:59, 12:00, 23:59. Отдельно выполните ошибочный вариант Hour&lt;=12 и покажите расхождение ровно в 12:00. Реальные часы и ожидания времени не использовать.
 
 **Пример и ожидаемое поведение**
 
-FixedClock(2030-01-01 11:59) -> "утро"; 12:00 -> "день".
+FixedClock(2030-01-01 11:59) -&gt; "утро"; 12:00 -&gt; "день".
 
 <a id="09-06"></a>
 ## 09-06. Общая рамка расчёта доставки
@@ -103,7 +103,7 @@ FixedClock(2030-01-01 11:59) -> "утро"; 12:00 -> "день".
 
 **Пример и ожидаемое поведение**
 
-Ground.Quote(2) -> 50, Ground.Quote(10) -> 70; Air.Quote(2) -> 140.
+Ground.Quote(2) -&gt; 50, Ground.Quote(10) -&gt; 70; Air.Quote(2) -&gt; 140.
 
 <a id="09-07"></a>
 ## 09-07. Перегрузка не заменила виртуальный метод
@@ -124,7 +124,7 @@ Animal animal = new BrokenDog();
 
 **Пример и ожидаемое поведение**
 
-Исходный animal.Speak() -> "unknown"; исправленный new Dog() через Animal -> "woof".
+Исходный animal.Speak() -&gt; "unknown"; исправленный new Dog() через Animal -&gt; "woof".
 
 <a id="09-08"></a>
 ## 09-08. Узкий интерфейс для читателя
@@ -139,7 +139,7 @@ public interface INameStore { string Read(); void Write(string value); }
 
 **Пример и ожидаемое поведение**
 
-MemoryName("A") -> "Имя: A"; после Write("B") -> "Имя: B"; ReadOnlyName("C") тоже подходит.
+MemoryName("A") -&gt; "Имя: A"; после Write("B") -&gt; "Имя: B"; ReadOnlyName("C") тоже подходит.
 
 <a id="09-09"></a>
 ## 09-09. Интерфейс не отменяет владение данными
@@ -150,7 +150,7 @@ MemoryName("A") -> "Имя: A"; после Write("B") -> "Имя: B"; ReadOnlyNa
 
 **Пример и ожидаемое поведение**
 
-Save([1,2]); изменить исходный[0]=9; Load() -> [1,2]; изменить загруженный[1]=8; следующий Load() -> [1,2].
+Save([1,2]); изменить исходный[0]=9; Load() -&gt; [1,2]; изменить загруженный[1]=8; следующий Load() -&gt; [1,2].
 
 <a id="09-10"></a>
 ## 09-10. Один контракт для листа и папки
@@ -166,7 +166,7 @@ foreach (long fileSize in directFiles) total += fileSize;
 
 **Пример и ожидаемое поведение**
 
-folder=[File(3), subfolder=[File(5),File(7)]] -> 15; пустая папка -> 0.
+folder=[File(3), subfolder=[File(5),File(7)]] -&gt; 15; пустая папка -&gt; 0.
 
 <a id="09-11"></a>
 ## 09-11. Добавление поведения обёрткой
@@ -177,18 +177,18 @@ folder=[File(3), subfolder=[File(5),File(7)]] -> 15; пустая папка -> 
 
 **Пример и ожидаемое поведение**
 
-Prefix(Trim(Identity)," > ").Transform("  a  ") -> " > a"; Trim(Prefix(Identity," > ")).Transform("  a  ") -> ">   a".
+Prefix(Trim(Identity)," &gt; ").Transform("  a  ") -&gt; " &gt; a"; Trim(Prefix(Identity," &gt; ")).Transform("  a  ") -&gt; "&gt;   a".
 
 <a id="09-12"></a>
 ## 09-12. Резервный источник вызывается по необходимости
 
 Уровень 3 · Реализация · Навык: Композиция Try-контрактов и ленивое обращение к запасной зависимости
 
-Объявите IValueSource { bool TryGet(string key,out string value); }. key не null. При отсутствии источник возвращает false и value=""; пустая строка при true — найденное значение. Создайте DictionarySource(Dictionary<string,string> data) (словарь не null, Ordinal, не меняется снаружи во время работы) и FallbackSource(IValueSource primary,IValueSource backup). Обе зависимости не null. Fallback обращается к backup только при false от primary; при true сохраняет результат даже если он пустой. Проверьте число вызовов зависимостей тестовым источником.
+Объявите IValueSource { bool TryGet(string key,out string value); }. key не null. При отсутствии источник возвращает false и value=""; пустая строка при true — найденное значение. Создайте DictionarySource(Dictionary&lt;string,string&gt; data) (словарь не null, Ordinal, не меняется снаружи во время работы) и FallbackSource(IValueSource primary,IValueSource backup). Обе зависимости не null. Fallback обращается к backup только при false от primary; при true сохраняет результат даже если он пустой. Проверьте число вызовов зависимостей тестовым источником.
 
 **Пример и ожидаемое поведение**
 
-primary={A:""}, backup={A:"запас",B:"второй"}: A -> true,"" без вызова backup; B -> true,"второй".
+primary={A:""}, backup={A:"запас",B:"второй"}: A -&gt; true,"" без вызова backup; B -&gt; true,"второй".
 
 <a id="09-13"></a>
 ## 09-13. Два представления одного отчёта
@@ -199,26 +199,26 @@ primary={A:""}, backup={A:"запас",B:"второй"}: A -> true,"" без в
 
 **Пример и ожидаемое поведение**
 
-Report("Задачи",3) -> ["Задачи","Задачи: 3"].
+Report("Задачи",3) -&gt; ["Задачи","Задачи: 3"].
 
 <a id="09-14"></a>
 ## 09-14. Совпадение сигнатур ещё не очередь
 
 Уровень 3 · Проектирование тестов · Навык: Поведенческий контракт подстановки
 
-Объявите IIntQueue { void Add(int value); bool TryTake(out int value); }. FIFO обязателен. На пустоте false и value=0. Создайте FifoQueue на Queue<int> и заведомо ошибочную LifoQueue на Stack<int> с теми же сигнатурами. Напишите public static bool SatisfiesContract(IIntQueue queue), принимающий новый пустой экземпляр и проверяющий пустоту, добавление 1,2, получение 1, добавление 3, получение 2,3 и конечную пустоту. В Run докажите, что FifoQueue проходит, LifoQueue отвергается. Числа любые int, до 1000 операций.
+Объявите IIntQueue { void Add(int value); bool TryTake(out int value); }. FIFO обязателен. На пустоте false и value=0. Создайте FifoQueue на Queue&lt;int&gt; и заведомо ошибочную LifoQueue на Stack&lt;int&gt; с теми же сигнатурами. Напишите public static bool SatisfiesContract(IIntQueue queue), принимающий новый пустой экземпляр и проверяющий пустоту, добавление 1,2, получение 1, добавление 3, получение 2,3 и конечную пустоту. В Run докажите, что FifoQueue проходит, LifoQueue отвергается. Числа любые int, до 1000 операций.
 
 **Пример и ожидаемое поведение**
 
-SatisfiesContract(new FifoQueue()) -> true; new LifoQueue() -> false.
+SatisfiesContract(new FifoQueue()) -&gt; true; new LifoQueue() -&gt; false.
 
 <a id="09-15"></a>
 ## 09-15. Локальная служба уведомлений
 
 Уровень 3 · Прикладная задача · Навык: Сборка приложения из трёх зависимостей вручную
 
-Создайте IRecipients { string[] Get(); }, IMessageTemplate { string Build(string recipient); }, IChannel { bool TrySend(string recipient,string message); }, public readonly record struct DeliverySummary(int Attempted,int Succeeded) и NotificationService с конструктором из трёх указанных зависимостей. Все зависимости/результаты/строки не null; адресатов 0..1000, дубликаты значимы. Метод DeliverySummary SendAll() вызывает Get ровно раз, для каждого адресата по порядку Build и TrySend ровно раз, продолжает после false. Внешние сети не использовать: реализации тестовые в памяти. Пустой список -> (0,0).
+Создайте IRecipients { string[] Get(); }, IMessageTemplate { string Build(string recipient); }, IChannel { bool TrySend(string recipient,string message); }, public readonly record struct DeliverySummary(int Attempted,int Succeeded) и NotificationService с конструктором из трёх указанных зависимостей. Все зависимости/результаты/строки не null; адресатов 0..1000, дубликаты значимы. Метод DeliverySummary SendAll() вызывает Get ровно раз, для каждого адресата по порядку Build и TrySend ровно раз, продолжает после false. Внешние сети не использовать: реализации тестовые в памяти. Пустой список -&gt; (0,0).
 
 **Пример и ожидаемое поведение**
 
-Адресаты ["a","b","a"], канал отвергает "b" -> Attempted=3, Succeeded=2; три попытки в том же порядке.
+Адресаты ["a","b","a"], канал отвергает "b" -&gt; Attempted=3, Succeeded=2; три попытки в том же порядке.

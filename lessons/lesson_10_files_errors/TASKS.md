@@ -29,18 +29,18 @@
 
 Уровень 1 · Реализация · Навык: Отдельные исключения EOF, неверной записи, переполнения и диапазона
 
-Реализуйте public static int ReadPort(TextReader reader). reader не null, принадлежит вызывающему: не закрывайте его. Читайте ровно одну строку. EOF -> EndOfStreamException. Десятичное целое допускает пробелы по краям и знак; разбор int с CultureInfo.InvariantCulture: неверная запись -> FormatException, выход за int -> OverflowException. После разбора значение вне 1..65535 -> ArgumentOutOfRangeException. Верните допустимый порт; ошибок не подавляйте.
+Реализуйте public static int ReadPort(TextReader reader). reader не null, принадлежит вызывающему: не закрывайте его. Читайте ровно одну строку. EOF -&gt; EndOfStreamException. Десятичное целое допускает пробелы по краям и знак; разбор int с CultureInfo.InvariantCulture: неверная запись -&gt; FormatException, выход за int -&gt; OverflowException. После разбора значение вне 1..65535 -&gt; ArgumentOutOfRangeException. Верните допустимый порт; ошибок не подавляйте.
 
 **Пример и ожидаемое поведение**
 
-" 8080\n" -> 8080; пустой поток -> EndOfStreamException; "0" -> ArgumentOutOfRangeException; "x" -> FormatException.
+" 8080\n" -&gt; 8080; пустой поток -&gt; EndOfStreamException; "0" -&gt; ArgumentOutOfRangeException; "x" -&gt; FormatException.
 
 <a id="10-02"></a>
 ## 10-02. Порядок using, catch и finally
 
 Уровень 1 · Чтение кода · Навык: Раскрутка стека и освобождение ресурса до внешнего обработчика
 
-Создайте private sealed class Probe : IDisposable, принимающий List<string> log и добавляющий "dispose" в Dispose(). Предскажите журналы и выполните следующий фрагмент в public static string[] Trace(bool fail). Исключение должно перехватываться только указанным catch; дополнительных записей не добавляйте.
+Создайте private sealed class Probe : IDisposable, принимающий List&lt;string&gt; log и добавляющий "dispose" в Dispose(). Предскажите журналы и выполните следующий фрагмент в public static string[] Trace(bool fail). Исключение должно перехватываться только указанным catch; дополнительных записей не добавляйте.
 ```csharp
 List<string> log = new();
 try
@@ -60,14 +60,14 @@ finally { log.Add("finally"); }
 
 **Пример и ожидаемое поведение**
 
-fail=false -> [enter,body,dispose,after,finally]; fail=true -> [enter,body,dispose,catch,finally].
+fail=false -&gt; [enter,body,dispose,after,finally]; fail=true -&gt; [enter,body,dispose,catch,finally].
 
 <a id="10-03"></a>
 ## 10-03. Обработчик, до которого нельзя дойти
 
 Уровень 1 · Поиск ошибки · Навык: Порядок catch и узкое перехватывание ожидаемых ошибок
 
-Исходный код не компилируется: объясните причину и исправьте как public static string ReadFirstStatus(TextReader reader). reader не null, не закрывать. Нормальная строка -> "ok:"+строка, EOF -> "eof"; FileNotFoundException -> "missing"; иная IOException -> "io". Все остальные исключения должны пройти наружу. Для теста используйте TextReader, который детерминированно бросает заданное исключение, без реального повреждения файлов.
+Исходный код не компилируется: объясните причину и исправьте как public static string ReadFirstStatus(TextReader reader). reader не null, не закрывать. Нормальная строка -&gt; "ok:"+строка, EOF -&gt; "eof"; FileNotFoundException -&gt; "missing"; иная IOException -&gt; "io". Все остальные исключения должны пройти наружу. Для теста используйте TextReader, который детерминированно бросает заданное исключение, без реального повреждения файлов.
 ```csharp
 try { return reader.ReadLine() ?? "eof"; }
 catch (Exception) { return "unknown"; }
@@ -76,7 +76,7 @@ catch (IOException) { return "io"; }
 
 **Пример и ожидаемое поведение**
 
-StringReader("A") -> "ok:A"; IOException -> "io"; FileNotFoundException -> "missing"; FormatException не перехватывается.
+StringReader("A") -&gt; "ok:A"; IOException -&gt; "io"; FileNotFoundException -&gt; "missing"; FormatException не перехватывается.
 
 <a id="10-04"></a>
 ## 10-04. Текст проходит через UTF-8 файл
@@ -87,7 +87,7 @@ StringReader("A") -> "ok:A"; IOException -> "io"; FileNotFoundException -> "miss
 
 **Пример и ожидаемое поведение**
 
-"Привет\r\nC#\n🙂" -> в точности та же строка; "" -> "".
+"Привет\r\nC#\n🙂" -&gt; в точности та же строка; "" -&gt; "".
 
 <a id="10-05"></a>
 ## 10-05. Потоковый подсчёт содержательных строк
@@ -98,29 +98,29 @@ StringReader("A") -> "ok:A"; IOException -> "io"; FileNotFoundException -> "miss
 
 **Пример и ожидаемое поведение**
 
-"A\n\n   \r\nB\n" -> 2; пустой поток -> 0.
+"A\n\n   \r\nB\n" -&gt; 2; пустой поток -&gt; 0.
 
 <a id="10-06"></a>
 ## 10-06. Импорт продолжается после плохой строки
 
 Уровень 2 · Реализация · Навык: Локальное восстановление ошибок данных и диагностика по физическим строкам
 
-Создайте public sealed record ParseReport(int[] Values,int[] InvalidLines) и public static ParseReport ParseNumbers(TextReader reader). reader не null, до 10000 строк, длина до 1000; reader не закрывать. Физические строки нумеруются с 1. Пустые/пробельные строки игнорируйте, но учитывайте в нумерации. Остальные разбирайте как int через NumberStyles.Integer и InvariantCulture. Неверная запись или переполнение -> номер строки в InvalidLines; продолжайте после ошибки. Values сохраняет порядок удачных чисел. Ошибки самого чтения не перехватывать.
+Создайте public sealed record ParseReport(int[] Values,int[] InvalidLines) и public static ParseReport ParseNumbers(TextReader reader). reader не null, до 10000 строк, длина до 1000; reader не закрывать. Физические строки нумеруются с 1. Пустые/пробельные строки игнорируйте, но учитывайте в нумерации. Остальные разбирайте как int через NumberStyles.Integer и InvariantCulture. Неверная запись или переполнение -&gt; номер строки в InvalidLines; продолжайте после ошибки. Values сохраняет порядок удачных чисел. Ошибки самого чтения не перехватывать.
 
 **Пример и ожидаемое поведение**
 
-"10\n\nwrong\n -2 \n999999999999" -> Values=[10,-2], InvalidLines=[3,5].
+"10\n\nwrong\n -2 \n999999999999" -&gt; Values=[10,-2], InvalidLines=[3,5].
 
 <a id="10-07"></a>
 ## 10-07. Имя файла без выхода из рабочей папки
 
 Уровень 2 · Реализация · Навык: Различие пути и одного переносимого имени
 
-Реализуйте public static string ResolveChild(string root,string? fileName). root — существующий абсолютный путь уникального временного каталога вызывающего; файлов создавать не нужно. Разрешён ровно один компонент имени длиной 1..100 из ASCII букв, цифр, точки, дефиса, подчёркивания. Имена "." и ".." запрещены. null, пустота, разделители, двоеточие, пробелы и иные символы -> ArgumentException. Иначе верните Path.Combine(root,fileName). Это учебная проверка синтаксиса одного имени, не обещание полной защиты файловой системы от символических ссылок.
+Реализуйте public static string ResolveChild(string root,string? fileName). root — существующий абсолютный путь уникального временного каталога вызывающего; файлов создавать не нужно. Разрешён ровно один компонент имени длиной 1..100 из ASCII букв, цифр, точки, дефиса, подчёркивания. Имена "." и ".." запрещены. null, пустота, разделители, двоеточие, пробелы и иные символы -&gt; ArgumentException. Иначе верните Path.Combine(root,fileName). Это учебная проверка синтаксиса одного имени, не обещание полной защиты файловой системы от символических ссылок.
 
 **Пример и ожидаемое поведение**
 
-"report-1.txt" -> путь root/report-1.txt; "../report.txt", "a\b", "C:other", ".." -> ArgumentException.
+"report-1.txt" -&gt; путь root/report-1.txt; "../report.txt", "a\b", "C:other", ".." -&gt; ArgumentException.
 
 <a id="10-08"></a>
 ## 10-08. Освобождение должно быть идемпотентным
@@ -131,7 +131,7 @@ StringReader("A") -> "ok:A"; IOException -> "io"; FileNotFoundException -> "miss
 
 **Пример и ожидаемое поведение**
 
-Read до Dispose -> token; два Dispose -> ReleaseCount=1; Read после -> ObjectDisposedException.
+Read до Dispose -&gt; token; два Dispose -&gt; ReleaseCount=1; Read после -&gt; ObjectDisposedException.
 
 <a id="10-09"></a>
 ## 10-09. Журнал действительно дописывается
@@ -142,14 +142,14 @@ Read до Dispose -> token; два Dispose -> ReleaseCount=1; Read после ->
 
 **Пример и ожидаемое поведение**
 
-["первый","","третий"] -> те же три строки в том же порядке; [] -> [].
+["первый","","третий"] -&gt; те же три строки в том же порядке; [] -&gt; [].
 
 <a id="10-10"></a>
 ## 10-10. Не читать дальше найденного
 
 Уровень 2 · Рефакторинг · Навык: Потоковая обработка с ранним завершением и сохранением владения
 
-Переработайте идею чтения всего текста в public static string? FirstLongLine(TextReader reader,int limit). reader не null и принадлежит вызывающему; до 100000 строк. limit любой int: отрицательный -> ArgumentOutOfRangeException. Верните первую строку с Length>limit (Length в UTF-16 code units), а при отсутствии null. Считывать строки после найденной нельзя. Не закрывайте reader. Исходная расточительная идея:
+Переработайте идею чтения всего текста в public static string? FirstLongLine(TextReader reader,int limit). reader не null и принадлежит вызывающему; до 100000 строк. limit любой int: отрицательный -&gt; ArgumentOutOfRangeException. Верните первую строку с Length&gt;limit (Length в UTF-16 code units), а при отсутствии null. Считывать строки после найденной нельзя. Не закрывайте reader. Исходная расточительная идея:
 ```csharp
 string all = reader.ReadToEnd();
 // разбить всё и только потом искать одну строку
@@ -157,7 +157,7 @@ string all = reader.ReadToEnd();
 
 **Пример и ожидаемое поведение**
 
-"aa\nlong\ntail", limit=2 -> "long"; следующим ReadLine вызывающий получает "tail".
+"aa\nlong\ntail", limit=2 -&gt; "long"; следующим ReadLine вызывающий получает "tail".
 
 <a id="10-11"></a>
 ## 10-11. Новый текст до точки фиксации
@@ -168,48 +168,48 @@ string all = reader.ReadToEnd();
 
 **Пример и ожидаемое поведение**
 
-Старый текст "old", новый "new": fail=true -> IOException и old сохранён; fail=false -> new; staging не остаётся.
+Старый текст "old", новый "new": fail=true -&gt; IOException и old сохранён; fail=false -&gt; new; staging не остаётся.
 
 <a id="10-12"></a>
 ## 10-12. Отсутствие файла не равно пустому файлу
 
 Уровень 3 · Реализация · Навык: Узкое восстановление FileNotFound и DirectoryNotFound
 
-Реализуйте public static string? ReadOptionalText(string path). path указывает внутрь уникального temp вызывающего, файл может отсутствовать. Читайте UTF-8. FileNotFoundException и DirectoryNotFoundException преобразуйте в null; пустой существующий файл -> "". Все другие ошибки, включая ArgumentException для нулевого символа в пути, передавайте наружу. Не используйте предварительную File.Exists как замену обработке операции чтения. Run создаёт и удаляет весь temp в finally.
+Реализуйте public static string? ReadOptionalText(string path). path указывает внутрь уникального temp вызывающего, файл может отсутствовать. Читайте UTF-8. FileNotFoundException и DirectoryNotFoundException преобразуйте в null; пустой существующий файл -&gt; "". Все другие ошибки, включая ArgumentException для нулевого символа в пути, передавайте наружу. Не используйте предварительную File.Exists как замену обработке операции чтения. Run создаёт и удаляет весь temp в finally.
 
 **Пример и ожидаемое поведение**
 
-Отсутствующий file.txt -> null; существующий пустой -> ""; текст "данные" -> "данные".
+Отсутствующий file.txt -&gt; null; существующий пустой -&gt; ""; текст "данные" -&gt; "данные".
 
 <a id="10-13"></a>
 ## 10-13. Причина исключения не потеряна
 
 Уровень 3 · Реализация · Навык: Доменные исключения и InnerException
 
-Создайте public sealed class ConfigurationReadException : Exception с конструктором (string message,Exception inner), передающим оба аргумента в base. Реализуйте public static string LoadRequired(TextReader reader). reader не null, не закрывается. ReadToEnd возвращает текст; пустой/пробельный текст -> FormatException. Только IOException при чтении заверните в ConfigurationReadException с сообщением "Не удалось прочитать настройки." и той же InnerException. Иные ошибки не оборачивайте. Для IO используйте тестовый TextReader, выбрасывающий заранее созданный IOException; реальные файлы не повреждать.
+Создайте public sealed class ConfigurationReadException : Exception с конструктором (string message,Exception inner), передающим оба аргумента в base. Реализуйте public static string LoadRequired(TextReader reader). reader не null, не закрывается. ReadToEnd возвращает текст; пустой/пробельный текст -&gt; FormatException. Только IOException при чтении заверните в ConfigurationReadException с сообщением "Не удалось прочитать настройки." и той же InnerException. Иные ошибки не оборачивайте. Для IO используйте тестовый TextReader, выбрасывающий заранее созданный IOException; реальные файлы не повреждать.
 
 **Пример и ожидаемое поведение**
 
-"mode=demo" -> тот же текст; " " -> FormatException; IOException -> ConfigurationReadException с исходной причиной.
+"mode=demo" -&gt; тот же текст; " " -&gt; FormatException; IOException -&gt; ConfigurationReadException с исходной причиной.
 
 <a id="10-14"></a>
 ## 10-14. Повреждённый UTF-8 не должен молча заменяться
 
 Уровень 3 · Проектирование тестов · Навык: Различающий тест строгого декодера и политики BOM
 
-Реализуйте public static string ReadStrictUtf8(string path). path — файл внутри уникального временного каталога вызывающего, размер до 10000 байтов. Разрешён UTF-8 без BOM или с байтами BOM EF BB BF в начале; BOM не входит в возвращаемый текст. Повреждённая последовательность -> System.Text.DecoderFallbackException, без подстановки U+FFFD; другие кодировки автоматически не распознавать. В Run создайте корректный, пустой, BOM и повреждённый C3 28 файлы, затем исполните ошибочный мягкий Encoding.UTF8.GetString над повреждёнными байтами и покажите различие. Очистка temp в finally.
+Реализуйте public static string ReadStrictUtf8(string path). path — файл внутри уникального временного каталога вызывающего, размер до 10000 байтов. Разрешён UTF-8 без BOM или с байтами BOM EF BB BF в начале; BOM не входит в возвращаемый текст. Повреждённая последовательность -&gt; System.Text.DecoderFallbackException, без подстановки U+FFFD; другие кодировки автоматически не распознавать. В Run создайте корректный, пустой, BOM и повреждённый C3 28 файлы, затем исполните ошибочный мягкий Encoding.UTF8.GetString над повреждёнными байтами и покажите различие. Очистка temp в finally.
 
 **Пример и ожидаемое поведение**
 
-D0 AF -> "Я"; EF BB BF 41 -> "A"; C3 28 -> DecoderFallbackException.
+D0 AF -&gt; "Я"; EF BB BF 41 -&gt; "A"; C3 28 -&gt; DecoderFallbackException.
 
 <a id="10-15"></a>
 ## 10-15. Сводка нескольких текстовых файлов
 
 Уровень 3 · Прикладная задача · Навык: Детерминированная обработка набора файлов и отчёт об ошибках записей
 
-Создайте public sealed record ImportSummary(long Sum,int Accepted,string[] Errors) и public static ImportSummary SummarizeFiles(string directory). directory — существующий уникальный temp вызывающего; в нём до 100 обычных файлов без подкаталогов, имена состоят из ASCII букв/цифр/точек. Обрабатывайте только файлы, чьё расширение в точности ".txt" по Ordinal, в порядке имени Ordinal. В каждом UTF-8 файле до 1000 строк. Пустые/пробельные строки пропускайте; int разбирайте через NumberStyles.Integer и InvariantCulture. Неверное число/переполнение -> Errors с "имя:номер", номер физической строки от 1, затем продолжайте. Складывайте удачные значения в long, Accepted считает записи. Ошибки IO проходят наружу, все открытые reader освобождаются. Пустой каталог -> (0,0,[]). Run создаёт данные только в своём temp, cleanup в finally.
+Создайте public sealed record ImportSummary(long Sum,int Accepted,string[] Errors) и public static ImportSummary SummarizeFiles(string directory). directory — существующий уникальный temp вызывающего; в нём до 100 обычных файлов без подкаталогов, имена состоят из ASCII букв/цифр/точек. Обрабатывайте только файлы, чьё расширение в точности ".txt" по Ordinal, в порядке имени Ordinal. В каждом UTF-8 файле до 1000 строк. Пустые/пробельные строки пропускайте; int разбирайте через NumberStyles.Integer и InvariantCulture. Неверное число/переполнение -&gt; Errors с "имя:номер", номер физической строки от 1, затем продолжайте. Складывайте удачные значения в long, Accepted считает записи. Ошибки IO проходят наружу, все открытые reader освобождаются. Пустой каталог -&gt; (0,0,[]). Run создаёт данные только в своём temp, cleanup в finally.
 
 **Пример и ожидаемое поведение**
 
-a.txt="2\nbad\n3", b.txt="wrong\n5", ignore.dat="99" -> Sum=10, Accepted=3, Errors=["a.txt:2","b.txt:1"].
+a.txt="2\nbad\n3", b.txt="wrong\n5", ignore.dat="99" -&gt; Sum=10, Accepted=3, Errors=["a.txt:2","b.txt:1"].
