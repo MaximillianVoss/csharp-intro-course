@@ -1,0 +1,33 @@
+name: Verify course
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  verify:
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check generated documents
+        run: python tools/render_course.py --check --strict
+      - name: Build and run every lesson
+        shell: pwsh
+        run: ./tools/Verify.ps1
+      - name: CLI black-box scenarios
+        run: python tools/cli_smoke.py
+      - name: Content and semantic review gate
+        run: python tools/audit_course.py
+      - name: Save verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-${{ matrix.os }}
+          path: artifacts/

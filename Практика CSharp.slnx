@@ -1,0 +1,18 @@
+<Solution>
+  <Project Path="lessons/lesson_01_basics/templates/Урок01.Заготовки.csproj" />
+  <Project Path="lessons/lesson_02_input_conditions/templates/Урок02.Заготовки.csproj" />
+  <Project Path="lessons/lesson_03_loops/templates/Урок03.Заготовки.csproj" />
+  <Project Path="lessons/lesson_04_methods/templates/Урок04.Заготовки.csproj" />
+  <Project Path="lessons/lesson_05_strings/templates/Урок05.Заготовки.csproj" />
+  <Project Path="lessons/lesson_06_arrays/templates/Урок06.Заготовки.csproj" />
+  <Project Path="lessons/lesson_07_collections/templates/Урок07.Заготовки.csproj" />
+  <Project Path="lessons/lesson_08_classes/templates/Урок08.Заготовки.csproj" />
+  <Project Path="lessons/lesson_09_interfaces/templates/Урок09.Заготовки.csproj" />
+  <Project Path="lessons/lesson_10_files_errors/templates/Урок10.Заготовки.csproj" />
+  <Project Path="lessons/lesson_11_json/templates/Урок11.Заготовки.csproj" />
+  <Project Path="lessons/lesson_12_generics/templates/Урок12.Заготовки.csproj" />
+  <Project Path="lessons/lesson_13_delegates/templates/Урок13.Заготовки.csproj" />
+  <Project Path="lessons/lesson_14_linq/templates/Урок14.Заготовки.csproj" />
+  <Project Path="lessons/lesson_15_async/templates/Урок15.Заготовки.csproj" />
+  <Project Path="lessons/lesson_16_testing_project/templates/Урок16.Заготовки.csproj" />
+</Solution>

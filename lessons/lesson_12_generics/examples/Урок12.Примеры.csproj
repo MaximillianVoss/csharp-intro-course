@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Course.Lesson12</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Using Include="Course" />
+    <Compile Include="../../../shared/Check.cs" Link="Infrastructure/Check.cs" />
+    <Compile Include="../../../shared/Runner.cs" Link="Infrastructure/Runner.cs" />
+  </ItemGroup>
+</Project>
