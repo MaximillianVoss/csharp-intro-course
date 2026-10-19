@@ -25,6 +25,8 @@ jobs:
         run: python tools/cli_smoke.py
       - name: Content and semantic review gate
         run: python tools/audit_course.py
+      - name: Export reviewed cards and compile all extracted starters
+        run: python tools/export_cards.py --verify-starters --source-version ${{ github.sha }}
       - name: Save verification evidence
         if: always()
         uses: actions/upload-artifact@v4

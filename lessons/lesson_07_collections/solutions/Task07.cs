@@ -14,5 +14,8 @@ public static class Task07
         Check.SequenceEqual(Array.Empty<int>(), CommonInLeftOrder(new[] { 1 }, new[] { 2 }));
         Check.SequenceEqual(Array.Empty<int>(), CommonInLeftOrder(Array.Empty<int>(), new[] { 1 }));
         Check.SequenceEqual(Array.Empty<int>(), CommonInLeftOrder(new[] { 1 }, Array.Empty<int>()));
+        int[] left = { 4, 2, 4, 3 }; int[] right = { 2, 4, 4 };
+        CommonInLeftOrder(left, right);
+        Check.SequenceEqual(new[] { 4, 2, 4, 3 }, left); Check.SequenceEqual(new[] { 2, 4, 4 }, right);
     }
 }

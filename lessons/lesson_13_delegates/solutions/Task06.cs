@@ -15,5 +15,17 @@ public static class Task06
         Check.Equal(0, Filter(Array.Empty<int>(), _ => true).Length);
         int visits = 0; Check.Throws<FormatException>(() => Filter(new[] { 1, 2, 3 }, x => { visits++; if (x == 2) throw new FormatException(); return true; })); Check.Equal(2, visits);
         Check.Throws<ArgumentNullException>(() => Filter<int>(null!, _ => true)); Check.Throws<ArgumentNullException>(() => Filter(new[] { 1 }, null!));
+        bool entered = false;
+        IEnumerable<int> Observed() { entered = true; yield return 1; }
+        Check.Throws<ArgumentNullException>(() => Filter(Observed(), null!)); Check.True(!entered);
+        int enumerations = 0, moves = 0, disposed = 0;
+        IEnumerable<int> Owned()
+        {
+            if (++enumerations > 1) throw new InvalidOperationException("Second enumeration.");
+            try { foreach (int value in new[] { 1, 2, 3 }) { moves++; yield return value; } }
+            finally { disposed++; }
+        }
+        Check.Throws<FormatException>(() => Filter(Owned(), x => x == 2 ? throw new FormatException() : true));
+        Check.Equal(1, enumerations); Check.Equal(2, moves); Check.Equal(1, disposed);
     }
 }

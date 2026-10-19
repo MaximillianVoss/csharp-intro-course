@@ -5,7 +5,7 @@ $artifacts = Join-Path $root 'artifacts'
 New-Item -ItemType Directory -Path $artifacts -Force | Out-Null
 
 function Invoke-Dotnet {
-    param([string[]]$Arguments, [string]$LogName, [int]$TimeoutSeconds = 180)
+    param([string[]]$Arguments, [string]$LogName, [int]$TimeoutSeconds = 180, [int]$ExpectedExit = 0)
     $info = [System.Diagnostics.ProcessStartInfo]::new('dotnet')
     $info.WorkingDirectory = $root
     $info.UseShellExecute = $false
@@ -27,7 +27,7 @@ function Invoke-Dotnet {
     $stdout = $stdoutTask.GetAwaiter().GetResult()
     $stderr = $stderrTask.GetAwaiter().GetResult()
     $stdout + $stderr | Set-Content -LiteralPath (Join-Path $artifacts "$LogName.log") -Encoding utf8
-    if ($process.ExitCode -ne 0) {
+    if ($process.ExitCode -ne $ExpectedExit) {
         Write-Host $stdout
         Write-Host $stderr
         throw "dotnet failed ($($process.ExitCode)): $($Arguments -join ' ')"
@@ -67,7 +67,16 @@ foreach ($manifest in $manifests) {
     $listed = Invoke-Dotnet -Arguments @('exec',$templateDll,'--list') -LogName "templates-$number" -TimeoutSeconds 30
     $ids = @($listed -split "\r?\n" | Where-Object { $_ -match '^\d{2}-\d{2}$' })
     if ($ids.Count -ne 15) { throw "Template catalog mismatch in module $number." }
-    $lessonResults += [ordered]@{lesson=[int]$lesson.number; tasks=[int]$result.tasks; assertions=[int]$result.assertions; example='passed'; templates='compiled_and_listed_only'}
+    $unfilled = Invoke-Dotnet -Arguments @('exec',$templateDll,'--all') -LogName "templates-unfilled-$number" -TimeoutSeconds 30 -ExpectedExit 1
+    $templateLine = @($unfilled -split "\r?\n" | Where-Object { $_.StartsWith('RESULT ') })
+    if ($templateLine.Count -ne 1) { throw "Missing template RESULT for module $number." }
+    $templateResult = $templateLine[0].Substring(7) | ConvertFrom-Json
+    if ($templateResult.tasks -ne 15 -or $templateResult.failed -ne 15 -or -not $templateResult.template -or $templateResult.assertions -ne 0) {
+        throw "Author starter tasks must remain unfilled in module $number."
+    }
+    $templateLog = Get-Content -LiteralPath (Join-Path $artifacts "templates-unfilled-$number.log") -Raw
+    if ([regex]::Matches($templateLog,'FAIL \d{2}-\d{2}: NotImplementedException:').Count -ne 15) { throw "Unexpected starter failure in module $number." }
+    $lessonResults += [ordered]@{lesson=[int]$lesson.number; tasks=[int]$result.tasks; assertions=[int]$result.assertions; example='passed'; templates='compiled_listed_and_all_15_confirmed_unfilled'}
 }
 $report = [ordered]@{
     sdk=(& dotnet --version)

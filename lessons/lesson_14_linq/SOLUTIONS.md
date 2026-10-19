@@ -36,6 +36,9 @@ public static class Task01
         Check.SequenceEqual(new[] { 4, 0, 16, 4 }, EvenSquares(new[] { 3, -2, 0, 4, -2 }));
         Check.Equal(0, EvenSquares(Array.Empty<int>()).Length); Check.SequenceEqual(new[] { 1000000 }, EvenSquares(new[] { -1000 }));
         Check.Throws<ArgumentOutOfRangeException>(() => EvenSquares(new[] { 1001 })); Check.Throws<ArgumentNullException>(() => EvenSquares(null!));
+        int enumerations = 0;
+        IEnumerable<int> Once() { if (++enumerations != 1) throw new InvalidOperationException("Second pass."); yield return 2; yield return 3; }
+        Check.SequenceEqual(new[] { 4 }, EvenSquares(Once())); Check.Equal(1, enumerations);
     }
 }
 ```
@@ -46,6 +49,7 @@ public static class Task01
 - Пустой источник
 - Неверное нечётное число отклонено
 - null источник отвергнут
+- Одноразовый источник перечисляется один раз
 
 <a id="14-02"></a>
 ## 14-02. Рейтинг с устойчивыми равенствами
@@ -168,6 +172,8 @@ public static class Task04
         Check.True(Array.Empty<int>().All(x => x >= 50)); Check.True(!AllPassed(Array.Empty<int>(), 50));
         Check.True(AllPassed(new[] { 50, 70 }, 50)); Check.True(!AllPassed(new[] { 49, 100 }, 50)); Check.True(AllPassed(new[] { 0 }, 0));
         Check.Throws<ArgumentOutOfRangeException>(() => AllPassed(new[] { 0, 101 }, 50)); Check.Throws<ArgumentOutOfRangeException>(() => AllPassed(new[] { 1 }, -1)); Check.Throws<ArgumentNullException>(() => AllPassed(null!, 50));
+        bool entered = false; IEnumerable<int> Source() { entered = true; yield return 1; }
+        Check.Throws<ArgumentOutOfRangeException>(() => AllPassed(Source(), 101)); Check.True(!entered);
     }
 }
 ```
@@ -178,6 +184,7 @@ public static class Task04
 - Исправленный пустой случай
 - Все/не все на границе
 - Диапазоны и null проверены
+- Проверка threshold=101не начинает перечисление
 
 <a id="14-05"></a>
 ## 14-05. Ноль или отсутствие совпадения
@@ -395,6 +402,9 @@ public static class Task09
         Check.Equal((5L, 8.50m), Totals(new[] { new Line(2, 1.25m), new Line(3, 2m) })); Check.Equal((0L, 0m), Totals(Array.Empty<Line>()));
         Check.Equal(3000000000L, Totals(Enumerable.Repeat(new Line(1000000, 0), 3000)).Units);
         Check.Throws<ArgumentException>(() => Totals(new[] { new Line(0, 1) })); Check.Throws<ArgumentException>(() => Totals(new Line[] { null! })); Check.Throws<ArgumentNullException>(() => Totals(null!));
+        int enumerations = 0;
+        IEnumerable<Line> Once() { if (++enumerations > 1) throw new InvalidOperationException("Second pass."); yield return new Line(2, 3m); }
+        Check.Equal((2L, 6m), Totals(Once())); Check.Equal(1, enumerations);
     }
 }
 ```
@@ -405,6 +415,7 @@ public static class Task09
 - Пустая корзина
 - Количество единиц больше int
 - Неверная строка и null отвергнуты
+- Одноразовый источник даёт оба результата без повторного обхода
 
 <a id="14-10"></a>
 ## 14-10. Уникальность имени: Single или First
@@ -441,6 +452,8 @@ public static class Task10
         var ada = new User("Ada"); Check.True(ReferenceEquals(ada, FindUnique(new[] { ada }, "ADA"))); Check.Equal<User?>(null, FindUnique(new[] { ada }, "Bob"));
         var duplicate = new[] { ada, new User("ADA") }; Check.Throws<InvalidOperationException>(() => FindUnique(duplicate, "ada")); Check.True(ReferenceEquals(ada, Broken(duplicate, "ada")));
         Check.Equal<User?>(null, FindUnique(Array.Empty<User>(), "")); Check.Throws<ArgumentException>(() => FindUnique(new User[] { null! }, "x"));
+        Check.Throws<ArgumentException>(() => FindUnique(new[] { ada, new User(null!) }, "Ada"));
+        Check.Throws<ArgumentNullException>(() => FindUnique(new[] { ada }, null!));
     }
 }
 ```
@@ -451,6 +464,7 @@ public static class Task10
 - Первый объект сохраняет идентичность
 - Ошибочный First реально возвращает при дубликате
 - null пользователь отвергнут
+- Поздний null Name проверяется до выбора найденного пользователя
 
 <a id="14-11"></a>
 ## 14-11. Словарь последних версий
@@ -530,6 +544,8 @@ public static class Task12
         var values = new[] { 10, 20, 30, 40, 50 }; Check.SequenceEqual(new[] { 10, 20 }, Page(values, 1, 2)); Check.SequenceEqual(new[] { 30, 40 }, Page(values, 2, 2));
         Check.SequenceEqual(new[] { 50 }, Page(values, 3, 2)); Check.Equal(0, Page(values, 4, 2).Length);
         Check.Throws<ArgumentOutOfRangeException>(() => Page(values, 0, 2)); Check.Throws<ArgumentOutOfRangeException>(() => Page(values, 1, 101)); Check.Throws<OverflowException>(() => Page(values, int.MaxValue, 100));
+        bool entered = false; IEnumerable<int> Source() { entered = true; yield return 1; }
+        Check.Throws<OverflowException>(() => Page(Source(), int.MaxValue, 100)); Check.True(!entered);
     }
 }
 ```
@@ -540,6 +556,7 @@ public static class Task12
 - Страница за концом
 - Неверные параметры
 - Переполнение смещения
+- Overflow смещения не начинает source
 
 <a id="14-13"></a>
 ## 14-13. Клиенты без заказов тоже в отчёте
@@ -548,7 +565,7 @@ GroupJoin связывает клиента с целой последовате
 
 **Ход решения**
 
-Обычный Join потерял бы клиента 2. GroupJoin выдаёт для него пустую группу, у Count и decimal Sum определены нужные нулевые результаты. Внешним источником должны быть клиенты. Неизвестные покупки не имеют внешнего клиента и естественно пропускаются. Средняя сложность O(c+p+c log c), память O(c+p).
+Обычный Join потерял бы клиента 2. GroupJoin выдаёт для него пустую группу, у Count и decimal Sum определены нужные нулевые результаты. Внешним источником должны быть клиенты. Неизвестные покупки не имеют внешнего клиента и естественно пропускаются. Средняя сложность O(c+p+c log c), память O(c+p). Допустимость каждой покупки не доказывает допустимость их суммы: две decimal.MaxValue для одного клиента приводят к OverflowException.
 
 **Частая ошибка**
 
@@ -576,6 +593,7 @@ public static class Task13
         Check.Equal(0, CustomerTotals(Array.Empty<Customer>(), Array.Empty<Purchase>()).Length);
         Check.Throws<ArgumentException>(() => CustomerTotals(new[] { new Customer(1), new Customer(1) }, Array.Empty<Purchase>()));
         Check.Throws<ArgumentException>(() => CustomerTotals(new[] { new Customer(1) }, new[] { new Purchase(1, -1) }));
+        Check.Throws<OverflowException>(() => CustomerTotals(new[] { new Customer(1) }, new[] { new Purchase(1, decimal.MaxValue), new Purchase(1, decimal.MaxValue) }));
     }
 }
 ```
@@ -586,6 +604,7 @@ public static class Task13
 - Клиент без покупок
 - Неизвестный клиент игнорируется
 - Дубликат клиента и отрицательная сумма отвергнуты
+- Две допустимые decimal.MaxValue переполняют агрегат и вызывают OverflowException
 
 <a id="14-14"></a>
 ## 14-14. Одноразовый источник

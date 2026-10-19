@@ -40,6 +40,9 @@ public static class Task01
         using StringReader tooLarge = new("65536"); Check.Throws<ArgumentOutOfRangeException>(() => ReadPort(tooLarge));
         using StringReader lower = new("1"); Check.Equal(1, ReadPort(lower));
         using StringReader upper = new("65535"); Check.Equal(65535, ReadPort(upper));
+        using StringReader blank = new("\n"); Check.Throws<FormatException>(() => ReadPort(blank));
+        using StringReader tail = new("8080\ntail"); Check.Equal(8080, ReadPort(tail)); Check.Equal("tail", tail.ReadLine());
+        using StringReader badTail = new("bad\ntail"); Check.Throws<FormatException>(() => ReadPort(badTail)); Check.Equal("tail", badTail.ReadLine());
     }
 }
 ```
@@ -52,6 +55,7 @@ public static class Task01
 - Переполнение int
 - Нижняя и верхняя границы
 - Выход за диапазон
+- Дополнено при пересмотре: Хвост после первого чтения остаётся вызывающему.
 
 <a id="10-02"></a>
 ## 10-02. Порядок using, catch и finally
@@ -60,7 +64,7 @@ using освобождает ресурс на выходе из своей об
 
 **Ход решения**
 
-При обычном ходе после Dispose выполняется after, catch пропускается, finally выполняется всегда. При ошибке выход из using вызывает Dispose до поиска внешнего обработчика; after пропускается, затем выполняются catch и finally. Тест сравнивает весь порядок, поэтому позднее или двойное освобождение обнаружится.
+При обычном ходе после Dispose выполняется after, catch пропускается, finally выполняется всегда. При ошибке выход из using вызывает Dispose до выполнения тела внешнего catch; after пропускается, затем выполняются catch и finally. Тест сравнивает весь порядок, поэтому позднее или двойное освобождение обнаружится.
 
 **Частая ошибка**
 
@@ -147,6 +151,7 @@ public static class Task03
         using FailingReader missing = new(new FileNotFoundException()); using FailingReader io = new(new IOException());
         Check.Equal("missing", ReadFirstStatus(missing)); Check.Equal("io", ReadFirstStatus(io));
         using FailingReader unexpected = new(new FormatException()); Check.Throws<FormatException>(() => ReadFirstStatus(unexpected));
+        using StringReader blank = new("\nnext"); Check.Equal("ok:", ReadFirstStatus(blank)); Check.Equal("next", blank.ReadLine());
     }
 }
 ```
@@ -158,19 +163,20 @@ public static class Task03
 - Специальный missing
 - Общий io
 - FormatException проходит наружу
+- Дополнено при пересмотре: Пустая строка даётok: и не потребляет следующий текст.
 
 <a id="10-04"></a>
 ## 10-04. Текст проходит через UTF-8 файл
 
-Используйте явный UTF8Encoding без BOM; операции всего текста не нормализуют переводы строк.
+Используйте явный UTF8Encoding без BOM; декодируйте прочитанные байты через GetString, сохраняя все символы и переводы строк.
 
 **Ход решения**
 
-Кодировка — перевод между символами и байтами. UTF-8 допускает разные длины байтов, поэтому число байтов не равно Length строки. WriteAllText/ReadAllText сохраняют имеющиеся CRLF/LF, в отличие от пересборки строк WriteLine. Уникальный temp предотвращает конфликт запусков; finally ограничивает владение файлами. O(L) времени и памяти.
+Кодировка переводит символы в байты и обратно. UTF-8 имеет переменную длину, поэтому число байтов не равно Length строки. Запись всего текста сохраняет CRLF/LF. Начальный U+FEFF из данных кодируется теми же байтами, что BOM: File.ReadAllText автоматически удалил бы их при чтении. Декодирование через UTF8Encoding(false,true).GetString над File.ReadAllBytes сохраняет этот символ. Уникальный temp предотвращает конфликт запусков; finally ограничивает владение файлами. Время и память O(L).
 
 **Частая ошибка**
 
-Использовать ASCII для кириллицы; собирать строки с Environment.NewLine и менять исходные переводы; фиксированное общее имя temp без GUID.
+Использовать ASCII для кириллицы; собирать строки с Environment.NewLine и менять исходные переводы; фиксированное общее имя temp без GUID. Автоматически распознавать BOM при чтении файла без добавленной сигнатуры: это удалит U+FEFF из начала исходных данных.
 
 Полный исходник: [solutions/Task04.cs](solutions/Task04.cs).
 
@@ -188,13 +194,15 @@ public static class Task04
             string path = Path.Combine(directory, "text.txt");
             System.Text.UTF8Encoding encoding = new(false, true);
             File.WriteAllText(path, text, encoding);
-            return File.ReadAllText(path, encoding);
+            return encoding.GetString(File.ReadAllBytes(path));
         }
         finally { Directory.Delete(directory, true); }
     }
     public static void Run()
     {
         Check.Equal("Привет\r\nC#\n🙂", RoundTrip("Привет\r\nC#\n🙂")); Check.Equal("", RoundTrip(""));
+        Check.Equal("\uFEFFabc", RoundTrip("\uFEFFabc"));
+        Check.Equal("\uFEFF\uFEFF", RoundTrip("\uFEFF\uFEFF"));
         string directory = Path.Combine(Path.GetTempPath(), "csharp-course-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(directory);
         try
@@ -214,6 +222,8 @@ public static class Task04
 - Пустой текст
 - UTF-8 байты слова Я без BOM
 - Временный каталог удалён после проверки
+- Начальный U+FEFF сохраняется как часть текста
+- Два начальных U+FEFF не удаляются
 
 <a id="10-05"></a>
 ## 10-05. Потоковый подсчёт содержательных строк
@@ -292,6 +302,10 @@ public static class Task06
         }
         return new ParseReport(values.ToArray(), invalid.ToArray());
     }
+    private sealed class ThrowingLineReader : TextReader
+    {
+        public override string? ReadLine() => throw new IOException("Отказ источника, не ошибка числа.");
+    }
     public static void Run()
     {
         using StringReader input = new("10\n\nwrong\n -2 \n999999999999"); ParseReport report = ParseNumbers(input);
@@ -299,6 +313,7 @@ public static class Task06
         using StringReader zero = new("bad\n0\n \n7"); ParseReport after = ParseNumbers(zero);
         Check.SequenceEqual(new[] { 0, 7 }, after.Values); Check.SequenceEqual(new[] { 1 }, after.InvalidLines);
         using StringReader empty = new(""); Check.Equal(0, ParseNumbers(empty).Values.Length);
+        using ThrowingLineReader broken = new(); Check.Throws<IOException>(() => ParseNumbers(broken));
     }
 }
 ```
@@ -310,6 +325,7 @@ public static class Task06
 - Пустой ввод
 - Пробелы пропущены без ошибки
 - Последующие числа после ошибки сохранены
+- Дополнено при пересмотре: Искусственная IOException действительно проходит наружу.
 
 <a id="10-07"></a>
 ## 10-07. Имя файла без выхода из рабочей папки
@@ -345,7 +361,8 @@ public static class Task07
         try
         {
             Check.Equal(Path.Combine(root, "report-1.txt"), ResolveChild(root, "report-1.txt"));
-            foreach (string? invalid in new string?[] { "../report.txt", "a\\b", "C:other", "..", ".", null, " ", new string('a', 101) })
+            Check.Equal(Path.Combine(root, new string('a', 100)), ResolveChild(root, new string('a', 100)));
+            foreach (string? invalid in new string?[] { "../report.txt", "a\\b", "C:other", "..", ".", null, "", " ", new string('a', 101) })
                 Check.Throws<ArgumentException>(() => ResolveChild(root, invalid));
         }
         finally { Directory.Delete(root, true); }
@@ -361,6 +378,7 @@ public static class Task07
 - Двоеточие
 - null и пробелы
 - Слишком длинное имя
+- Дополнено при пересмотре: 101 символ отвергнут,100 разрешены.
 
 <a id="10-08"></a>
 ## 10-08. Освобождение должно быть идемпотентным
@@ -417,15 +435,15 @@ public static class Task08
 <a id="10-09"></a>
 ## 10-09. Журнал действительно дописывается
 
-Создайте пустой файл заранее; каждый новый StreamWriter должен использовать append:true и завершить область using до чтения.
+Создайте пустой файл заранее; каждый StreamWriter использует append:true и завершается до чтения. Затем читайте строки через StreamReader с той же кодировкой без преамбулы и detectEncodingFromByteOrderMarks:false.
 
 **Ход решения**
 
-Без append каждый проход перезаписывал бы предыдущие записи. Dispose сбрасывает буфер и освобождает дескриптор, поэтому чтение идёт после закрытия writer. Пустая запись — отдельная строка, она не исчезает при ReadAllLines. Учебное отдельное открытие каждой записи показывает режим, хотя для большого журнала эффективнее один writer на пакет. O(объём текста).
+Без append каждый проход перезаписывал бы предыдущие записи. Dispose сбрасывает буфер и освобождает дескриптор, поэтому чтение начинается после закрытия writer. Пустая запись остаётся отдельной строкой. Кодировка UTF8Encoding(false,true) не добавляет преамбулу; отключённое распознавание BOM у StreamReader сохраняет U+FEFF, если он принадлежал первой записи. Каждый ReadLine добавляется в результат, включая пустые строки. Отдельное открытие каждой записи показывает режим append, хотя для большого журнала эффективнее один writer на пакет. Время O(объём текста), память O(объём результата).
 
 **Частая ошибка**
 
-Открывать с append:false; читать до flush/dispose; отфильтровать пустые записи как ошибки.
+Открывать с append:false; читать до flush/dispose; отфильтровать пустые записи как ошибки. Читать через File.ReadAllLines с распознаванием BOM и терять начальный U+FEFF первой записи.
 
 Полный исходник: [solutions/Task09.cs](solutions/Task09.cs).
 
@@ -445,7 +463,11 @@ public static class Task09
             {
                 using StreamWriter writer = new(path, append: true, encoding: encoding); writer.WriteLine(message);
             }
-            return File.ReadAllLines(path, encoding);
+            using StreamReader reader = new(path, encoding, detectEncodingFromByteOrderMarks: false);
+            List<string> result = new();
+            string? line;
+            while ((line = reader.ReadLine()) is not null) result.Add(line);
+            return result.ToArray();
         }
         finally { Directory.Delete(directory, true); }
     }
@@ -454,6 +476,9 @@ public static class Task09
         Check.SequenceEqual(new[] { "первый", "", "третий" }, AppendAndRead(new[] { "первый", "", "третий" }));
         Check.SequenceEqual(Array.Empty<string>(), AppendAndRead(Array.Empty<string>()));
         Check.SequenceEqual(new[] { "один" }, AppendAndRead(new[] { "один" }));
+        Check.SequenceEqual(new[] { "", "" }, AppendAndRead(new[] { "", "" }));
+        Check.SequenceEqual(new[] { "\uFEFFabc", "\uFEFF", "" }, AppendAndRead(new[] { "\uFEFFabc", "\uFEFF", "" }));
+        Check.SequenceEqual(new[] { "", "\uFEFFabc" }, AppendAndRead(new[] { "", "\uFEFFabc" }));
     }
 }
 ```
@@ -465,6 +490,9 @@ public static class Task09
 - Нулевой пакет
 - Кириллица
 - Одна запись
+- Дополнено при пересмотре: Две подряд пустые записи сохраняют кратность.
+- U+FEFF сохраняется в первой и последующих записях
+- Пустая первая запись не меняет следующий U+FEFF
 
 <a id="10-10"></a>
 ## 10-10. Не читать дальше найденного
@@ -500,6 +528,8 @@ public static class Task10
         using StringReader none = new("a\nb"); Check.True(FirstLongLine(none, 2) is null);
         using StringReader empty = new(""); Check.True(FirstLongLine(empty, 0) is null);
         using StringReader invalid = new("stay"); Check.Throws<ArgumentOutOfRangeException>(() => FirstLongLine(invalid, -1)); Check.Equal("stay", invalid.ReadLine());
+        using StringReader emoji = new("🙂\ntail"); Check.Equal("🙂", FirstLongLine(emoji, 1)); Check.Equal("tail", emoji.ReadLine());
+        using StringReader exactEmoji = new("🙂\nabc"); Check.Equal("abc", FirstLongLine(exactEmoji, 2));
     }
 }
 ```
@@ -511,6 +541,7 @@ public static class Task10
 - Нет совпадений
 - Пустой поток
 - Отрицательный limit не потребляет строку
+- Дополнено при пересмотре: Emoji занимает2 UTF-16 единицы.
 
 <a id="10-11"></a>
 ## 10-11. Новый текст до точки фиксации
@@ -551,8 +582,12 @@ public static class Task11
             string path = Path.Combine(directory, "data.txt"); File.WriteAllText(path, "old");
             Check.Throws<IOException>(() => WriteThenCommit(path, "new", true)); Check.Equal("old", File.ReadAllText(path));
             Check.Equal(1, Directory.GetFiles(directory).Length);
+            string absent = Path.Combine(directory, "absent.txt");
+            Check.Throws<IOException>(() => WriteThenCommit(absent, "not-committed", true));
+            Check.True(!File.Exists(absent)); Check.Equal(1, Directory.GetFiles(directory).Length);
             WriteThenCommit(path, "new", false); Check.Equal("new", File.ReadAllText(path)); Check.Equal(1, Directory.GetFiles(directory).Length);
             string second = Path.Combine(directory, "second.txt"); WriteThenCommit(second, "создан", false); Check.Equal("создан", File.ReadAllText(second));
+            Check.SequenceEqual(System.Text.Encoding.UTF8.GetBytes("создан"), File.ReadAllBytes(second));
         }
         finally { Directory.Delete(directory, true); }
     }
@@ -566,6 +601,7 @@ public static class Task11
 - Успешная замена
 - Создание нового назначения
 - Весь тестовый temp очищается
+- Дополнено при пересмотре: Байты созданного текста безBOM.
 
 <a id="10-12"></a>
 ## 10-12. Отсутствие файла не равно пустому файлу
@@ -712,6 +748,10 @@ public static class Task14
             byte[] corrupt = { 0xC3, 0x28 }; File.WriteAllBytes(path, corrupt);
             Check.Throws<System.Text.DecoderFallbackException>(() => ReadStrictUtf8(path));
             string wrong = System.Text.Encoding.UTF8.GetString(corrupt); Check.True(wrong.Contains('\uFFFD'));
+            File.WriteAllBytes(path, new byte[] { 0xC3 }); Check.Throws<System.Text.DecoderFallbackException>(() => ReadStrictUtf8(path));
+            File.WriteAllBytes(path, new byte[] { 0xFF, 0xFE, 0x41, 0x00 }); Check.Throws<System.Text.DecoderFallbackException>(() => ReadStrictUtf8(path));
+            File.WriteAllBytes(path, new byte[] { 0xEF, 0xBB, 0xBF }); Check.Equal("", ReadStrictUtf8(path));
+            File.WriteAllBytes(path, new byte[] { 0x41, 0xEF, 0xBB, 0xBF }); Check.Equal("A\uFEFF", ReadStrictUtf8(path));
         }
         finally { Directory.Delete(directory, true); }
     }
@@ -725,6 +765,7 @@ public static class Task14
 - Пустой файл
 - Повреждение бросает точный тип
 - Мягкий ошибочный вариант содержит U+FFFD
+- Дополнено при пересмотре: Мягкий вариант даёт замену.
 
 <a id="10-15"></a>
 ## 10-15. Сводка нескольких текстовых файлов
@@ -778,6 +819,9 @@ public static class Task15
             File.WriteAllText(Path.Combine(directory, "large.txt"), "2147483647\n\n2147483647\nwrong");
             ImportSummary large = SummarizeFiles(directory); Check.Equal(4294967304L, large.Sum); Check.Equal(5, large.Accepted);
             Check.SequenceEqual(new[] { "a.txt:2", "b.txt:1", "large.txt:4" }, large.Errors);
+            File.WriteAllText(Path.Combine(directory, "overflow.txt"), "999999999999\n7");
+            ImportSummary recovered = SummarizeFiles(directory); Check.Equal(4294967311L, recovered.Sum); Check.Equal(6, recovered.Accepted);
+            Check.SequenceEqual(new[] { "a.txt:2", "b.txt:1", "large.txt:4", "overflow.txt:1" }, recovered.Errors);
         }
         finally { Directory.Delete(directory, true); }
     }
@@ -792,3 +836,4 @@ public static class Task15
 - Сумма больше int.MaxValue
 - Пустой каталог
 - Продолжение после ошибки
+- Дополнено при пересмотре: Переполнение отдельногоint даётoverflow.txt:1, следующая7 принята.

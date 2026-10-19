@@ -18,5 +18,8 @@ public static class Task08
         Check.True(!TryReserve(stock, new(StringComparer.Ordinal) { ["C"] = 1 }));
         Check.True(TryReserve(stock, new(StringComparer.Ordinal) { ["C"] = 0 })); Check.True(!stock.ContainsKey("C"));
         Check.True(TryReserve(stock, new(StringComparer.Ordinal)));
+        Dictionary<string, int> request = new(StringComparer.Ordinal) { ["A"] = 1, ["B"] = 0 };
+        Check.True(TryReserve(stock, request));
+        Check.Equal(1, request["A"]); Check.Equal(0, request["B"]); Check.Equal(2, request.Count);
     }
 }

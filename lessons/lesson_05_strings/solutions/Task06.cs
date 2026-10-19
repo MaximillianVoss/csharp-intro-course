@@ -17,5 +17,10 @@ public static class Task06
         Check.Equal(false, SameCommand(" start ", "start"));
         Check.Equal(false, SameCommand("starter", "start"));
         Check.True(SameCommand("stop", "stop"));
+
+        // Review 2026-10-19: ordinal Latin I contrasts
+        Check.True(SameCommand("I", "i"));
+        Check.Equal(false, SameCommand("ı", "i"));
+        Check.Equal(false, SameCommand("İ", "i"));
     }
 }

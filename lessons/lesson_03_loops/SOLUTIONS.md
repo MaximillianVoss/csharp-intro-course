@@ -422,6 +422,9 @@ public static class Task08
         Check.Equal(0L, SumLines(invalid));
         using var large = new StringReader("2147483647\n2147483647\n");
         Check.Equal(4_294_967_294L, SumLines(large));
+
+        // Review 2026-10-19: reader remains caller owned
+        Check.Equal<string?>(null, revised.ReadLine());
     }
 }
 ```
@@ -432,6 +435,7 @@ public static class Task08
 - Пустой поток
 - Неверная и пустая строки
 - Сумма двух int.MaxValue
+- После SumLines источник остаётся доступен вызывающему коду: следующее ReadLine корректно возвращает EOF
 
 <a id="03-09"></a>
 ## 03-09. Наибольший общий делитель
@@ -714,6 +718,13 @@ public static class Task13
         Check.Equal("-2147483648", Maximum(minimum));
         using var mixed = new StringReader("1\n10\nx\n0\n");
         Check.Equal("10", Maximum(mixed));
+
+        // Review 2026-10-19: maximum preserves reader ownership
+        Check.Equal<string?>(null, minimum.ReadLine());
+
+        // Review 2026-10-19: zero maximum is present data
+        using var zeroMaximum = new StringReader("bad\n0\n-2\n");
+        Check.Equal("0", Maximum(zeroMaximum));
     }
 }
 ```
@@ -725,6 +736,8 @@ public static class Task13
 - Только неверные строки
 - Единственное int.MinValue
 - Максимум в середине смешанного потока
+- Maximum не закрывает переданный reader: после обработки можно снова прочитать EOF
+- Настоящий нулевой максимум отличается от отсутствия чисел
 
 <a id="03-14"></a>
 ## 03-14. Целый корень двоичным поиском
@@ -833,6 +846,13 @@ public static class Task15
         Check.Equal("locked", TryCode(emptyLine, 1));
         using var numeric = new StringReader("420\n");
         Check.Equal("locked", TryCode(numeric, 1));
+
+        // Review 2026-10-19: exact attempt boundary and immediate EOF
+        using var noLines = new StringReader("");
+        Check.Equal("eof", TryCode(noLines, 3));
+        using var lastAttempt = new StringReader("bad\nalso-bad\n0420\nuntouched\n");
+        Check.Equal("ok:3", TryCode(lastAttempt, 3));
+        Check.Equal("untouched", lastAttempt.ReadLine());
     }
 }
 ```
@@ -845,3 +865,5 @@ public static class Task15
 - EOF
 - Пустая строка расходует попытку
 - 420 не равно 0420
+- EOF до первой попытки
+- Успех ровно на последней разрешённой попытке и сохранение хвоста

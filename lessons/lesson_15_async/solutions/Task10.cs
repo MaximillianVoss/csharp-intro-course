@@ -17,5 +17,8 @@ public static class Task10
         var badGate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously); int early = 0; var bad = Broken(() => badGate.Task, () => early++); Check.True(bad.IsCompleted); Check.Equal(1, early); badGate.SetResult(); await badGate.Task;
         await Check.ThrowsAsync<IOException>(() => SaveThenNotifyAsync(() => Task.FromException(new IOException()), () => notices++)); Check.Equal(1, notices);
         int saves = 0; await Check.ThrowsAsync<ArgumentNullException>(() => SaveThenNotifyAsync(() => { saves++; return Task.CompletedTask; }, null!)); Check.Equal(0, saves);
+        var error = new FormatException("notify failure");
+        var observed = await Check.ThrowsAsync<FormatException>(() => SaveThenNotifyAsync(() => { saves++; return Task.CompletedTask; }, () => throw error));
+        Check.True(ReferenceEquals(error, observed)); Check.Equal(1, saves);
     }
 }

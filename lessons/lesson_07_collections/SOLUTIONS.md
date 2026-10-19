@@ -55,7 +55,7 @@ public static class Task01
 
 **Ход решения**
 
-Словарь решает задачу поиска значения по ключу. Компаратор задаётся при создании, поэтому одинаковые по контракту коды попадают в одну запись без изменения исходных строк. TryGetValue сообщает отсутствие и возвращает ноль для нового счётчика. Ожидаемое O(n) времени и O(u) памяти.
+Словарь решает задачу поиска значения по ключу. Компаратор задаётся при создании, поэтому одинаковые по контракту коды попадают в одну запись без изменения исходных строк. TryGetValue сообщает отсутствие и возвращает ноль для нового счётчика. Ожидаемое время O(L), где L — суммарная длина кодов: хеширование и сравнение строк зависят от числа символов. Дополнительная память O(u) для u различных кодов; сами исходные строки не копируются.
 
 **Частая ошибка**
 
@@ -84,6 +84,14 @@ public static class Task02
         Check.Equal(2, result["aB"]); Check.Equal(1, result["X"]); Check.Equal(2, result.Count);
         Check.Equal(0, CountCodes(Array.Empty<string>()).Count);
         Check.Equal(2, CountCodes(new[] { "ab", "a-b" }).Count);
+        System.Globalization.CultureInfo previous = System.Globalization.CultureInfo.CurrentCulture;
+        try
+        {
+            System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("tr-TR");
+            Dictionary<string, int> technical = CountCodes(new[] { "I", "i" });
+            Check.Equal(1, technical.Count); Check.Equal(2, technical["i"]);
+        }
+        finally { System.Globalization.CultureInfo.CurrentCulture = previous; }
     }
 }
 ```
@@ -94,6 +102,7 @@ public static class Task02
 - Поиск результата в другом регистре
 - Пустой массив
 - Дефис отличен от отсутствия дефиса
+- Дополнено при пересмотре: tr-TR: I/i обязаны объединяться.
 
 <a id="07-03"></a>
 ## 07-03. Уникальные в порядке появления
@@ -306,6 +315,9 @@ public static class Task07
         Check.SequenceEqual(Array.Empty<int>(), CommonInLeftOrder(new[] { 1 }, new[] { 2 }));
         Check.SequenceEqual(Array.Empty<int>(), CommonInLeftOrder(Array.Empty<int>(), new[] { 1 }));
         Check.SequenceEqual(Array.Empty<int>(), CommonInLeftOrder(new[] { 1 }, Array.Empty<int>()));
+        int[] left = { 4, 2, 4, 3 }; int[] right = { 2, 4, 4 };
+        CommonInLeftOrder(left, right);
+        Check.SequenceEqual(new[] { 4, 2, 4, 3 }, left); Check.SequenceEqual(new[] { 2, 4, 4 }, right);
     }
 }
 ```
@@ -316,6 +328,7 @@ public static class Task07
 - Нет пересечения
 - Пустой left
 - Пустой right
+- Дополнено при пересмотре: Добавлена проверка обоих источников.
 
 <a id="07-08"></a>
 ## 07-08. Склад: резервирование целиком
@@ -353,6 +366,9 @@ public static class Task08
         Check.True(!TryReserve(stock, new(StringComparer.Ordinal) { ["C"] = 1 }));
         Check.True(TryReserve(stock, new(StringComparer.Ordinal) { ["C"] = 0 })); Check.True(!stock.ContainsKey("C"));
         Check.True(TryReserve(stock, new(StringComparer.Ordinal)));
+        Dictionary<string, int> request = new(StringComparer.Ordinal) { ["A"] = 1, ["B"] = 0 };
+        Check.True(TryReserve(stock, request));
+        Check.Equal(1, request["A"]); Check.Equal(0, request["B"]); Check.Equal(2, request.Count);
     }
 }
 ```
@@ -364,6 +380,7 @@ public static class Task08
 - Отсутствующий положительный товар
 - Нулевой отсутствующий товар не добавлен
 - Пустой запрос
+- Дополнено при пересмотре: Именованный request не меняется после успеха.
 
 <a id="07-09"></a>
 ## 07-09. Круговое обслуживание
@@ -466,7 +483,7 @@ public static class Task10
 
 **Ход решения**
 
-Dictionary&lt;string,List&lt;int&gt;&gt; означает, что значением является список; квадратные скобки универсальных типов не создают отдельную группу автоматически. TryGetValue даёт существующий список либо повод создать новый. Один список на все ключи смешал бы группы. Ожидаемое O(n), память O(n).
+Dictionary&lt;string,List&lt;int&gt;&gt; означает, что значением является список; угловые скобки параметров типа не создают отдельную группу автоматически. TryGetValue даёт существующий список либо повод создать новый. Один список на все ключи смешал бы группы. Ожидаемое время O(L+n), где L — суммарная длина меток, n — число позиций: поиск строкового ключа требует хеширования его символов. Дополнительная память O(n).
 
 **Частая ошибка**
 
@@ -601,6 +618,15 @@ public static class Task13
         Check.Equal(0, ReplayEditor(new[] { "undo", "redo" }));
         Check.Equal(0, ReplayEditor(new[] { "set 1", "set 2", "undo", "undo" }));
         Check.Equal(4, ReplayEditor(new[] { "set 4", "set 4", "undo" }));
+        Check.Equal(1, ReplayEditor(new[] { "set 1", "set 2", "undo", "set 1", "redo" }));
+        System.Globalization.CultureInfo previous = System.Globalization.CultureInfo.CurrentCulture;
+        try
+        {
+            System.Globalization.CultureInfo unusual = (System.Globalization.CultureInfo)System.Globalization.CultureInfo.InvariantCulture.Clone();
+            unusual.NumberFormat.NegativeSign = "minus"; System.Globalization.CultureInfo.CurrentCulture = unusual;
+            Check.Equal(int.MinValue, ReplayEditor(new[] { "set -2147483648" }));
+        }
+        finally { System.Globalization.CultureInfo.CurrentCulture = previous; }
     }
 }
 ```
@@ -612,6 +638,7 @@ public static class Task13
 - Пустые истории безопасны
 - Несколько undo подряд
 - Повторная запись того же числа
+- Дополнено при пересмотре: Invariant-разбор отрицательных под изменённой культурой.
 
 <a id="07-14"></a>
 ## 07-14. Проверка компаратора ключей
@@ -620,7 +647,7 @@ public static class Task13
 
 **Ход решения**
 
-Тест [id,id] не различает компараторы, а [id,ID] различает. Значимые знаки проверяют, что реализация не нормализует лишнее. Пустота отличает неверную начальную единицу счётчика. Ожидаемое O(n), память O(u). Ошибочный вариант действительно вычисляется и даёт 3 на общем примере вместо 2.
+Тест [id,id] не различает компараторы, а [id,ID] различает. Значимые знаки проверяют, что реализация не нормализует лишнее. Пустота отличает неверную начальную единицу счётчика. Ожидаемое время O(L), где L — суммарная длина кодов, дополнительная память O(u) для u различных ключей: хеширование строки читает её символы. Ошибочный вариант действительно вычисляется и даёт 3 на общем примере вместо 2.
 
 **Частая ошибка**
 
@@ -703,6 +730,8 @@ public static class Task15
         Check.Equal(0, ShortestPath(new bool[1, 1], 0, 0, 0, 0));
         Check.Equal(-1, ShortestPath(new[,] { { true, false } }, 0, 0, 0, 1));
         Check.True(map[0, 1] && !map[1, 1]);
+        Check.Equal(-1, ShortestPath(new[,] { { false, true } }, 0, 0, 0, 1));
+        Check.Equal(4, ShortestPath(new bool[2, 4], 0, 0, 1, 3));
     }
 }
 ```
@@ -714,3 +743,4 @@ public static class Task15
 - Одна свободная клетка
 - Заблокированный старт
 - Карта сохранена
+- Дополнено при пересмотре: Прямоугольный прямой путь.

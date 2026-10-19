@@ -566,6 +566,12 @@ public static class Task11
         Check.Equal(0, value);
         Check.Equal(false, Wrong("-5", out value));
         Check.Equal(-5, value);
+
+        // Review 2026-10-19: format failures reset out
+        Check.Equal(false, TryPositive("", out value));
+        Check.Equal(0, value);
+        Check.Equal(false, TryPositive("not-a-number", out value));
+        Check.Equal(0, value);
     }
 }
 ```
@@ -578,6 +584,7 @@ public static class Task11
 - EOF
 - Переполнение
 - Wrong имеет неверный out при false
+- Пустая строка и неверный формат отдельно проверяют false вместе с обязательным out=0
 
 <a id="04-12"></a>
 ## 04-12. Быстрая целая степень
@@ -756,6 +763,15 @@ public static class Task14
         Refusal(12, 30, -1);
         Refusal(12, 30, 1441);
         Refusal(12, 30, int.MaxValue);
+
+        // Review 2026-10-19: last minute and extreme invalid state
+        hours = 23;
+        minutes = 59;
+        Check.True(TryAdvanceClock(ref hours, ref minutes, 1));
+        Check.Equal(0, hours);
+        Check.Equal(0, minutes);
+        Refusal(int.MinValue, 30, 0);
+        Refusal(23, int.MaxValue, 0);
     }
 }
 ```
@@ -768,6 +784,8 @@ public static class Task14
 - Переход 00:59 на следующий час
 - Недопустимые часы, минуты и добавки сохраняют оба ref
 - Очень большая добавка отвергается до арифметики
+- Переход 23:59 на 00:00
+- Крайние недопустимые часы/минуты сохраняют оба ref без арифметики
 
 <a id="04-15"></a>
 ## 04-15. Проверка номера с контрольной цифрой

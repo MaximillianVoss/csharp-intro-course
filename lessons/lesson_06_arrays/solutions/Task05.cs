@@ -11,6 +11,7 @@ public static class Task05
             values[right] = temporary;
         }
     }
+    private static void WrongNoOp(int[] values) { _ = values; }
     public static void Run()
     {
         int[] empty = Array.Empty<int>(); Reverse(empty);
@@ -19,7 +20,7 @@ public static class Task05
         int[] even = { 1, 2, 3, 4 }; Reverse(even);
         Check.SequenceEqual(new[] { 4, 3, 2, 1 }, even);
         int[] odd = { 1, 1, 3 }; Reverse(odd); Check.SequenceEqual(new[] { 3, 1, 1 }, odd);
-        int[] wrongNoOp = { 1, 2, 3, 4 };
+        int[] wrongNoOp = { 1, 2, 3, 4 }; WrongNoOp(wrongNoOp);
         Check.True(wrongNoOp[0] != even[0], "Асимметричный тест различает no-op.");
     }
 }

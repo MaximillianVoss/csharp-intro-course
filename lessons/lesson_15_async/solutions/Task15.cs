@@ -27,5 +27,25 @@ public static class Task15
         await Check.ThrowsAsync<IOException>(() => ImportAsync(failure, (item, _) => { if (item.Id == 2) throw new IOException(); saved.Add(item.Id); return Task.CompletedTask; })); Check.SequenceEqual(new[] { 1 }, saved);
         using var empty = Json("[]"); Check.Equal(0, await ImportAsync(empty, (_, _) => Task.CompletedTask));
         using var cancel = Json("[]"); await Check.ThrowsAsync<OperationCanceledException>(() => ImportAsync(cancel, (_, _) => Task.CompletedTask, new CancellationToken(true))); Check.Equal(0L, cancel.Position);
+        using var ordered = Json("[{\"Id\":1,\"Name\":\"A\"},{\"Id\":2,\"Name\":\"B\"}]");
+        var firstStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var finishFirst = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously); int sequentialCalls = 0;
+        var sequential = ImportAsync(ordered, (item, _) =>
+        {
+            Interlocked.Increment(ref sequentialCalls);
+            if (item.Id == 1) { firstStarted.SetResult(); return finishFirst.Task; }
+            return Task.CompletedTask;
+        });
+        await firstStarted.Task; Check.Equal(1, Volatile.Read(ref sequentialCalls)); Check.True(!sequential.IsCompleted);
+        finishFirst.SetResult(); Check.Equal(2, await sequential); Check.Equal(2, Volatile.Read(ref sequentialCalls));
+        using var afterLast = Json("[{\"Id\":1,\"Name\":\"A\"}]"); using var afterLastToken = new CancellationTokenSource();
+        int finalSaves = 0;
+        await Check.ThrowsAsync<OperationCanceledException>(() => ImportAsync(afterLast, (_, token) =>
+        {
+            Check.Equal(afterLastToken.Token, token); finalSaves++; afterLastToken.Cancel(); return Task.CompletedTask;
+        }, afterLastToken.Token));
+        Check.Equal(1, finalSaves); Check.True(afterLast.CanRead);
+        using var malformedName = Json("[{\"Id\":1,\"Name\":\"A\"},{\"Id\":2,\"Name\":\"\\uD800\"}]"); int invalidSaves = 0;
+        await Check.ThrowsAsync<JsonException>(() => ImportAsync(malformedName, (_, _) => { invalidSaves++; return Task.CompletedTask; })); Check.Equal(0, invalidSaves);
     }
 }

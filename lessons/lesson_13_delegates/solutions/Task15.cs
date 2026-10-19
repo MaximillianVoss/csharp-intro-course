@@ -29,5 +29,7 @@ public static class Task15
         Check.Throws<InvalidOperationException>(() => router.Register("Echo", _ => { })); Check.True(router.Execute("echo", new[] { "kept" })); Check.Equal("kept", log[2]);
         Check.Throws<ArgumentException>(() => router.Execute("bad name", Array.Empty<string>())); Check.Throws<ArgumentNullException>(() => router.Execute("help", null!));
         Check.Throws<ArgumentNullException>(() => router.Register("null", null!)); router.Register("fail", _ => throw new FormatException()); Check.Throws<FormatException>(() => router.Execute("fail", Array.Empty<string>()));
+        var boundaryName = new string('a', 20); router.Register(boundaryName, _ => { }); Check.True(router.Execute(boundaryName, Array.Empty<string>()));
+        foreach (var name in new[] { "", "echo1", "эхо", new string('a', 21) }) Check.Throws<ArgumentException>(() => router.Register(name, _ => { }));
     }
 }

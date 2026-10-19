@@ -1,13 +1,27 @@
-namespace Course.Lesson11;
+// Авторский предметный каркас. Модели и API заданы; алгоритмы и проверки предстоит написать.
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
+namespace Course.Lesson11;
 // 11-01. Карточка в JSON
 // Условие: ../TASKS.md, раздел 11-01.
 public static class Task01
 {
+    public sealed class Card
+    {
+        public string Name { get; set; } = "";
+        public int Count { get; set; }
+    }
+
+    public static string Serialize(Card card)
+    {
+        throw new NotImplementedException();
+    }
+
     public static void Run()
     {
-        // TODO: выполните условие и добавьте проверки. Ответов здесь нет.
-        throw new NotImplementedException("Задача 11-01 ещё не решена.");
+        // TODO: Проверьте точное восстановление имени после разбора JSON и самостоятельные ошибки модели.
+        throw new NotImplementedException();
     }
 }
 
@@ -15,10 +29,21 @@ public static class Task01
 // Условие: ../TASKS.md, раздел 11-02.
 public static class Task02
 {
+    public sealed class Reading
+    {
+        public decimal Value { get; set; }
+        public string? Unit { get; set; }
+    }
+
+    public static Reading Read(string json)
+    {
+        throw new NotImplementedException();
+    }
+
     public static void Run()
     {
-        // TODO: выполните условие и добавьте проверки. Ответов здесь нет.
-        throw new NotImplementedException("Задача 11-02 ещё не решена.");
+        // TODO: Сопоставьте допустимый JSON с моделью, затем независимо проверьте синтаксис, тип и доменные ограничения.
+        throw new NotImplementedException();
     }
 }
 
@@ -26,10 +51,22 @@ public static class Task02
 // Условие: ../TASKS.md, раздел 11-03.
 public static class Task03
 {
+    public sealed class Settings
+    {
+        public int Limit { get; set; } = 9;
+
+        public int Counter = 4;
+    }
+
+    public static (int Limit, int Counter) Observe(string json)
+    {
+        throw new NotImplementedException();
+    }
+
     public static void Run()
     {
-        // TODO: выполните условие и добавьте проверки. Ответов здесь нет.
-        throw new NotImplementedException("Задача 11-03 ещё не решена.");
+        // TODO: До запуска запишите прогноз для исходника и контрольного JSON с другим регистром свойства.
+        throw new NotImplementedException();
     }
 }
 
@@ -37,10 +74,15 @@ public static class Task03
 // Условие: ../TASKS.md, раздел 11-04.
 public static class Task04
 {
+    public static JsonElement ReadDetached(string json)
+    {
+        throw new NotImplementedException();
+    }
+
     public static void Run()
     {
-        // TODO: выполните условие и добавьте проверки. Ответов здесь нет.
-        throw new NotImplementedException("Задача 11-04 ещё не решена.");
+        // TODO: Воспроизведите ошибку исходного using, затем проверьте чтение вложенных значений после возврата метода.
+        throw new NotImplementedException();
     }
 }
 
@@ -48,10 +90,15 @@ public static class Task04
 // Условие: ../TASKS.md, раздел 11-05.
 public static class Task05
 {
+    public static string Label(string json)
+    {
+        throw new NotImplementedException();
+    }
+
     public static void Run()
     {
-        // TODO: выполните условие и добавьте проверки. Ответов здесь нет.
-        throw new NotImplementedException("Задача 11-05 ещё не решена.");
+        // TODO: Подберите независимые входы для отсутствия, null, пустой строки и неверного типа.
+        throw new NotImplementedException();
     }
 }
 
@@ -59,10 +106,25 @@ public static class Task05
 // Условие: ../TASKS.md, раздел 11-06.
 public static class Task06
 {
+    public sealed class Settings
+    {
+        public int Volume { get; set; } = 50;
+    }
+
+    public static void Save(string path, Settings settings)
+    {
+        throw new NotImplementedException();
+    }
+
+    public static Settings Load(string path)
+    {
+        throw new NotImplementedException();
+    }
+
     public static void Run()
     {
-        // TODO: выполните условие и добавьте проверки. Ответов здесь нет.
-        throw new NotImplementedException("Задача 11-06 ещё не решена.");
+        // TODO: Работайте в собственном временном каталоге; отдельно проверьте отсутствие файла и повреждение существующего.
+        throw new NotImplementedException();
     }
 }
 
@@ -70,10 +132,26 @@ public static class Task06
 // Условие: ../TASKS.md, раздел 11-07.
 public static class Task07
 {
+    public sealed class Order
+    {
+        public Line?[]? Lines { get; set; }
+    }
+
+    public sealed class Line
+    {
+        public int Quantity { get; set; }
+        public decimal Price { get; set; }
+    }
+
+    public static decimal Total(string json)
+    {
+        throw new NotImplementedException();
+    }
+
     public static void Run()
     {
-        // TODO: выполните условие и добавьте проверки. Ответов здесь нет.
-        throw new NotImplementedException("Задача 11-07 ещё не решена.");
+        // TODO: Проверьте корень, коллекцию и элемент как три самостоятельные границы, затем точную денежную сумму.
+        throw new NotImplementedException();
     }
 }
 
@@ -81,10 +159,15 @@ public static class Task07
 // Условие: ../TASKS.md, раздел 11-08.
 public static class Task08
 {
+    public static (double Lat, double Lon) ReadPoint(string json)
+    {
+        throw new NotImplementedException();
+    }
+
     public static void Run()
     {
-        // TODO: выполните условие и добавьте проверки. Ответов здесь нет.
-        throw new NotImplementedException("Задача 11-08 ещё не решена.");
+        // TODO: Проверьте обе координаты на границах и число с чрезмерной экспонентой.
+        throw new NotImplementedException();
     }
 }
 
@@ -92,10 +175,15 @@ public static class Task08
 // Условие: ../TASKS.md, раздел 11-09.
 public static class Task09
 {
+    public static string BuildMessage(string text)
+    {
+        throw new NotImplementedException();
+    }
+
     public static void Run()
     {
-        // TODO: выполните условие и добавьте проверки. Ответов здесь нет.
-        throw new NotImplementedException("Задача 11-09 ещё не решена.");
+        // TODO: Покажите вход, ломающий склейку; проверяйте восстановленный текст и количество свойств объекта.
+        throw new NotImplementedException();
     }
 }
 
@@ -103,10 +191,15 @@ public static class Task09
 // Условие: ../TASKS.md, раздел 11-10.
 public static class Task10
 {
+    public static int[] RoundTrip(int[] values)
+    {
+        throw new NotImplementedException();
+    }
+
     public static void Run()
     {
-        // TODO: выполните условие и добавьте проверки. Ответов здесь нет.
-        throw new NotImplementedException("Задача 11-10 ещё не решена.");
+        // TODO: Выберите вход, на котором сортировка заметна, и отдельно проверьте независимость массивов.
+        throw new NotImplementedException();
     }
 }
 
@@ -114,10 +207,16 @@ public static class Task10
 // Условие: ../TASKS.md, раздел 11-11.
 public static class Task11
 {
+    public sealed record Config(string Name, int Retries);
+    public static Config Read(string json)
+    {
+        throw new NotImplementedException();
+    }
+
     public static void Run()
     {
-        // TODO: выполните условие и добавьте проверки. Ответов здесь нет.
-        throw new NotImplementedException("Задача 11-11 ещё не решена.");
+        // TODO: Составьте отдельные примеры каждой версии и ошибки обязательных полей; не угадывайте формат по label.
+        throw new NotImplementedException();
     }
 }
 
@@ -125,10 +224,26 @@ public static class Task11
 // Условие: ../TASKS.md, раздел 11-12.
 public static class Task12
 {
+    public sealed class Item
+    {
+        public int Id { get; set; }
+    }
+
+    public sealed class Report
+    {
+        public List<int> Ids { get; } = new();
+        public List<int> ErrorLines { get; } = new();
+    }
+
+    public static Report Import(TextReader reader)
+    {
+        throw new NotImplementedException();
+    }
+
     public static void Run()
     {
-        // TODO: выполните условие и добавьте проверки. Ответов здесь нет.
-        throw new NotImplementedException("Задача 11-12 ещё не решена.");
+        // TODO: Проверьте номера после пустых строк, сохранение повторов и отличие ошибки записи от отказа чтения.
+        throw new NotImplementedException();
     }
 }
 
@@ -136,10 +251,26 @@ public static class Task12
 // Условие: ../TASKS.md, раздел 11-13.
 public static class Task13
 {
+    public enum Status
+    {
+        Pending,
+        Done
+    }
+
+    public static Status Read(string json)
+    {
+        throw new NotImplementedException();
+    }
+
+    public static string Write(Status status)
+    {
+        throw new NotImplementedException();
+    }
+
     public static void Run()
     {
-        // TODO: выполните условие и добавьте проверки. Ответов здесь нет.
-        throw new NotImplementedException("Задача 11-13 ещё не решена.");
+        // TODO: Разделите пробелы синтаксиса JSON и содержимого строки; проверьте запрещённые составные имена.
+        throw new NotImplementedException();
     }
 }
 
@@ -147,10 +278,16 @@ public static class Task13
 // Условие: ../TASKS.md, раздел 11-14.
 public static class Task14
 {
+    public sealed record Profile(string Name, string? Bio);
+    public static Profile Patch(Profile original, string json)
+    {
+        throw new NotImplementedException();
+    }
+
     public static void Run()
     {
-        // TODO: выполните условие и добавьте проверки. Ответов здесь нет.
-        throw new NotImplementedException("Задача 11-14 ещё не решена.");
+        // TODO: Проверьте различие пропуска и сброса поля; ошибка последнего поля не должна менять исходный профиль.
+        throw new NotImplementedException();
     }
 }
 
@@ -158,9 +295,36 @@ public static class Task14
 // Условие: ../TASKS.md, раздел 11-15.
 public static class Task15
 {
+    public sealed class Item
+    {
+        public int Id { get; set; }
+        public string? Name { get; set; }
+    }
+
+    public sealed class Catalog
+    {
+        public int Count
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public void Import(string json)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string Export()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public static void Run()
     {
-        // TODO: выполните условие и добавьте проверки. Ответов здесь нет.
-        throw new NotImplementedException("Задача 11-15 ещё не решена.");
+        // TODO: Сохраните экспорт до ошибочного позднего элемента и сравните весь снимок после отказа.
+        throw new NotImplementedException();
     }
 }

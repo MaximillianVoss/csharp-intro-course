@@ -19,5 +19,8 @@ public static class Task09
         Check.Equal((5L, 8.50m), Totals(new[] { new Line(2, 1.25m), new Line(3, 2m) })); Check.Equal((0L, 0m), Totals(Array.Empty<Line>()));
         Check.Equal(3000000000L, Totals(Enumerable.Repeat(new Line(1000000, 0), 3000)).Units);
         Check.Throws<ArgumentException>(() => Totals(new[] { new Line(0, 1) })); Check.Throws<ArgumentException>(() => Totals(new Line[] { null! })); Check.Throws<ArgumentNullException>(() => Totals(null!));
+        int enumerations = 0;
+        IEnumerable<Line> Once() { if (++enumerations > 1) throw new InvalidOperationException("Second pass."); yield return new Line(2, 3m); }
+        Check.Equal((2L, 6m), Totals(Once())); Check.Equal(1, enumerations);
     }
 }

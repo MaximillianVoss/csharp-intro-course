@@ -32,6 +32,8 @@ public static class Task01
         int calls = 0; Check.Equal(5, Apply(4, x => { calls++; return x + 1; })); Check.Equal(1, calls);
         Check.Throws<FormatException>(() => Apply(0, _ => throw new FormatException("bad")));
         Check.Throws<ArgumentNullException>(() => Apply(0, null!));
+        var failure = new FormatException("same instance"); int faultCalls = 0;
+        var observed = Check.Throws<FormatException>(() => Apply(1, _ => { faultCalls++; throw failure; })); Check.True(ReferenceEquals(failure, observed)); Check.Equal(1, faultCalls);
     }
 }
 ```
@@ -42,6 +44,7 @@ public static class Task01
 - Ровно один вызов
 - Ошибка операции распространяется
 - null отвергнут
+- Ошибка зависимости сохраняет тот же объект исключения, вызов ровно один
 
 <a id="13-02"></a>
 ## 13-02. Композиция в заданном порядке
@@ -252,6 +255,18 @@ public static class Task06
         Check.Equal(0, Filter(Array.Empty<int>(), _ => true).Length);
         int visits = 0; Check.Throws<FormatException>(() => Filter(new[] { 1, 2, 3 }, x => { visits++; if (x == 2) throw new FormatException(); return true; })); Check.Equal(2, visits);
         Check.Throws<ArgumentNullException>(() => Filter<int>(null!, _ => true)); Check.Throws<ArgumentNullException>(() => Filter(new[] { 1 }, null!));
+        bool entered = false;
+        IEnumerable<int> Observed() { entered = true; yield return 1; }
+        Check.Throws<ArgumentNullException>(() => Filter(Observed(), null!)); Check.True(!entered);
+        int enumerations = 0, moves = 0, disposed = 0;
+        IEnumerable<int> Owned()
+        {
+            if (++enumerations > 1) throw new InvalidOperationException("Second enumeration.");
+            try { foreach (int value in new[] { 1, 2, 3 }) { moves++; yield return value; } }
+            finally { disposed++; }
+        }
+        Check.Throws<FormatException>(() => Filter(Owned(), x => x == 2 ? throw new FormatException() : true));
+        Check.Equal(1, enumerations); Check.Equal(2, moves); Check.Equal(1, disposed);
     }
 }
 ```
@@ -262,6 +277,8 @@ public static class Task06
 - Точное число вызовов
 - Пустой источник
 - Ошибка останавливает обход; null отвергнут
+- Неверный предикат не начинает обход source
+- Один enumerator, остановка продвижения и его освобождение при ошибке предиката
 
 <a id="13-07"></a>
 ## 13-07. Составное сравнение имён
@@ -297,6 +314,13 @@ public static class Task07
         var input = new[] { "bb", "a", "AA", "b", "" }; Check.SequenceEqual(new[] { "", "a", "b", "AA", "bb" }, SortNames(input));
         Check.SequenceEqual(new[] { "bb", "a", "AA", "b", "" }, input); Check.Equal(0, SortNames(Array.Empty<string>()).Length);
         Check.Throws<ArgumentException>(() => SortNames(new string[] { "a", null! })); Check.Throws<ArgumentNullException>(() => SortNames(null!));
+        var previousCulture = System.Globalization.CultureInfo.CurrentCulture;
+        try
+        {
+            System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.GetCultureInfo("tr-TR");
+            Check.SequenceEqual(new[] { "I", "i", "\u0130", "\u0131" }, SortNames(new[] { "\u0131", "\u0130", "i", "I" }));
+        }
+        finally { System.Globalization.CultureInfo.CurrentCulture = previousCulture; }
     }
 }
 ```
@@ -307,6 +331,7 @@ public static class Task07
 - Пустая строка
 - Исходный массив сохраняется
 - null массив/элемент отвергнуты
+- Ordinal-порядок I/i/İ/ı не меняется при tr-TR
 
 <a id="13-08"></a>
 ## 13-08. Наблюдатель накопленной суммы
@@ -680,6 +705,8 @@ public static class Task15
         Check.Throws<InvalidOperationException>(() => router.Register("Echo", _ => { })); Check.True(router.Execute("echo", new[] { "kept" })); Check.Equal("kept", log[2]);
         Check.Throws<ArgumentException>(() => router.Execute("bad name", Array.Empty<string>())); Check.Throws<ArgumentNullException>(() => router.Execute("help", null!));
         Check.Throws<ArgumentNullException>(() => router.Register("null", null!)); router.Register("fail", _ => throw new FormatException()); Check.Throws<FormatException>(() => router.Execute("fail", Array.Empty<string>()));
+        var boundaryName = new string('a', 20); router.Register(boundaryName, _ => { }); Check.True(router.Execute(boundaryName, Array.Empty<string>()));
+        foreach (var name in new[] { "", "echo1", "эхо", new string('a', 21) }) Check.Throws<ArgumentException>(() => router.Register(name, _ => { }));
     }
 }
 ```
@@ -690,3 +717,4 @@ public static class Task15
 - Регистр и неизвестная команда
 - Дубликат не перезаписывает
 - Неверное имя, null и исключение обработчика
+- Имя длины20принимается;21,цифра,кириллица и пустота отвергаются

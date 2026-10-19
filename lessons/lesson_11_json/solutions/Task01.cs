@@ -9,8 +9,17 @@ public static class Task01
     public static string Serialize(Card card)
     {
         ArgumentNullException.ThrowIfNull(card);
-        if (string.IsNullOrWhiteSpace(card.Name) || card.Count < 0) throw new ArgumentException("Invalid card.");
+        if (string.IsNullOrWhiteSpace(card.Name) || card.Count < 0 || !WellFormed(card.Name)) throw new ArgumentException("Invalid card.");
         return JsonSerializer.Serialize(card);
+    }
+    private static bool WellFormed(string text)
+    {
+        for (int i = 0; i < text.Length; i++)
+        {
+            if (char.IsHighSurrogate(text[i])) { if (i + 1 == text.Length || !char.IsLowSurrogate(text[i + 1])) return false; i++; }
+            else if (char.IsLowSurrogate(text[i])) return false;
+        }
+        return true;
     }
     public static void Run()
     {
@@ -22,5 +31,9 @@ public static class Task01
         Check.Throws<ArgumentException>(() => Serialize(new Card { Name = " " }));
         Check.Throws<ArgumentException>(() => Serialize(new Card { Name = "a", Count = -1 }));
         Check.Throws<ArgumentNullException>(() => Serialize(null!));
+        var unicode = " до\uD83D\uDE00после ";
+        Check.Equal(unicode, JsonSerializer.Deserialize<Card>(Serialize(new Card { Name = unicode }))!.Name);
+        Check.Throws<ArgumentException>(() => Serialize(new Card { Name = "\uD800" }));
+        Check.Throws<ArgumentException>(() => Serialize(new Card { Name = "\uDC00" }));
     }
 }

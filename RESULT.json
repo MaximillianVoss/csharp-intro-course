@@ -1,10 +1,11 @@
 {
-  "schema_version": 1,
-  "status": "course_content_verified",
-  "verified_at_utc": "2026-10-17T17:45:48.954298+00:00",
+  "schema_version": 2,
+  "status": "course_revision_locally_verified",
+  "revision_date": "2026-10-19",
+  "verified_at_utc": "2026-10-19T04:31:32.209042+00:00",
   "repository_url": "https://github.com/MaximillianVoss/csharp-intro-course",
-  "visibility": "public",
-  "verified_course_content_commit": "db48d4ed29ad39f8ff91fb9d20879c3c9eff5e8c",
+  "base_release_commit": "853d8fe408d8666bcb0d4915a7024042ca32baf5",
+  "source_content_sha256": "01d696eb9781d9cde8a10adbb8565fd37b153079c5c06e4d321a5eafd4635cc6",
   "scope": {
     "modules": 16,
     "tasks": 240,
@@ -13,210 +14,667 @@
       "2": 80,
       "3": 80
     },
-    "target_framework": "net10.0",
-    "language": "C# 14"
-  },
-  "anonymous_clean_clone": {
-    "commit": "db48d4ed29ad39f8ff91fb9d20879c3c9eff5e8c",
-    "https_without_credentials": true,
-    "tracked_files_unchanged_after_checks": true,
-    "verification": {
-      "sdk": "10.0.402",
-      "platform": "Microsoft Windows 10.0.26300",
-      "release_build": "passed_with_warnings_as_errors",
-      "mstest": {
-        "total": 49,
-        "passed": 49,
-        "failed": 0
-      },
-      "lessons": [
-        {
-          "lesson": 1,
-          "tasks": 15,
-          "assertions": 73,
-          "example": "passed",
-          "templates": "compiled_and_listed_only"
-        },
-        {
-          "lesson": 2,
-          "tasks": 15,
-          "assertions": 108,
-          "example": "passed",
-          "templates": "compiled_and_listed_only"
-        },
-        {
-          "lesson": 3,
-          "tasks": 15,
-          "assertions": 88,
-          "example": "passed",
-          "templates": "compiled_and_listed_only"
-        },
-        {
-          "lesson": 4,
-          "tasks": 15,
-          "assertions": 125,
-          "example": "passed",
-          "templates": "compiled_and_listed_only"
-        },
-        {
-          "lesson": 5,
-          "tasks": 15,
-          "assertions": 113,
-          "example": "passed",
-          "templates": "compiled_and_listed_only"
-        },
-        {
-          "lesson": 6,
-          "tasks": 15,
-          "assertions": 73,
-          "example": "passed",
-          "templates": "compiled_and_listed_only"
-        },
-        {
-          "lesson": 7,
-          "tasks": 15,
-          "assertions": 72,
-          "example": "passed",
-          "templates": "compiled_and_listed_only"
-        },
-        {
-          "lesson": 8,
-          "tasks": 15,
-          "assertions": 120,
-          "example": "passed",
-          "templates": "compiled_and_listed_only"
-        },
-        {
-          "lesson": 9,
-          "tasks": 15,
-          "assertions": 68,
-          "example": "passed",
-          "templates": "compiled_and_listed_only"
-        },
-        {
-          "lesson": 10,
-          "tasks": 15,
-          "assertions": 87,
-          "example": "passed",
-          "templates": "compiled_and_listed_only"
-        },
-        {
-          "lesson": 11,
-          "tasks": 15,
-          "assertions": 146,
-          "example": "passed",
-          "templates": "compiled_and_listed_only"
-        },
-        {
-          "lesson": 12,
-          "tasks": 15,
-          "assertions": 118,
-          "example": "passed",
-          "templates": "compiled_and_listed_only"
-        },
-        {
-          "lesson": 13,
-          "tasks": 15,
-          "assertions": 126,
-          "example": "passed",
-          "templates": "compiled_and_listed_only"
-        },
-        {
-          "lesson": 14,
-          "tasks": 15,
-          "assertions": 88,
-          "example": "passed",
-          "templates": "compiled_and_listed_only"
-        },
-        {
-          "lesson": 15,
-          "tasks": 15,
-          "assertions": 120,
-          "example": "passed",
-          "templates": "compiled_and_listed_only"
-        },
-        {
-          "lesson": 16,
-          "tasks": 15,
-          "assertions": 110,
-          "example": "passed",
-          "templates": "compiled_and_listed_only"
-        }
-      ],
-      "tasks": 240,
-      "assertions": 1635,
-      "examples": 16,
-      "template_projects": 16,
-      "templates_claimed_solved": false
+    "formats": {
+      "implementation": 138,
+      "reading": 25,
+      "debugging": 20,
+      "refactoring": 19,
+      "testing": 20,
+      "mini-project": 18
     },
-    "cli_scenarios": 15,
-    "content_audit_passed": true
+    "target_framework": "net10.0",
+    "language": "C# 14",
+    "stable_ids_preserved": true
   },
-  "github_actions": {
-    "url": "https://github.com/MaximillianVoss/csharp-intro-course/actions/runs/39054980068",
-    "run_id": 39054980068,
-    "commit": "db48d4ed29ad39f8ff91fb9d20879c3c9eff5e8c",
-    "conclusion": "success",
-    "platforms": [
+  "revision": {
+    "individual_reviews": 240,
+    "subject_starters": 240,
+    "metadata_tasks_changed": 100,
+    "changed_fields_by_task": {
+      "01-03": [
+        "example"
+      ],
+      "01-06": [
+        "example"
+      ],
+      "01-10": [
+        "example"
+      ],
+      "01-12": [
+        "statement",
+        "example"
+      ],
+      "01-14": [
+        "statement"
+      ],
+      "01-15": [
+        "statement",
+        "example",
+        "solution",
+        "reasoning",
+        "pitfalls",
+        "checks"
+      ],
+      "02-04": [
+        "checks"
+      ],
+      "02-06": [
+        "example"
+      ],
+      "03-06": [
+        "example"
+      ],
+      "03-08": [
+        "checks"
+      ],
+      "03-13": [
+        "checks"
+      ],
+      "03-15": [
+        "checks"
+      ],
+      "04-03": [
+        "example"
+      ],
+      "04-05": [
+        "example"
+      ],
+      "04-10": [
+        "example"
+      ],
+      "04-11": [
+        "checks"
+      ],
+      "04-13": [
+        "statement"
+      ],
+      "04-14": [
+        "checks"
+      ],
+      "05-03": [
+        "statement",
+        "example"
+      ],
+      "05-06": [
+        "checks"
+      ],
+      "05-10": [
+        "checks"
+      ],
+      "05-13": [
+        "checks"
+      ],
+      "05-14": [
+        "checks"
+      ],
+      "05-15": [
+        "checks"
+      ],
+      "06-02": [
+        "example"
+      ],
+      "06-05": [
+        "checks"
+      ],
+      "06-08": [
+        "checks"
+      ],
+      "07-02": [
+        "reasoning",
+        "checks"
+      ],
+      "07-04": [
+        "example"
+      ],
+      "07-07": [
+        "checks"
+      ],
+      "07-08": [
+        "checks"
+      ],
+      "07-11": [
+        "reasoning"
+      ],
+      "07-13": [
+        "checks"
+      ],
+      "07-14": [
+        "reasoning"
+      ],
+      "07-15": [
+        "checks"
+      ],
+      "08-02": [
+        "checks"
+      ],
+      "08-03": [
+        "example"
+      ],
+      "08-05": [
+        "checks"
+      ],
+      "08-06": [
+        "checks"
+      ],
+      "08-07": [
+        "reasoning",
+        "checks"
+      ],
+      "08-10": [
+        "reasoning",
+        "checks"
+      ],
+      "08-11": [
+        "example"
+      ],
+      "09-02": [
+        "example"
+      ],
+      "09-04": [
+        "checks"
+      ],
+      "09-08": [
+        "statement"
+      ],
+      "09-12": [
+        "reasoning"
+      ],
+      "09-15": [
+        "checks"
+      ],
+      "10-01": [
+        "checks"
+      ],
+      "10-02": [
+        "example",
+        "reasoning"
+      ],
+      "10-03": [
+        "checks"
+      ],
+      "10-04": [
+        "algorithm",
+        "statement",
+        "solution",
+        "reasoning",
+        "pitfalls",
+        "checks"
+      ],
+      "10-06": [
+        "checks"
+      ],
+      "10-07": [
+        "checks"
+      ],
+      "10-09": [
+        "statement",
+        "solution",
+        "reasoning",
+        "pitfalls",
+        "checks"
+      ],
+      "10-10": [
+        "checks"
+      ],
+      "10-11": [
+        "checks"
+      ],
+      "10-14": [
+        "checks"
+      ],
+      "10-15": [
+        "checks"
+      ],
+      "11-01": [
+        "statement",
+        "reasoning",
+        "checks"
+      ],
+      "11-02": [
+        "checks"
+      ],
+      "11-04": [
+        "statement",
+        "reasoning",
+        "checks"
+      ],
+      "11-05": [
+        "statement",
+        "reasoning",
+        "checks"
+      ],
+      "11-06": [
+        "statement",
+        "checks"
+      ],
+      "11-08": [
+        "checks"
+      ],
+      "11-11": [
+        "statement",
+        "checks"
+      ],
+      "11-12": [
+        "checks"
+      ],
+      "11-14": [
+        "statement",
+        "reasoning",
+        "checks"
+      ],
+      "11-15": [
+        "checks"
+      ],
+      "12-02": [
+        "checks"
+      ],
+      "12-04": [
+        "example"
+      ],
+      "12-12": [
+        "reasoning",
+        "checks"
+      ],
+      "12-13": [
+        "statement"
+      ],
+      "12-14": [
+        "reasoning"
+      ],
+      "13-01": [
+        "checks"
+      ],
+      "13-06": [
+        "checks"
+      ],
+      "13-07": [
+        "checks"
+      ],
+      "13-15": [
+        "checks"
+      ],
+      "14-01": [
+        "checks"
+      ],
+      "14-04": [
+        "checks"
+      ],
+      "14-09": [
+        "checks"
+      ],
+      "14-10": [
+        "checks"
+      ],
+      "14-12": [
+        "checks"
+      ],
+      "14-13": [
+        "statement",
+        "reasoning",
+        "checks"
+      ],
+      "15-02": [
+        "algorithm",
+        "statement",
+        "example",
+        "reasoning",
+        "checks"
+      ],
+      "15-03": [
+        "statement"
+      ],
+      "15-09": [
+        "checks"
+      ],
+      "15-10": [
+        "checks"
+      ],
+      "15-11": [
+        "statement",
+        "reasoning",
+        "checks"
+      ],
+      "15-15": [
+        "checks"
+      ],
+      "16-02": [
+        "example"
+      ],
+      "16-03": [
+        "checks"
+      ],
+      "16-04": [
+        "checks"
+      ],
+      "16-05": [
+        "statement",
+        "reasoning",
+        "checks"
+      ],
+      "16-07": [
+        "statement",
+        "example"
+      ],
+      "16-08": [
+        "statement",
+        "checks"
+      ],
+      "16-10": [
+        "statement",
+        "reasoning",
+        "checks"
+      ],
+      "16-11": [
+        "statement",
+        "checks"
+      ],
+      "16-13": [
+        "statement",
+        "checks"
+      ],
+      "16-14": [
+        "statement",
+        "checks"
+      ],
+      "16-15": [
+        "statement"
+      ]
+    }
+  },
+  "local_verification": {
+    "sdk": "10.0.402",
+    "platform": "Microsoft Windows 10.0.26300",
+    "release_build": "passed_with_warnings_as_errors",
+    "mstest": {
+      "total": 49,
+      "passed": 49,
+      "failed": 0
+    },
+    "lessons": [
       {
-        "job": "evidence-ubuntu-latest",
-        "sdk": "10.0.402",
-        "platform": "Ubuntu 24.04.5 LTS",
-        "tasks": 240,
-        "assertions": 1635,
-        "examples": 16,
-        "mstest": {
-          "total": 49,
-          "passed": 49,
-          "failed": 0
-        }
+        "lesson": 1,
+        "tasks": 15,
+        "assertions": 76,
+        "example": "passed",
+        "templates": "compiled_listed_and_all_15_confirmed_unfilled"
       },
       {
-        "job": "evidence-windows-latest",
-        "sdk": "10.0.402",
-        "platform": "Microsoft Windows 10.0.26100",
-        "tasks": 240,
-        "assertions": 1635,
-        "examples": 16,
-        "mstest": {
-          "total": 49,
-          "passed": 49,
-          "failed": 0
-        }
+        "lesson": 2,
+        "tasks": 15,
+        "assertions": 119,
+        "example": "passed",
+        "templates": "compiled_listed_and_all_15_confirmed_unfilled"
+      },
+      {
+        "lesson": 3,
+        "tasks": 15,
+        "assertions": 94,
+        "example": "passed",
+        "templates": "compiled_listed_and_all_15_confirmed_unfilled"
+      },
+      {
+        "lesson": 4,
+        "tasks": 15,
+        "assertions": 138,
+        "example": "passed",
+        "templates": "compiled_listed_and_all_15_confirmed_unfilled"
+      },
+      {
+        "lesson": 5,
+        "tasks": 15,
+        "assertions": 135,
+        "example": "passed",
+        "templates": "compiled_listed_and_all_15_confirmed_unfilled"
+      },
+      {
+        "lesson": 6,
+        "tasks": 15,
+        "assertions": 75,
+        "example": "passed",
+        "templates": "compiled_listed_and_all_15_confirmed_unfilled"
+      },
+      {
+        "lesson": 7,
+        "tasks": 15,
+        "assertions": 84,
+        "example": "passed",
+        "templates": "compiled_listed_and_all_15_confirmed_unfilled"
+      },
+      {
+        "lesson": 8,
+        "tasks": 15,
+        "assertions": 145,
+        "example": "passed",
+        "templates": "compiled_listed_and_all_15_confirmed_unfilled"
+      },
+      {
+        "lesson": 9,
+        "tasks": 15,
+        "assertions": 70,
+        "example": "passed",
+        "templates": "compiled_listed_and_all_15_confirmed_unfilled"
+      },
+      {
+        "lesson": 10,
+        "tasks": 15,
+        "assertions": 116,
+        "example": "passed",
+        "templates": "compiled_listed_and_all_15_confirmed_unfilled"
+      },
+      {
+        "lesson": 11,
+        "tasks": 15,
+        "assertions": 173,
+        "example": "passed",
+        "templates": "compiled_listed_and_all_15_confirmed_unfilled"
+      },
+      {
+        "lesson": 12,
+        "tasks": 15,
+        "assertions": 123,
+        "example": "passed",
+        "templates": "compiled_listed_and_all_15_confirmed_unfilled"
+      },
+      {
+        "lesson": 13,
+        "tasks": 15,
+        "assertions": 141,
+        "example": "passed",
+        "templates": "compiled_listed_and_all_15_confirmed_unfilled"
+      },
+      {
+        "lesson": 14,
+        "tasks": 15,
+        "assertions": 99,
+        "example": "passed",
+        "templates": "compiled_listed_and_all_15_confirmed_unfilled"
+      },
+      {
+        "lesson": 15,
+        "tasks": 15,
+        "assertions": 151,
+        "example": "passed",
+        "templates": "compiled_listed_and_all_15_confirmed_unfilled"
+      },
+      {
+        "lesson": 16,
+        "tasks": 15,
+        "assertions": 164,
+        "example": "passed",
+        "templates": "compiled_listed_and_all_15_confirmed_unfilled"
+      }
+    ],
+    "tasks": 240,
+    "assertions": 1903,
+    "examples": 16,
+    "template_projects": 16,
+    "templates_claimed_solved": false
+  },
+  "cli": {
+    "scenarios": 15,
+    "passed": true,
+    "details": [
+      {
+        "arguments": [
+          "list"
+        ],
+        "exit_code": 0,
+        "passed": true
+      },
+      {
+        "arguments": [
+          "add",
+          "Азбука 🌲",
+          "Автор",
+          "2000"
+        ],
+        "exit_code": 0,
+        "passed": true
+      },
+      {
+        "arguments": [
+          "add",
+          "Вторая книга",
+          "Другой автор",
+          "2020"
+        ],
+        "exit_code": 0,
+        "passed": true
+      },
+      {
+        "arguments": [
+          "search",
+          "АЗБУКА"
+        ],
+        "exit_code": 0,
+        "passed": true
+      },
+      {
+        "arguments": [
+          "read",
+          "1"
+        ],
+        "exit_code": 0,
+        "passed": true
+      },
+      {
+        "arguments": [
+          "list",
+          "--unread"
+        ],
+        "exit_code": 0,
+        "passed": true
+      },
+      {
+        "arguments": [
+          "stats"
+        ],
+        "exit_code": 0,
+        "passed": true
+      },
+      {
+        "arguments": [
+          "add",
+          "",
+          "Автор",
+          "2000"
+        ],
+        "exit_code": 2,
+        "passed": true
+      },
+      {
+        "arguments": [
+          "remove",
+          "99"
+        ],
+        "exit_code": 3,
+        "passed": true
+      },
+      {
+        "arguments": [
+          "nonsense"
+        ],
+        "exit_code": 2,
+        "passed": true
+      },
+      {
+        "arguments": [
+          "remove",
+          "2"
+        ],
+        "exit_code": 0,
+        "passed": true
+      },
+      {
+        "arguments": [
+          "add",
+          "Третья",
+          "Автор",
+          "2001"
+        ],
+        "exit_code": 0,
+        "passed": true
+      },
+      {
+        "arguments": [
+          "list"
+        ],
+        "exit_code": 0,
+        "passed": true
+      },
+      {
+        "arguments": [
+          "stats"
+        ],
+        "exit_code": 1,
+        "passed": true
+      },
+      {
+        "arguments": [
+          "add",
+          "Не сохранять",
+          "Автор",
+          "2000"
+        ],
+        "exit_code": 1,
+        "passed": true
       }
     ]
   },
-  "semantic_audit": {
+  "content_audit": {
     "review_complete": true,
-    "candidates": 3,
-    "unreviewed": 0,
-    "report": "docs/DIVERSITY_REPORT.md",
-    "decisions": "docs/SEMANTIC_REVIEW.json"
+    "task_reviews": 240,
+    "links_checked": 717,
+    "semantic_candidates": 3,
+    "unreviewed": [],
+    "errors": []
+  },
+  "card_export": {
+    "learner_cards": 240,
+    "teacher_cards": 240,
+    "isolated_starter_compilations": 240,
+    "source_content_sha256": "01d696eb9781d9cde8a10adbb8565fd37b153079c5c06e4d321a5eafd4635cc6"
   },
   "independent_review": {
-    "report": "docs/INDEPENDENT_REVIEW.md",
-    "open_findings": 0
+    "scope": "all 240 task chains and revised export/audit tooling",
+    "confirmed_open_findings": 0,
+    "extra_probes": {
+      "paint_decimal_integer_oracle_cases": 20000,
+      "async_cancellation_iterations": 5000,
+      "cross_card_reference_rejected": true,
+      "nullable_warning_rejected": true,
+      "tool_dependency_rejected": true,
+      "stale_review_rejected": true,
+      "ring_buffer_model_snapshots": 12800,
+      "unicode_round_trip_cases": 263
+    }
   },
-  "browser_review": {
-    "commit": "db48d4ed29ad39f8ff91fb9d20879c3c9eff5e8c",
-    "pages": [
-      "README.md",
-      "lessons/lesson_15_async/TASKS.md#15-13",
-      "lessons/lesson_12_generics/SOLUTIONS.md#12-07"
-    ],
-    "generic_type_names_and_anchor_navigation": "verified"
-  },
-  "not_claimed": [
-    "Visual Studio GUI/F5/Test Explorer run",
-    "macOS execution",
-    "solved student template bodies",
-    "multi-writer or power-loss durability guarantees"
+  "limits": [
+    "Visual Studio GUI/F5/Test Explorer not run",
+    "macOS not run",
+    "C# execution/sandbox/grading in virtual tutor not verified",
+    "Large-ring arithmetic boundary checked without allocating a multi-gigabyte buffer",
+    "Learner starter bodies intentionally unfilled"
   ],
-  "reproduce": [
-    "python tools/render_course.py --check --strict",
-    "pwsh -NoProfile -File tools/Verify.ps1",
-    "python tools/cli_smoke.py",
-    "python tools/audit_course.py"
-  ],
-  "receipt_note": "Этот файл и дополненный отчёт проверки добавлены следующим коммитом. Проверенный SHA учебного содержимого указан выше; окончательный SHA публикации и архива сохранён в RESULT.json комплекта сдачи вне репозитория."
+  "release_note": "This source receipt records local verification of the content digest. Exact publication commit, remote CI, archive hash and handoff are recorded in the external delivery RESULT.json."
 }

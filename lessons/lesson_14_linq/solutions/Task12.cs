@@ -14,5 +14,7 @@ public static class Task12
         var values = new[] { 10, 20, 30, 40, 50 }; Check.SequenceEqual(new[] { 10, 20 }, Page(values, 1, 2)); Check.SequenceEqual(new[] { 30, 40 }, Page(values, 2, 2));
         Check.SequenceEqual(new[] { 50 }, Page(values, 3, 2)); Check.Equal(0, Page(values, 4, 2).Length);
         Check.Throws<ArgumentOutOfRangeException>(() => Page(values, 0, 2)); Check.Throws<ArgumentOutOfRangeException>(() => Page(values, 1, 101)); Check.Throws<OverflowException>(() => Page(values, int.MaxValue, 100));
+        bool entered = false; IEnumerable<int> Source() { entered = true; yield return 1; }
+        Check.Throws<OverflowException>(() => Page(Source(), int.MaxValue, 100)); Check.True(!entered);
     }
 }

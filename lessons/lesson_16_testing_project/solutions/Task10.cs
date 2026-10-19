@@ -26,7 +26,11 @@ public static class Task10
         Check.Equal(new Options(3,true),Parse(["--reverse","--limit","3"]));
         Check.Equal(new Options(1,true),Parse(["--limit","1","--reverse"]));
         Check.Equal(100,Parse(["--limit","100"]).Limit);
+        Check.Equal(1,Parse(["--limit",new string('0',100)+"1"]).Limit);
+        Check.Equal(new Options(10,true),Parse(["--reverse"]));
         string[][] wrong=[["--reverse","--reverse"],["--limit"],["--limit","0"],["--limit","101"],["--limit","+2"],["other"],["--limit","10","--limit","2"]];
         foreach(var row in wrong)Check.Throws<ArgumentException>(()=>Parse(row));
+        foreach(string value in new[]{""," 2","2 ","２","2147483648","--reverse"})
+            Check.Throws<ArgumentException>(()=>Parse(["--limit",value]));
     }
 }

@@ -17,5 +17,6 @@ public static class Task13
         Check.Equal(0, CustomerTotals(Array.Empty<Customer>(), Array.Empty<Purchase>()).Length);
         Check.Throws<ArgumentException>(() => CustomerTotals(new[] { new Customer(1), new Customer(1) }, Array.Empty<Purchase>()));
         Check.Throws<ArgumentException>(() => CustomerTotals(new[] { new Customer(1) }, new[] { new Purchase(1, -1) }));
+        Check.Throws<OverflowException>(() => CustomerTotals(new[] { new Customer(1) }, new[] { new Purchase(1, decimal.MaxValue), new Purchase(1, decimal.MaxValue) }));
     }
 }

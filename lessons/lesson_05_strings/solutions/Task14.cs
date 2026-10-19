@@ -31,5 +31,11 @@ public static class Task14
         Check.Equal(false, TryAmount(null, "ru-RU", out value));
         Check.Equal(false, TryAmount("1000001", "en-US", out value));
         Check.Equal(0m, value);
+
+        // Review 2026-10-19: exponent and grouping remain forbidden
+        Check.Equal(false, TryAmount("1e2", "en-US", out value));
+        Check.Equal(0m, value);
+        Check.Equal(false, TryAmount("1 000", "ru-RU", out value));
+        Check.Equal(0m, value);
     }
 }

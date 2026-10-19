@@ -20,10 +20,22 @@ def grams(items,n=4):
     return {tuple(items[i:i+n]) for i in range(max(0,len(items)-n+1))}
 def similarity(a,b):
     return len(a&b)/len(a|b) if a|b else 1.0
-errors=[]; tasks=[]; lesson_stats=[]
+errors=[]; tasks=[]; lesson_stats=[]; task_reviews={}
 for manifest in sorted((ROOT/"lessons").glob("lesson_*/tasks.json")):
     lesson=json.loads(manifest.read_text(encoding="utf-8-sig")); number=lesson["number"]; folder=manifest.parent
     these=lesson["tasks"];levels=Counter(t["level"] for t in these);formats=Counter(t["format"] for t in these)
+    review_path=folder/"TASK_REVIEW.json"
+    reviews=json.loads(review_path.read_text(encoding="utf-8-sig")) if review_path.exists() else []
+    if [r.get("id") for r in reviews]!=[t["id"] for t in these]:errors.append(f"missing/incorrect per-task review: lesson {number}")
+    for review in reviews:
+        for field in ("condition","skill","distinctness","solution","starter"):
+            if not isinstance(review.get(field),str) or not review[field].strip():errors.append(f"incomplete review {review.get('id')}: {field}")
+        tests=review.get("tests")
+        if not ((isinstance(tests,str) and tests.strip()) or
+                (isinstance(tests,list) and tests and all(isinstance(item,str) and item.strip() for item in tests))):
+            errors.append(f"incomplete review {review.get('id')}: tests")
+        if not review.get("changes"):errors.append(f"missing review changes {review.get('id')}")
+        task_reviews[review.get("id")]=review
     if levels!={1:5,2:5,3:5}:errors.append(f"level balance: {number}: {dict(levels)}")
     for kind in ("implementation","reading","debugging","refactoring","testing","mini-project"):
         if not formats[kind]:errors.append(f"missing format {kind}: lesson {number}")
@@ -58,6 +70,10 @@ for t in tasks:
     if s["checks"]<1:errors.append("no executable assertions "+t["id"])
     if "Run" not in s["methods"]:errors.append("missing Run "+t["id"])
     if s["incomplete"]:errors.append("NotImplementedException in solution "+t["id"])
+    if not s["starterIncomplete"]:errors.append("starter is not left unsolved "+t["id"])
+    if s["starterSubjectMembers"]<1 and t["format"] not in {"reading","testing"}:errors.append("starter has no subject API "+t["id"])
+    reviewed_content=digest({"task":{k:v for k,v in t.items() if not k.startswith('_')},"solution":s["sourceSha256"],"starter":s["starterCode"]})
+    if task_reviews.get(t["id"],{}).get("reviewed_sha256")!=reviewed_content:errors.append("task review not bound to current content "+t["id"])
     if t["format"] in {"reading","refactoring"} and s["statementSyntaxErrors"]:
         errors.append("C# snippet syntax in condition "+t["id"]+": "+"; ".join(s["statementSyntaxErrors"]))
 candidates=[]
@@ -104,6 +120,7 @@ for path in ROOT.rglob("*.md"):
         destination=(path.parent/relative).resolve()
         if not destination.exists():errors.append(f"broken link {path.relative_to(ROOT)} -> {target}")
 report={"lessons":lesson_stats,"tasks":len(tasks),"formats":dict(Counter(t["format"] for t in tasks)),
+"task_reviews":len(task_reviews),
 "levels":dict(Counter(t["level"] for t in tasks)),"links_checked":link_count,"errors":errors,
 "syntax_records":syntax,"candidates":candidates,"unreviewed":unreviewed,
 "review_complete":not errors and not unreviewed,"method":"normalized conditions + Roslyn token/node structure + algorithm descriptions; manual decisions required"}

@@ -31,5 +31,11 @@ public static class Task11
         Check.Equal(0, value);
         Check.Equal(false, Wrong("-5", out value));
         Check.Equal(-5, value);
+
+        // Review 2026-10-19: format failures reset out
+        Check.Equal(false, TryPositive("", out value));
+        Check.Equal(0, value);
+        Check.Equal(false, TryPositive("not-a-number", out value));
+        Check.Equal(0, value);
     }
 }

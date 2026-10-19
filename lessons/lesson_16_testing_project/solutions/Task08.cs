@@ -17,5 +17,10 @@ public static class Task08
         Check.True(!IsValidSort([2,1,2],[1,2])); Check.True(!IsValidSort([1,4],[2,3]));
         Check.True(!IsValidSort([2,1],[2,1]));
         Check.True(IsValidSort([int.MaxValue,int.MinValue],[int.MinValue,int.MaxValue]));
+        Check.True(!IsValidSort([1,1,2],[1,2,2]));
+        int[] original=[3,1,3,2],result=[1,2,3,3];
+        int[] originalCopy=(int[])original.Clone(),resultCopy=(int[])result.Clone();
+        Check.True(IsValidSort(original,result));
+        Check.SequenceEqual(originalCopy,original); Check.SequenceEqual(resultCopy,result);
     }
 }

@@ -16,5 +16,12 @@ public static class Task07
         var input = new[] { "bb", "a", "AA", "b", "" }; Check.SequenceEqual(new[] { "", "a", "b", "AA", "bb" }, SortNames(input));
         Check.SequenceEqual(new[] { "bb", "a", "AA", "b", "" }, input); Check.Equal(0, SortNames(Array.Empty<string>()).Length);
         Check.Throws<ArgumentException>(() => SortNames(new string[] { "a", null! })); Check.Throws<ArgumentNullException>(() => SortNames(null!));
+        var previousCulture = System.Globalization.CultureInfo.CurrentCulture;
+        try
+        {
+            System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.GetCultureInfo("tr-TR");
+            Check.SequenceEqual(new[] { "I", "i", "\u0130", "\u0131" }, SortNames(new[] { "\u0131", "\u0130", "i", "I" }));
+        }
+        finally { System.Globalization.CultureInfo.CurrentCulture = previousCulture; }
     }
 }

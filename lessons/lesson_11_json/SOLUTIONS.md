@@ -10,7 +10,7 @@
 
 **Ход решения**
 
-Сначала защищаем границу метода: null не является карточкой. Проверяем имя и количество, затем передаём объект сериализатору. Проверка результата через JsonDocument сравнивает значения, поэтому не зависит от порядка свойств и Unicode-экранирования. Работа занимает O(L), где L — длина имени и результата.
+Сначала защищаем границу метода: null не является карточкой. Проверяем имя и количество, затем передаём объект сериализатору. Проверка результата через JsonDocument сравнивает значения, поэтому не зависит от порядка свойств и Unicode-экранирования. Работа занимает O(L), где L — длина имени и результата. Строка C# может содержать непарный суррогат; до Serialize такой Name отклоняется, иначе writer способен заменить его U+FFFD и нарушить сохранение имени.
 
 **Частая ошибка**
 
@@ -30,8 +30,17 @@ public static class Task01
     public static string Serialize(Card card)
     {
         ArgumentNullException.ThrowIfNull(card);
-        if (string.IsNullOrWhiteSpace(card.Name) || card.Count < 0) throw new ArgumentException("Invalid card.");
+        if (string.IsNullOrWhiteSpace(card.Name) || card.Count < 0 || !WellFormed(card.Name)) throw new ArgumentException("Invalid card.");
         return JsonSerializer.Serialize(card);
+    }
+    private static bool WellFormed(string text)
+    {
+        for (int i = 0; i < text.Length; i++)
+        {
+            if (char.IsHighSurrogate(text[i])) { if (i + 1 == text.Length || !char.IsLowSurrogate(text[i + 1])) return false; i++; }
+            else if (char.IsLowSurrogate(text[i])) return false;
+        }
+        return true;
     }
     public static void Run()
     {
@@ -43,6 +52,10 @@ public static class Task01
         Check.Throws<ArgumentException>(() => Serialize(new Card { Name = " " }));
         Check.Throws<ArgumentException>(() => Serialize(new Card { Name = "a", Count = -1 }));
         Check.Throws<ArgumentNullException>(() => Serialize(null!));
+        var unicode = " до\uD83D\uDE00после ";
+        Check.Equal(unicode, JsonSerializer.Deserialize<Card>(Serialize(new Card { Name = unicode }))!.Name);
+        Check.Throws<ArgumentException>(() => Serialize(new Card { Name = "\uD800" }));
+        Check.Throws<ArgumentException>(() => Serialize(new Card { Name = "\uDC00" }));
     }
 }
 ```
@@ -52,6 +65,7 @@ public static class Task01
 - Русское имя и количество
 - Кавычка и перенос строки восстанавливаются
 - Пустое имя, отрицательное количество и null отклонены
+- Имя с emoji и внешними пробелами сохраняется точно; одиночные high/low суррогаты отклонены
 
 <a id="11-02"></a>
 ## 11-02. Чтение показания
@@ -94,6 +108,8 @@ public static class Task02
         foreach (var json in new[] { "null", "{", "{\"Unit\":\"K\"}", "{\"Value\":1001,\"Unit\":\"C\"}", "{\"Value\":\"1\",\"Unit\":\"C\"}" })
             Check.Throws<JsonException>(() => Read(json));
         Check.Throws<ArgumentNullException>(() => Read(null!));
+        Check.Throws<JsonException>(() => Read("{\"Value\":-1000.01,\"Unit\":\"C\"}"));
+        Check.Throws<JsonException>(() => Read("[]"));
     }
 }
 ```
@@ -103,6 +119,7 @@ public static class Task02
 - Дробное и граничные показания
 - Отсутствующее Value равно 0
 - Ошибочные единица, диапазон, синтаксис, тип и null-корень
+- Значение чуть ниже -1000 и массив вместо Reading отклонены
 
 <a id="11-03"></a>
 ## 11-03. Что действительно прочитано
@@ -160,7 +177,7 @@ public static class Task03
 
 **Ход решения**
 
-RootElement не владеет самостоятельным снимком дерева: его чтение обращается к памяти JsonDocument. Using освобождает документ до того, как вызывающий читает свойство, поэтому исходный вариант даёт ObjectDisposedException. Clone создаёт самостоятельное представление, которое остаётся пригодным после Dispose исходного документа. Тесты читают и объект, и массив уже за границей метода. Время и дополнительная память O(L) для клонирования дерева.
+RootElement не владеет самостоятельным снимком дерева: его чтение обращается к памяти JsonDocument. Using освобождает документ до того, как вызывающий читает свойство, поэтому исходный вариант даёт ObjectDisposedException. Clone создаёт самостоятельное представление, которое остаётся пригодным после Dispose исходного документа. Тесты читают и объект, и массив уже за границей метода. Время и дополнительная память O(L) для клонирования дерева. Clone отделяет память, но не исправляет некорректные Unicode escape. Поэтому дерево предварительно проверяется чтением всех строк и имён; ошибка декодирования переводится в JsonException.
 
 **Частая ошибка**
 
@@ -178,15 +195,29 @@ public static class Task04
 {
     public static JsonElement ReadDetached(string json)
     {
-        ArgumentNullException.ThrowIfNull(json); using var document = JsonDocument.Parse(json); return document.RootElement.Clone();
+        ArgumentNullException.ThrowIfNull(json); using var document = JsonDocument.Parse(json);
+        try { ValidateStrings(document.RootElement); }
+        catch (InvalidOperationException error) { throw new JsonException("Invalid Unicode in JSON.", error); }
+        return document.RootElement.Clone();
     }
     private static JsonElement Broken(string json) { using var document = JsonDocument.Parse(json); return document.RootElement; }
+    private static void ValidateStrings(JsonElement value)
+    {
+        if (value.ValueKind == JsonValueKind.String) { _ = value.GetString(); }
+        else if (value.ValueKind == JsonValueKind.Array)
+            foreach (var item in value.EnumerateArray()) ValidateStrings(item);
+        else if (value.ValueKind == JsonValueKind.Object)
+            foreach (var property in value.EnumerateObject()) { _ = property.Name; ValidateStrings(property.Value); }
+    }
     public static void Run()
     {
         var broken = Broken("{\"Name\":\"Ada\"}"); Check.Throws<ObjectDisposedException>(() => broken.GetProperty("Name").GetString());
         var element = ReadDetached("{\"Name\":\"Ada\",\"Nested\":{\"Count\":2}}"); Check.Equal("Ada", element.GetProperty("Name").GetString()); Check.Equal(2, element.GetProperty("Nested").GetProperty("Count").GetInt32());
         var array = ReadDetached("[1,2]"); Check.Equal(2, array.GetArrayLength()); Check.Equal(2, array[1].GetInt32()); Check.Equal(JsonValueKind.Null, ReadDetached("null").ValueKind);
         Check.Throws<JsonException>(() => ReadDetached("{")); Check.Throws<ArgumentNullException>(() => ReadDetached(null!));
+        Check.Throws<JsonException>(() => ReadDetached("{\"nested\":[\"\\uD800\"]}"));
+        Check.Throws<JsonException>(() => ReadDetached("{\"\\uDC00\":1}"));
+        Check.Equal("\uD83D\uDE00", ReadDetached("\"\\uD83D\\uDE00\"").GetString());
     }
 }
 ```
@@ -197,6 +228,7 @@ public static class Task04
 - Исправленный объект и вложенные значения читаются после возврата
 - Массив и JSON null
 - Неверный JSON и null аргумент
+- Вложенный непарный escape и некорректное имя свойства отклонены; корректная emoji-пара доступна после Clone
 
 <a id="11-05"></a>
 ## 11-05. Нет поля и поле null
@@ -205,7 +237,7 @@ public static class Task04
 
 **Ход решения**
 
-TryGetProperty отвечает за наличие ключа. ValueKind отвечает за тип значения присутствующего ключа. Вызов GetString без этой проверки привёл бы к исключению другого уровня или смешению состояний. Возвращаем самостоятельную string, которая переживает Dispose документа. Время O(L).
+TryGetProperty отвечает за наличие ключа. ValueKind отвечает за тип значения присутствующего ключа. Вызов GetString без этой проверки привёл бы к исключению другого уровня или смешению состояний. Возвращаем самостоятельную string, которая переживает Dispose документа. Время O(L). После проверки ValueKind также возможна ошибка декодирования непарного escape; она не считается отсутствием/null и сообщается как JsonException.
 
 **Частая ошибка**
 
@@ -230,7 +262,12 @@ public static class Task05
         if (!root.TryGetProperty("label", out var value)) return "нет";
         if (value.ValueKind == JsonValueKind.Null) return "пусто";
         if (value.ValueKind != JsonValueKind.String) throw new JsonException("String required.");
-        return value.GetString()!;
+        return Decode(value)!;
+    }
+    private static string? Decode(JsonElement value)
+    {
+        try { return value.GetString(); }
+        catch (InvalidOperationException error) { throw new JsonException("Invalid Unicode string.", error); }
     }
     public static void Run()
     {
@@ -238,6 +275,8 @@ public static class Task05
         Check.Equal("", Label("{\"label\":\"\"}")); Check.Equal("x", Label("{\"label\":\"x\"}"));
         Check.Throws<JsonException>(() => Label("{\"label\":4}")); Check.Throws<JsonException>(() => Label("[]"));
         Check.Throws<ArgumentNullException>(() => Label(null!));
+        Check.Throws<JsonException>(() => Label("{\"label\":\"\\uDC00\"}"));
+        Check.Equal("\uD83D\uDE00", Label("{\"label\":\"\\uD83D\\uDE00\"}"));
     }
 }
 ```
@@ -247,6 +286,7 @@ public static class Task05
 - Все три состояния и непустая строка
 - Число вместо строки и массив вместо объекта отвергнуты
 - null аргумент отклонён
+- Невалидный escape label отклонён JsonException, корректная emoji-пара сохранена
 
 <a id="11-06"></a>
 ## 11-06. Настройки в собственном файле
@@ -304,6 +344,14 @@ public static class Task06
             Check.Throws<DirectoryNotFoundException>(() => Load(Path.Combine(dir, "absent-directory", "file.json")));
         }
         finally { Directory.Delete(dir, true); }
+        // Independently exercise the promised corrupt-file cases in a fresh directory.
+        var more = Path.Combine(Path.GetTempPath(), "csharp-json-review-" + Guid.NewGuid()); Directory.CreateDirectory(more);
+        try
+        {
+            var p = Path.Combine(more, "data.json");
+            foreach (var json in new[] { "", "null", "{\"Volume\":-1}" }) { File.WriteAllText(p, json); Check.Throws<JsonException>(() => Load(p)); }
+        }
+        finally { Directory.Delete(more, true); }
     }
 }
 ```
@@ -313,6 +361,7 @@ public static class Task06
 - Отсутствующий файл
 - Крайние громкости 0 и 100 проходят round trip
 - Испорченный файл и диапазон отвергнуты; путь проверен
+- Пустой файл, null-корень и Volume=-1 не превращаются в настройки по умолчанию
 
 <a id="11-07"></a>
 ## 11-07. Сумма вложенного заказа
@@ -410,6 +459,8 @@ public static class Task08
         var p = ReadPoint("{\"lat\":55.75,\"lon\":37.62}"); Check.Near(55.75, p.Lat); Check.Near(37.62, p.Lon);
         Check.Equal((-90d, 180d), ReadPoint("{\"lat\":-90,\"lon\":180}"));
         foreach (var json in new[] { "{}", "[]", "{\"lat\":\"0\",\"lon\":0}", "{\"lat\":91,\"lon\":0}", "{\"lat\":0,\"lon\":1e999}" }) Check.Throws<JsonException>(() => ReadPoint(json));
+        Check.Equal((90d, -180d), ReadPoint("{\"lat\":90,\"lon\":-180}"));
+        Check.Throws<ArgumentNullException>(() => ReadPoint(null!));
     }
 }
 ```
@@ -418,6 +469,7 @@ public static class Task08
 
 - Обычная точка и обе границы
 - Пропуск, строковое число, массив и огромная экспонента отвергнуты
+- Lat=90/Lon=-180 допустимы; null строка отклонена
 
 <a id="11-09"></a>
 ## 11-09. Убираем склейку JSON
@@ -559,20 +611,29 @@ public static class Task11
         ArgumentNullException.ThrowIfNull(json); using var doc = JsonDocument.Parse(json); var root = doc.RootElement;
         if (root.ValueKind != JsonValueKind.Object || !root.TryGetProperty("version", out var v) || !TryGetInt32Safe(v, out var version) || version < 1 || version > 2) throw new JsonException("Version.");
         var key = version == 1 ? "label" : "name";
-        if (!root.TryGetProperty(key, out var name) || name.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(name.GetString())) throw new JsonException("Name.");
+        if (!root.TryGetProperty(key, out var name) || name.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(Decode(name))) throw new JsonException("Name.");
         int retries = 3;
         if (version == 2 && (!root.TryGetProperty("retries", out var r) || r.ValueKind != JsonValueKind.Number || !r.TryGetInt32(out retries) || retries < 0 || retries > 5)) throw new JsonException("Retries.");
-        return new Config(name.GetString()!, retries);
+        return new Config(Decode(name)!, retries);
     }
     private static bool TryGetInt32Safe(JsonElement value, out int number)
     {
         number = 0; return value.ValueKind == JsonValueKind.Number && value.TryGetInt32(out number);
+    }
+    private static string? Decode(JsonElement value)
+    {
+        try { return value.GetString(); }
+        catch (InvalidOperationException error) { throw new JsonException("Invalid Unicode string.", error); }
     }
     public static void Run()
     {
         Check.Equal(new Config("demo", 3), Read("{\"version\":1,\"label\":\"demo\"}"));
         Check.Equal(new Config("x", 0), Read("{\"version\":2,\"name\":\"x\",\"retries\":0}"));
         foreach (var json in new[] { "{\"version\":3}", "{\"version\":2,\"name\":\"x\"}", "{\"version\":\"1\"}", "null", "{\"version\":1,\"label\":\" \"}" }) Check.Throws<JsonException>(() => Read(json));
+        Check.Equal(new Config("v2", 5), Read("{\"version\":2,\"name\":\"v2\",\"retries\":5}"));
+        Check.Throws<JsonException>(() => Read("{\"version\":2,\"name\":\"x\",\"retries\":6}"));
+        Check.Throws<JsonException>(() => Read("{\"version\":1,\"label\":\"\\uD800\"}"));
+        Check.Throws<ArgumentNullException>(() => Read(null!));
     }
 }
 ```
@@ -581,6 +642,7 @@ public static class Task11
 
 - Обе версии и retries=0
 - Неизвестная версия, отсутствующее retries и неверные типы отвергнуты
+- retries=5 допустим, 6 отклонён; непарный escape имени и null аргумент проверены
 
 <a id="11-12"></a>
 ## 11-12. Построчный импорт NDJSON
@@ -623,6 +685,10 @@ public static class Task12
         }
         return report;
     }
+    private sealed class FailedReader : TextReader
+    {
+        public override string? ReadLine() => throw new IOException("Read failure.");
+    }
     public static void Run()
     {
         using var reader = new StringReader("{\"Id\":2}\n\n{bad}\n{\"Id\":3}\n{\"Id\":2}\nnull\n{}\n{\"Id\":-1}");
@@ -630,6 +696,7 @@ public static class Task12
         Check.Equal("", reader.ReadToEnd());
         using var empty = new StringReader(""); Check.Equal(0, Import(empty).Ids.Count);
         Check.Throws<ArgumentNullException>(() => Import(null!));
+        using var failed = new FailedReader(); Check.Throws<IOException>(() => Import(failed));
     }
 }
 ```
@@ -640,6 +707,7 @@ public static class Task12
 - Пустая строка сохраняет нумерацию
 - Повтор разрешён; отрицательный, отсутствующий Id и null отмечены
 - EOF и владение reader
+- IOException ReadLine распространяется, не превращаясь в ErrorLines
 
 <a id="11-13"></a>
 ## 11-13. Статус как строка
@@ -715,7 +783,7 @@ public static class Task13
 
 **Ход решения**
 
-DTO с nullable Bio не позволяет понять, было ли bio вообще передано. DOM сохраняет наличие ключа. Все изменения держим в локальных переменных; если позднее поле ошибочно, исходная модель остаётся прежней. HashSet имён также обнаруживает повтор: по условию последняя запись не должна молча выигрывать.
+DTO с nullable Bio не позволяет понять, было ли bio вообще передано. DOM сохраняет наличие ключа. Все изменения держим в локальных переменных; если позднее поле ошибочно, исходная модель остаётся прежней. HashSet имён также обнаруживает повтор: по условию последняя запись не должна молча выигрывать. Некорректное декодирование ключа и строки — тоже ошибка patch; она переводится в JsonException до создания нового record.
 
 **Частая ошибка**
 
@@ -740,12 +808,23 @@ public static class Task14
         string name = original.Name; string? bio = original.Bio; var seen = new HashSet<string>(StringComparer.Ordinal);
         foreach (var property in doc.RootElement.EnumerateObject())
         {
-            if (!seen.Add(property.Name)) throw new JsonException("Duplicate.");
-            if (property.Name == "name" && property.Value.ValueKind == JsonValueKind.String && !string.IsNullOrWhiteSpace(property.Value.GetString())) name = property.Value.GetString()!;
-            else if (property.Name == "bio" && (property.Value.ValueKind == JsonValueKind.String || property.Value.ValueKind == JsonValueKind.Null)) bio = property.Value.GetString();
+            var key = PropertyName(property);
+            if (!seen.Add(key)) throw new JsonException("Duplicate.");
+            if (key == "name" && property.Value.ValueKind == JsonValueKind.String && !string.IsNullOrWhiteSpace(Decode(property.Value))) name = Decode(property.Value)!;
+            else if (key == "bio" && (property.Value.ValueKind == JsonValueKind.String || property.Value.ValueKind == JsonValueKind.Null)) bio = Decode(property.Value);
             else throw new JsonException("Invalid patch.");
         }
         return new Profile(name, bio);
+    }
+    private static string? Decode(JsonElement value)
+    {
+        try { return value.GetString(); }
+        catch (InvalidOperationException error) { throw new JsonException("Invalid Unicode string.", error); }
+    }
+    private static string PropertyName(JsonProperty value)
+    {
+        try { return value.Name; }
+        catch (InvalidOperationException error) { throw new JsonException("Invalid Unicode property name.", error); }
     }
     public static void Run()
     {
@@ -754,6 +833,10 @@ public static class Task14
         Check.Equal(new Profile("New", "old"), Patch(old, "{\"name\":\"New\"}")); Check.Equal("Ada", old.Name);
         foreach (var json in new[] { "{\"extra\":1}", "{\"bio\":1}", "{\"name\":\" \"}", "{\"bio\":null,\"bio\":\"x\"}", "[]" }) Check.Throws<JsonException>(() => Patch(old, json));
         Check.Throws<ArgumentNullException>(() => Patch(null!, "{}"));
+        Check.Throws<JsonException>(() => Patch(old, "{\"name\":\"New\",\"bio\":\"\\uD800\"}")); Check.Equal(new Profile("Ada", "old"), old);
+        Check.Throws<JsonException>(() => Patch(old, "{\"\\uDC00\":null}"));
+        Check.Throws<ArgumentException>(() => Patch(new Profile(" ", null), "{}"));
+        Check.Throws<ArgumentNullException>(() => Patch(old, null!));
     }
 }
 ```
@@ -763,6 +846,7 @@ public static class Task14
 - Пропуск и сброс Bio
 - Замена имени и сохранение исходника
 - Неизвестный ключ, повтор, неверный тип и пустое имя отклонены
+- Невалидный Unicode ключ/значение и неверный original отклонены; original после поздней ошибки прежний
 
 <a id="11-15"></a>
 ## 11-15. Каталог с безопасным импортом
@@ -812,6 +896,8 @@ public static class Task15
         foreach (var bad in new[] { "[null]", "null", "[{\"Id\":1,\"Name\":\" \"}]" }) { Check.Throws<JsonException>(() => catalog.Import(bad)); Check.Equal(before, catalog.Export()); }
         catalog.Import("[]"); Check.Equal(0, catalog.Count);
         Check.Throws<ArgumentNullException>(() => catalog.Import(null!));
+        catalog.Import(before);
+        Check.Throws<JsonException>(() => catalog.Import("[{\"Id\":1,\"Name\":\"A\"},{\"Id\":2,\"Name\":\"\\uD800\"}]")); Check.Equal(before, catalog.Export());
     }
 }
 ```
@@ -822,3 +908,4 @@ public static class Task15
 - Дубликат в конце сохраняет прежний снимок
 - null-элемент и неверное имя отклонены
 - Пустой импорт очищает каталог
+- Невалидный Unicode во второй записи сохраняет весь прежний экспорт

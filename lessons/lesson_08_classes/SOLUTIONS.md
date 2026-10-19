@@ -90,6 +90,10 @@ public static class Task02
         Check.True(rectangle.TryResize(4, 5)); Check.Equal(20m, rectangle.Area);
         Check.True(rectangle.TryResize(0, 3)); Check.Equal(0m, rectangle.Area);
         Check.True(!rectangle.TryResize(1_000_001, 1));
+        Check.True(!rectangle.TryResize(-1, 5)); Check.True(!rectangle.TryResize(1, 1_000_001));
+        Check.True(!rectangle.TryResize(decimal.MaxValue, 1));
+        Check.Equal(0m, rectangle.Width); Check.Equal(3m, rectangle.Height);
+        Check.True(rectangle.TryResize(1_000_000, 1_000_000)); Check.Equal(1_000_000_000_000m, rectangle.Area);
     }
 }
 ```
@@ -101,6 +105,7 @@ public static class Task02
 - Успешное изменение
 - Нулевая площадь
 - Верхняя граница
+- Дополнено при пересмотре: Обе верхние границы приняты.
 
 <a id="08-03"></a>
 ## 08-03. Объект и значение при присваивании
@@ -220,14 +225,16 @@ public static class Task05
             Volume += amount; return true;
         }
     }
+    private static bool WrongCanFill(int capacity, int current, int amount) => amount >= 0 && amount < capacity - current;
     public static void Run()
     {
         Tank tank = new(10); Check.True(tank.TryFill(10)); Check.Equal(10, tank.Volume);
         Check.True(!tank.TryFill(1)); Check.Equal(10, tank.Volume);
         Check.True(tank.TryFill(0)); Check.True(!tank.TryFill(-1));
         Tank empty = new(10); Check.True(!empty.TryFill(int.MaxValue)); Check.Equal(0, empty.Volume);
-        bool wrongExactFill = 10 >= 0 && 10 < empty.Capacity - empty.Volume;
+        bool wrongExactFill = WrongCanFill(empty.Capacity, empty.Volume, 10);
         Check.True(!wrongExactFill); Check.True(empty.TryFill(10));
+        Tank partial = new(10); Check.True(partial.TryFill(3)); Check.True(partial.TryFill(7)); Check.Equal(10, partial.Volume);
     }
 }
 ```
@@ -239,6 +246,7 @@ public static class Task05
 - Нулевой и отрицательный долив
 - int.MaxValue не переполняет
 - Плохой предикат различён
+- Дополнено при пересмотре: Последовательные3+7 и ошибочный строгий предикат.
 
 <a id="08-06"></a>
 ## 08-06. Изменение записи через with
@@ -271,6 +279,7 @@ public static class Task06
         Product original = new("P1", "Книга", 100);
         Product? changed = Reprice(original, 120);
         Check.True(changed is not null); Check.Equal(120m, changed!.Price); Check.Equal(100m, original.Price);
+        Check.Equal(new Product("P1", "Книга", 120m), changed);
         Check.True(Reprice(original, -1) is null); Check.True(Reprice(original, 1_000_001) is null);
         Product? same = Reprice(original, 100); Check.Equal(original, same); Check.True(!ReferenceEquals(original, same));
         Check.Equal(0m, Reprice(original, 0)!.Price);
@@ -284,6 +293,7 @@ public static class Task06
 - Отрицательная и слишком большая цена
 - Та же цена: равны данные, различны ссылки
 - Нулевая цена
+- Дополнено при пересмотре: Нулевая цена.
 
 <a id="08-07"></a>
 ## 08-07. Корзина состоит из строк
@@ -292,7 +302,7 @@ Cart владеет списком неизменяемых CartLine и вычи
 
 **Ход решения**
 
-Композиция выражает отношение «корзина содержит строки». У каждой строки своя формула, корзина только суммирует. Проверка всех параметров предшествует созданию строки; максимум строк ограничивает размер и сумму. Разные операции одного кода остаются отдельными по контракту. TryAdd ожидаемо O(1), подсчёт Total O(n).
+Композиция выражает отношение «корзина содержит строки». У каждой строки своя формула, корзина только суммирует. Проверка всех параметров предшествует созданию строки; максимум строк ограничивает размер и сумму. Разные операции одного кода остаются отдельными по контракту. TryAdd требует до O(длина кода) на проверку пробельных символов и амортизированное O(1) на добавление в список; подсчёт Total занимает O(n).
 
 **Частая ошибка**
 
@@ -328,6 +338,11 @@ public static class Task07
         Check.True(!cart.TryAdd(null, 1, 1)); Check.True(!cart.TryAdd(" ", 1, 1));
         Check.True(!cart.TryAdd("B", 1, 0)); Check.Equal(2, cart.Count);
         Check.True(cart.TryAdd("free", 0, 1)); Check.Equal(7.50m, cart.Total);
+        Check.True(!cart.TryAdd("bad-price", -1, 1)); Check.True(!cart.TryAdd("bad-quantity", 1, 1001)); Check.Equal(3, cart.Count);
+        Cart full = new(); bool allAccepted = true;
+        for (int i = 0; i < 1000; i++) if (!full.TryAdd("A", 1, 1)) allAccepted = false;
+        Check.True(allAccepted); Check.Equal(1000, full.Count); Check.Equal(1000m, full.Total);
+        Check.True(!full.TryAdd("B", 2, 1)); Check.Equal(1000, full.Count); Check.Equal(1000m, full.Total);
     }
 }
 ```
@@ -339,6 +354,7 @@ public static class Task07
 - Нулевая quantity
 - Нулевая цена допустима
 - Отказы не добавляют строки
+- Дополнено при пересмотре: Ровно1000 добавлений и отказ1001-го без изменения Count/Total.
 
 <a id="08-08"></a>
 ## 08-08. Одна температура, две шкалы
@@ -446,7 +462,7 @@ public static class Task09
 
 **Ход решения**
 
-readonly запрещает переназначить поле, но не запрещает Clear у List. Поэтому одного readonly недостаточно для защиты от внешнего кода. ToArray копирует ссылки на неизменяемые string, что достаточно для независимого изменения набора и позиций. Старый снимок не дополняется после новых добавлений. TryAdd O(1) в среднем, GetTitles O(n).
+readonly запрещает переназначить поле, но не запрещает Clear у List. Поэтому одного readonly недостаточно для защиты от внешнего кода. ToArray копирует ссылки на неизменяемые string, что достаточно для независимого изменения набора и позиций. Старый снимок не дополняется после новых добавлений. TryAdd требует до O(длина заголовка) на проверку пробельных символов и амортизированное O(1) на добавление; GetTitles занимает O(n).
 
 **Частая ошибка**
 
@@ -476,6 +492,10 @@ public static class Task10
         string[] snapshot = catalog.GetTitles(); snapshot[0] = "X"; Check.Equal("A", catalog.GetTitles()[0]);
         Check.True(catalog.TryAdd("A")); Check.Equal(1, snapshot.Length); Check.SequenceEqual(new[] { "A", "A" }, catalog.GetTitles());
         Check.True(!catalog.TryAdd(null)); Check.True(!catalog.TryAdd("  ")); Check.Equal(2, catalog.Count);
+        Catalog full = new(); bool allAccepted = true;
+        for (int i = 0; i < 1000; i++) if (!full.TryAdd("entry-" + i.ToString(System.Globalization.CultureInfo.InvariantCulture))) allAccepted = false;
+        Check.True(allAccepted); Check.Equal(1000, full.Count);
+        Check.True(!full.TryAdd("overflow")); Check.Equal(1000, full.Count); Check.Equal("entry-999", full.GetTitles()[999]);
     }
 }
 ```
@@ -486,6 +506,7 @@ public static class Task10
 - Новый элемент не меняет старый снимок
 - Невалидные строки отклонены
 - Порядок и повтор сохранены
+- Дополнено при пересмотре: 1000 приняты,1001-я отклонена без потери последней записи.
 
 <a id="08-11"></a>
 ## 08-11. Структура с общей ссылкой внутри

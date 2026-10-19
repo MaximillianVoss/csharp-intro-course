@@ -14,6 +14,10 @@ public static class Task06
         }
         return new ParseReport(values.ToArray(), invalid.ToArray());
     }
+    private sealed class ThrowingLineReader : TextReader
+    {
+        public override string? ReadLine() => throw new IOException("Отказ источника, не ошибка числа.");
+    }
     public static void Run()
     {
         using StringReader input = new("10\n\nwrong\n -2 \n999999999999"); ParseReport report = ParseNumbers(input);
@@ -21,5 +25,6 @@ public static class Task06
         using StringReader zero = new("bad\n0\n \n7"); ParseReport after = ParseNumbers(zero);
         Check.SequenceEqual(new[] { 0, 7 }, after.Values); Check.SequenceEqual(new[] { 1 }, after.InvalidLines);
         using StringReader empty = new(""); Check.Equal(0, ParseNumbers(empty).Values.Length);
+        using ThrowingLineReader broken = new(); Check.Throws<IOException>(() => ParseNumbers(broken));
     }
 }

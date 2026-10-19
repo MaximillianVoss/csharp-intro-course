@@ -20,5 +20,9 @@ public static class Task13
         Check.Equal(false, SameLabel("a", "a "));
         Check.Equal(false, SameLabel("①", "1"));
         Check.True(SameLabel("", ""));
+
+        // Review 2026-10-19: normalization is not deaccenting or confusable folding
+        Check.Equal(false, SameLabel("e", "é"));
+        Check.Equal(false, SameLabel("A", "А"));
     }
 }

@@ -3,7 +3,7 @@
 Сначала решите задачу самостоятельно. Ответы находятся в отдельном SOLUTIONS.md.
 Уровни: 1 — базовый, 2 — прикладной, 3 — повышенный.
 Код пишите в templates/Tasks.cs; каждый TaskNN.Run — независимое рабочее место.
-Методы из условия можно объявить внутри класса TaskNN.
+В TaskNN уже даны предметные сигнатуры; заполните методы и свой Run, сохранив контракт.
 В задачах на чтение и тестирование запишите объяснение и воспроизводимый эксперимент.
 
 | ID | Уровень | Формат | Задача |
@@ -174,7 +174,7 @@ return scores.All(score => score >= threshold);
 
 Уровень 3 · Реализация · Навык: GroupJoin сохраняет внешний набор
 
-Даны Customer(int Id), Purchase(int CustomerId,decimal Amount), Summary(int CustomerId,int Orders,decimal Total). Реализуйте Summary[] CustomerTotals(Customer[] customers,Purchase[] purchases). Id клиентов положительны и уникальны; CustomerId покупки положителен, Amount&gt;=0, повторы покупок разрешены. null массивы — ArgumentNullException, null/неверные элементы и дубликат клиента — ArgumentException. Каждый клиент присутствует, даже без покупок (Orders=0,Total=0). Покупки неизвестных клиентов игнорируются. Сортируйте по CustomerId.
+Даны Customer(int Id), Purchase(int CustomerId,decimal Amount), Summary(int CustomerId,int Orders,decimal Total). Реализуйте Summary[] CustomerTotals(Customer[] customers,Purchase[] purchases). Id клиентов положительны и уникальны; CustomerId покупки положителен, Amount&gt;=0, повторы покупок разрешены. null массивы — ArgumentNullException, null/неверные элементы и дубликат клиента — ArgumentException. Каждый клиент присутствует, даже без покупок (Orders=0,Total=0). Покупки неизвестных клиентов игнорируются. Сортируйте по CustomerId. Переполнение общей decimal-суммы распространяйте как OverflowException.
 
 **Пример и ожидаемое поведение**
 

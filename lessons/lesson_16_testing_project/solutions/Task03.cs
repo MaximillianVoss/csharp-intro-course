@@ -18,5 +18,10 @@ public static class Task03
             ("65536",false,0),("+80",false,0),(" 80",false,0),("８０",false,0),
             ("123456",false,0),("",false,0),(null,false,0) };
         foreach (var row in cases) { Check.Equal(row.Success,TryPort(row.Text,out int port)); Check.Equal(row.Port,port); }
+        foreach (var row in new (string Text,bool Success,int Port)[] {
+            ("00001",true,1),("00000",false,0),("000001",false,0),("80 ",false,0),("8a0",false,0) })
+        {
+            Check.Equal(row.Success,TryPort(row.Text,out int port)); Check.Equal(row.Port,port);
+        }
     }
 }

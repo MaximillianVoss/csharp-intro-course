@@ -38,7 +38,7 @@
       "skill": "Статический выбор скрытого члена и виртуальная диспетчеризация",
       "algorithm": "Вызвать new-метод и override через разные статические типы",
       "statement": "Предскажите три строки и воспроизведите код в public static string[] Replay(). Все приведённые типы поместите внутрь Task02. Порядок вызовов сохраняется.\n```csharp\npublic class Printer\n{\n    public string Describe() => \"base description\";\n    public virtual string Render() => \"base render\";\n}\npublic sealed class FancyPrinter : Printer\n{\n    public new string Describe() => \"fancy description\";\n    public override string Render() => \"fancy render\";\n}\nFancyPrinter derived = new();\nPrinter parent = derived;\n// вернуть parent.Describe(), parent.Render(), derived.Describe()\n```",
-      "example": "[\"base description\",\"fancy render\",\"fancy description\"].",
+      "example": "Replay возвращает string[3] в порядке parent.Describe(), parent.Render(), derived.Describe(); конкретные строки предскажите до выполнения.",
       "solution": "new скрывает член по статическому типу переменной; override меняет поведение виртуального вызова.",
       "reasoning": "parent и derived ссылаются на один объект. Describe не виртуальный, поэтому parent.Describe выбирает реализацию Printer. Render виртуальный и диспетчеризуется к FancyPrinter. derived.Describe видит скрывающий член FancyPrinter. Точное выполнение фрагмента проверяет все три строки, а ReferenceEquals подтверждает общий объект.",
       "pitfalls": "Считать new эквивалентом override; объяснять результат разными объектами.",
@@ -82,7 +82,8 @@
         "Порядок разных команд",
         "Отрицательная сумма",
         "Пустой массив",
-        "Каждая команда выполнена один раз"
+        "Каждая команда выполнена один раз",
+        "Дополнено при пересмотре: Пользовательский знак отрицательных не меняет строку суммы."
       ],
       "id": "09-04"
     },
@@ -148,7 +149,7 @@
       "format": "refactoring",
       "skill": "Разделение контрактов чтения и записи",
       "algorithm": "Отчёт получает IReadName вместо полного изменяемого хранилища",
-      "statement": "Переработайте зависимость функции отчёта. Создайте IReadName { string Read(); }, IWriteName { void Write(string value); }, MemoryName(string initial), реализующий оба интерфейса, и public static string BuildHeading(IReadName source), возвращающий \"Имя: \" + source.Read(). Все ссылки и строки не null. Отчёт должен компилироваться с объектом, который умеет только читать. Исходный чрезмерный контракт:\n```csharp\npublic interface INameStore { string Read(); void Write(string value); }\n// BuildHeading требует INameStore, хотя никогда не пишет.\n```",
+      "statement": "Переработайте зависимость функции отчёта. Создайте IReadName { string Read(); }, IWriteName { void Write(string value); }, MemoryName(string initial), реализующий оба интерфейса, и public static string BuildHeading(IReadName source), возвращающий \"Имя: \" + source.Read(). Все ссылки и строки не null. Отчёт должен компилироваться с объектом, который умеет только читать. Исходный чрезмерный контракт:\n```csharp\npublic interface INameStore { string Read(); void Write(string value); }\n// BuildHeading требует INameStore, хотя никогда не пишет.\n``` Создайте также public sealed class ReadOnlyName(string value), реализующий только IReadName и возвращающий переданное значение; допустим обычный эквивалентный конструктор.",
       "example": "MemoryName(\"A\") -> \"Имя: A\"; после Write(\"B\") -> \"Имя: B\"; ReadOnlyName(\"C\") тоже подходит.",
       "solution": "Разделите чтение и запись; используйте на границе минимально необходимый интерфейс.",
       "reasoning": "Потребитель чтения не должен требовать бесполезную реализацию Write. Один MemoryName может реализовать оба контракта, а ReadOnlyName — только IReadName. Компилятор подтверждает, что BuildHeading не зависит от изменяемости. Вызов Read выполняется один раз. Сложность O(длина строки) на построение заголовка.",
@@ -228,7 +229,7 @@
       "statement": "Объявите IValueSource { bool TryGet(string key,out string value); }. key не null. При отсутствии источник возвращает false и value=\"\"; пустая строка при true — найденное значение. Создайте DictionarySource(Dictionary<string,string> data) (словарь не null, Ordinal, не меняется снаружи во время работы) и FallbackSource(IValueSource primary,IValueSource backup). Обе зависимости не null. Fallback обращается к backup только при false от primary; при true сохраняет результат даже если он пустой. Проверьте число вызовов зависимостей тестовым источником.",
       "example": "primary={A:\"\"}, backup={A:\"запас\",B:\"второй\"}: A -> true,\"\" без вызова backup; B -> true,\"второй\".",
       "solution": "Признаком наличия служит bool, а не содержимое строки; используйте короткий путь по успешному первому результату.",
-      "reasoning": "Пустое значение и отсутствие — разные состояния контракта. Проверка IsNullOrEmpty неверно отправила бы найденный пустой A в резерв. Две зависимости объединяются через интерфейс без знания о словаре. Тестовый счётчик обнаруживает лишний запрос к backup даже если окончательный текст случайно верен. Ожидаемое O(1) для словарей.",
+      "reasoning": "Пустое значение и отсутствие — разные состояния контракта. Проверка IsNullOrEmpty неверно отправила бы найденный пустой A в резерв. Две зависимости объединяются через интерфейс без знания о словаре. Тестовый счётчик обнаруживает лишний запрос к backup даже если окончательный текст случайно верен. Для словарных источников ожидаемое время O(длина ключа), поскольку вычисление строкового хеша и сравнение зависят от символов ключа; число обращений к источникам не превышает двух.",
       "pitfalls": "Вызвать оба источника заранее; считать пустой результат отсутствием; оставить out неопределённым при false.",
       "checks": [
         "Найденная пустая строка не идёт в backup",
@@ -292,7 +293,8 @@
         "Порядок и содержимое сообщений",
         "Get вызван один раз",
         "Продолжение после отказа",
-        "Пустой список"
+        "Пустой список",
+        "Дополнено при пересмотре: Пустой список."
       ],
       "id": "09-15"
     }

@@ -34,6 +34,9 @@ public static class Task15
             File.WriteAllText(Path.Combine(directory, "large.txt"), "2147483647\n\n2147483647\nwrong");
             ImportSummary large = SummarizeFiles(directory); Check.Equal(4294967304L, large.Sum); Check.Equal(5, large.Accepted);
             Check.SequenceEqual(new[] { "a.txt:2", "b.txt:1", "large.txt:4" }, large.Errors);
+            File.WriteAllText(Path.Combine(directory, "overflow.txt"), "999999999999\n7");
+            ImportSummary recovered = SummarizeFiles(directory); Check.Equal(4294967311L, recovered.Sum); Check.Equal(6, recovered.Accepted);
+            Check.SequenceEqual(new[] { "a.txt:2", "b.txt:1", "large.txt:4", "overflow.txt:1" }, recovered.Errors);
         }
         finally { Directory.Delete(directory, true); }
     }

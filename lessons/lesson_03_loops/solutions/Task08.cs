@@ -41,5 +41,8 @@ public static class Task08
         Check.Equal(0L, SumLines(invalid));
         using var large = new StringReader("2147483647\n2147483647\n");
         Check.Equal(4_294_967_294L, SumLines(large));
+
+        // Review 2026-10-19: reader remains caller owned
+        Check.Equal<string?>(null, revised.ReadLine());
     }
 }

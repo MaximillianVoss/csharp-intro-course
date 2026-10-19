@@ -198,6 +198,14 @@ public static class Task04
         Check.SequenceEqual(new[] { "-3" }, ExecuteAll(new ICommand[] { new SumCommand(-5, 2) }));
         Check.Equal(0, ExecuteAll(Array.Empty<ICommand>()).Length);
         CountingCommand command = new(); ExecuteAll(new ICommand[] { command }); Check.Equal(1, command.Calls);
+        System.Globalization.CultureInfo previous = System.Globalization.CultureInfo.CurrentCulture;
+        try
+        {
+            System.Globalization.CultureInfo unusual = (System.Globalization.CultureInfo)System.Globalization.CultureInfo.InvariantCulture.Clone();
+            unusual.NumberFormat.NegativeSign = "minus"; System.Globalization.CultureInfo.CurrentCulture = unusual;
+            Check.Equal("-3", new SumCommand(-5, 2).Execute());
+        }
+        finally { System.Globalization.CultureInfo.CurrentCulture = previous; }
     }
 }
 ```
@@ -208,6 +216,7 @@ public static class Task04
 - Отрицательная сумма
 - Пустой массив
 - Каждая команда выполнена один раз
+- Дополнено при пересмотре: Пользовательский знак отрицательных не меняет строку суммы.
 
 <a id="09-05"></a>
 ## 09-05. Часы для повторяемого теста
@@ -557,7 +566,7 @@ public static class Task11
 
 **Ход решения**
 
-Пустое значение и отсутствие — разные состояния контракта. Проверка IsNullOrEmpty неверно отправила бы найденный пустой A в резерв. Две зависимости объединяются через интерфейс без знания о словаре. Тестовый счётчик обнаруживает лишний запрос к backup даже если окончательный текст случайно верен. Ожидаемое O(1) для словарей.
+Пустое значение и отсутствие — разные состояния контракта. Проверка IsNullOrEmpty неверно отправила бы найденный пустой A в резерв. Две зависимости объединяются через интерфейс без знания о словаре. Тестовый счётчик обнаруживает лишний запрос к backup даже если окончательный текст случайно верен. Для словарных источников ожидаемое время O(длина ключа), поскольку вычисление строкового хеша и сравнение зависят от символов ключа; число обращений к источникам не превышает двух.
 
 **Частая ошибка**
 
@@ -766,7 +775,11 @@ public static class Task15
         public FixedRecipients(string[] values) { this.values = values; }
         public string[] Get() { Calls++; return (string[])values.Clone(); }
     }
-    private sealed class GreetingTemplate : IMessageTemplate { public string Build(string recipient) => "Привет, " + recipient; }
+    private sealed class GreetingTemplate : IMessageTemplate
+    {
+        public int Calls { get; private set; }
+        public string Build(string recipient) { Calls++; return "Привет, " + recipient; }
+    }
     private sealed class RecordingChannel : IChannel
     {
         public List<string> Attempts { get; } = new();
@@ -775,8 +788,8 @@ public static class Task15
     public static void Run()
     {
         FixedRecipients recipients = new(new[] { "a", "b", "a" }); RecordingChannel channel = new();
-        DeliverySummary result = new NotificationService(recipients, new GreetingTemplate(), channel).SendAll();
-        Check.Equal(new DeliverySummary(3, 2), result); Check.Equal(1, recipients.Calls);
+        GreetingTemplate template = new(); DeliverySummary result = new NotificationService(recipients, template, channel).SendAll();
+        Check.Equal(new DeliverySummary(3, 2), result); Check.Equal(1, recipients.Calls); Check.Equal(3, template.Calls);
         Check.SequenceEqual(new[] { "a|Привет, a", "b|Привет, b", "a|Привет, a" }, channel.Attempts);
         Check.Equal(new DeliverySummary(0, 0), new NotificationService(new FixedRecipients(Array.Empty<string>()), new GreetingTemplate(), new RecordingChannel()).SendAll());
     }
@@ -790,3 +803,4 @@ public static class Task15
 - Get вызван один раз
 - Продолжение после отказа
 - Пустой список
+- Дополнено при пересмотре: Пустой список.

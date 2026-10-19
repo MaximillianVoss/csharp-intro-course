@@ -188,6 +188,19 @@ public static class Task04
         Check.Equal(false, MayOpen(true, false, false, false));
         Check.Equal(false, MayOpen(false, false, true, false));
         Check.Equal(false, MayOpen(true, true, true, true));
+
+        // Review 2026-10-19: complete permission truth table
+        Check.Equal(false, MayOpen(false, false, false, false));
+        Check.Equal(false, MayOpen(false, false, false, true));
+        Check.Equal(false, MayOpen(false, false, true, true));
+        Check.Equal(false, MayOpen(false, true, false, false));
+        Check.Equal(false, MayOpen(false, true, false, true));
+        Check.Equal(false, MayOpen(false, true, true, false));
+        Check.Equal(false, MayOpen(false, true, true, true));
+        Check.Equal(false, MayOpen(true, false, false, true));
+        Check.Equal(false, MayOpen(true, false, true, true));
+        Check.Equal(false, MayOpen(true, true, false, true));
+        Check.Equal(true, MayOpen(true, true, true, false));
     }
 }
 ```
@@ -199,6 +212,7 @@ public static class Task04
 - Нет оснований
 - Неактивен с пропуском
 - Заблокированный владелец
+- Все 16 сочетаний active/owner/hasPass/blocked сверены с явной таблицей допустимых состояний
 
 <a id="02-05"></a>
 ## 02-05. Имя направления через switch

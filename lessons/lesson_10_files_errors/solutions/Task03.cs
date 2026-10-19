@@ -20,5 +20,6 @@ public static class Task03
         using FailingReader missing = new(new FileNotFoundException()); using FailingReader io = new(new IOException());
         Check.Equal("missing", ReadFirstStatus(missing)); Check.Equal("io", ReadFirstStatus(io));
         using FailingReader unexpected = new(new FormatException()); Check.Throws<FormatException>(() => ReadFirstStatus(unexpected));
+        using StringReader blank = new("\nnext"); Check.Equal("ok:", ReadFirstStatus(blank)); Check.Equal("next", blank.ReadLine());
     }
 }

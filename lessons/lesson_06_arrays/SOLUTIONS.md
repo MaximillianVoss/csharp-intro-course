@@ -217,6 +217,7 @@ public static class Task05
             values[right] = temporary;
         }
     }
+    private static void WrongNoOp(int[] values) { _ = values; }
     public static void Run()
     {
         int[] empty = Array.Empty<int>(); Reverse(empty);
@@ -225,7 +226,7 @@ public static class Task05
         int[] even = { 1, 2, 3, 4 }; Reverse(even);
         Check.SequenceEqual(new[] { 4, 3, 2, 1 }, even);
         int[] odd = { 1, 1, 3 }; Reverse(odd); Check.SequenceEqual(new[] { 3, 1, 1 }, odd);
-        int[] wrongNoOp = { 1, 2, 3, 4 };
+        int[] wrongNoOp = { 1, 2, 3, 4 }; WrongNoOp(wrongNoOp);
         Check.True(wrongNoOp[0] != even[0], "Асимметричный тест различает no-op.");
     }
 }
@@ -237,6 +238,7 @@ public static class Task05
 - Чётная и нечётная длина
 - Дубликаты
 - Явное различение ошибочного no-op
+- Дополнено при пересмотре: Плохая реализация действительно вызвана.
 
 <a id="06-06"></a>
 ## 06-06. Циклический сдвиг
@@ -381,6 +383,11 @@ public static class Task08
         Check.SequenceEqual(new[] { 4 }, MergeSorted(Array.Empty<int>(), new[] { 4 }));
         Check.SequenceEqual(Array.Empty<int>(), MergeSorted(Array.Empty<int>(), Array.Empty<int>()));
         Check.SequenceEqual(new[] { -4, -2, 1, 5 }, MergeSorted(new[] { -2, 1, 5 }, new[] { -4 }));
+        int[] shared = { 1, 2, 2 };
+        int[] merged = MergeSorted(shared, shared);
+        Check.SequenceEqual(new[] { 1, 1, 2, 2, 2, 2 }, merged);
+        merged[0] = 99;
+        Check.SequenceEqual(new[] { 1, 2, 2 }, shared);
     }
 }
 ```
@@ -391,6 +398,7 @@ public static class Task08
 - Левый пуст
 - Оба пусты
 - Правый заканчивается первым
+- Дополнено при пересмотре: Мутация слияния не меняет общий источник.
 
 <a id="06-09"></a>
 ## 06-09. Самое левое совпадение

@@ -30,5 +30,7 @@ public static class Task15
         foreach (var bad in new[] { "[null]", "null", "[{\"Id\":1,\"Name\":\" \"}]" }) { Check.Throws<JsonException>(() => catalog.Import(bad)); Check.Equal(before, catalog.Export()); }
         catalog.Import("[]"); Check.Equal(0, catalog.Count);
         Check.Throws<ArgumentNullException>(() => catalog.Import(null!));
+        catalog.Import(before);
+        Check.Throws<JsonException>(() => catalog.Import("[{\"Id\":1,\"Name\":\"A\"},{\"Id\":2,\"Name\":\"\\uD800\"}]")); Check.Equal(before, catalog.Export());
     }
 }

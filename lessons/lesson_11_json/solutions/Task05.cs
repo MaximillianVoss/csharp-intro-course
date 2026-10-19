@@ -14,7 +14,12 @@ public static class Task05
         if (!root.TryGetProperty("label", out var value)) return "нет";
         if (value.ValueKind == JsonValueKind.Null) return "пусто";
         if (value.ValueKind != JsonValueKind.String) throw new JsonException("String required.");
-        return value.GetString()!;
+        return Decode(value)!;
+    }
+    private static string? Decode(JsonElement value)
+    {
+        try { return value.GetString(); }
+        catch (InvalidOperationException error) { throw new JsonException("Invalid Unicode string.", error); }
     }
     public static void Run()
     {
@@ -22,5 +27,7 @@ public static class Task05
         Check.Equal("", Label("{\"label\":\"\"}")); Check.Equal("x", Label("{\"label\":\"x\"}"));
         Check.Throws<JsonException>(() => Label("{\"label\":4}")); Check.Throws<JsonException>(() => Label("[]"));
         Check.Throws<ArgumentNullException>(() => Label(null!));
+        Check.Throws<JsonException>(() => Label("{\"label\":\"\\uDC00\"}"));
+        Check.Equal("\uD83D\uDE00", Label("{\"label\":\"\\uD83D\\uDE00\"}"));
     }
 }

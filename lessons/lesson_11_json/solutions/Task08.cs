@@ -23,5 +23,7 @@ public static class Task08
         var p = ReadPoint("{\"lat\":55.75,\"lon\":37.62}"); Check.Near(55.75, p.Lat); Check.Near(37.62, p.Lon);
         Check.Equal((-90d, 180d), ReadPoint("{\"lat\":-90,\"lon\":180}"));
         foreach (var json in new[] { "{}", "[]", "{\"lat\":\"0\",\"lon\":0}", "{\"lat\":91,\"lon\":0}", "{\"lat\":0,\"lon\":1e999}" }) Check.Throws<JsonException>(() => ReadPoint(json));
+        Check.Equal((90d, -180d), ReadPoint("{\"lat\":90,\"lon\":-180}"));
+        Check.Throws<ArgumentNullException>(() => ReadPoint(null!));
     }
 }

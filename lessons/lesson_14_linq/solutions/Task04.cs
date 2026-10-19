@@ -15,5 +15,7 @@ public static class Task04
         Check.True(Array.Empty<int>().All(x => x >= 50)); Check.True(!AllPassed(Array.Empty<int>(), 50));
         Check.True(AllPassed(new[] { 50, 70 }, 50)); Check.True(!AllPassed(new[] { 49, 100 }, 50)); Check.True(AllPassed(new[] { 0 }, 0));
         Check.Throws<ArgumentOutOfRangeException>(() => AllPassed(new[] { 0, 101 }, 50)); Check.Throws<ArgumentOutOfRangeException>(() => AllPassed(new[] { 1 }, -1)); Check.Throws<ArgumentNullException>(() => AllPassed(null!, 50));
+        bool entered = false; IEnumerable<int> Source() { entered = true; yield return 1; }
+        Check.Throws<ArgumentOutOfRangeException>(() => AllPassed(Source(), 101)); Check.True(!entered);
     }
 }

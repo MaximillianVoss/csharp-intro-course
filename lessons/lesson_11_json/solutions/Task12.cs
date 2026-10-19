@@ -23,6 +23,10 @@ public static class Task12
         }
         return report;
     }
+    private sealed class FailedReader : TextReader
+    {
+        public override string? ReadLine() => throw new IOException("Read failure.");
+    }
     public static void Run()
     {
         using var reader = new StringReader("{\"Id\":2}\n\n{bad}\n{\"Id\":3}\n{\"Id\":2}\nnull\n{}\n{\"Id\":-1}");
@@ -30,5 +34,6 @@ public static class Task12
         Check.Equal("", reader.ReadToEnd());
         using var empty = new StringReader(""); Check.Equal(0, Import(empty).Ids.Count);
         Check.Throws<ArgumentNullException>(() => Import(null!));
+        using var failed = new FailedReader(); Check.Throws<IOException>(() => Import(failed));
     }
 }

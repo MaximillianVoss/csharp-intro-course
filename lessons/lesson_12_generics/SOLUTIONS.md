@@ -67,12 +67,20 @@ public static class Task02
     {
         ArgumentNullException.ThrowIfNull(items); return items.Count == 0 ? fallback : items[0];
     }
+    private sealed class HeadOnly : IReadOnlyList<int>
+    {
+        public int Count => 2;
+        public int this[int index] => index == 0 ? 0 : throw new InvalidOperationException("Unexpected tail access.");
+        public IEnumerator<int> GetEnumerator() => throw new InvalidOperationException("Unexpected enumeration.");
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+    }
     public static void Run()
     {
         var values = new[] { 0, 5 }; Check.Equal(0, FirstOr(values, 9)); Check.SequenceEqual(new[] { 0, 5 }, values);
         Check.Equal(9, FirstOr(Array.Empty<int>(), 9));
         Check.Equal<string?>(null, FirstOr(new string?[] { null }, "x"));
         Check.Throws<ArgumentNullException>(() => FirstOr<int>(null!, 0));
+        Check.Equal(0, FirstOr(new HeadOnly(), 9));
     }
 }
 ```
@@ -83,6 +91,7 @@ public static class Task02
 - Первый default(int)
 - Первый null и сохранение списка
 - null-коллекция отвергнута
+- Контейнер с запрещённым перечислением/хвостом успешно возвращает нулевой первый элемент
 
 <a id="12-03"></a>
 ## 12-03. Статическое поле для каждого T
@@ -544,7 +553,7 @@ public static class Task11
 
 **Ход решения**
 
-Держим полуинтервал [left,right). Если середина меньше target, отбрасываем её и всё левее; иначе переносим right на середину. В конце left — место вставки перед равными. Проверка границы и CompareTo==0 отличает существующий элемент от позиции вставки. Формула середины left+(right-left)/2 избегает переполнения суммы.
+Держим полуинтервал [left,right). Если середина меньше target, отбрасываем её и всё левее; иначе переносим right на середину. В конце left — место вставки перед равными. Проверка границы и CompareTo==0 отличает существующий элемент от позиции вставки. Формула середины left+(right-left)/2 избегает переполнения суммы. Отдельный тип возвращает разность ключей, а не только -1/0/1; счётчик сравнений на 1024 элементах должен оставаться &lt;=12. Линейный поиск этот тест не проходит.
 
 **Частая ошибка**
 
@@ -566,12 +575,21 @@ public static class Task12
         while (left < right) { int mid = left + (right - left) / 2; if (sorted[mid].CompareTo(target) < 0) left = mid + 1; else right = mid; }
         return left < sorted.Count && sorted[left].CompareTo(target) == 0 ? left : -1;
     }
+    private sealed class Counted : IComparable<Counted>
+    {
+        public static int Comparisons; public int Key { get; }
+        public Counted(int key) { Key = key; }
+        public int CompareTo(Counted? other) { Comparisons++; return other is null ? 1 : Key - other.Key; }
+    }
     public static void Run()
     {
         var data = new[] { 1, 2, 2, 2, 5 }; Check.Equal(1, FirstIndex(data, 2)); Check.Equal(0, FirstIndex(data, 1));
         foreach (int missing in new[] { 0, 3, 9 }) Check.Equal(-1, FirstIndex(data, missing));
         Check.Equal(-1, FirstIndex(Array.Empty<int>(), 1)); Check.Equal(1, FirstIndex(new[] { "a", "b", "b" }, "b"));
         Check.Throws<ArgumentNullException>(() => FirstIndex<int>(null!, 1)); Check.Throws<ArgumentNullException>(() => FirstIndex(new[] { "a" }, null!));
+        var measured = new Counted[1024]; for (int i = 0; i < measured.Length; i++) measured[i] = new Counted(i);
+        Counted.Comparisons = 0; Check.Equal(0, FirstIndex(measured, new Counted(0))); Check.True(Counted.Comparisons <= 12, "Linear scanning violates the comparison bound.");
+        Counted.Comparisons = 0; Check.Equal(-1, FirstIndex(measured, new Counted(2000))); Check.True(Counted.Comparisons <= 12);
     }
 }
 ```
@@ -582,6 +600,7 @@ public static class Task12
 - До начала, между и после элементов
 - Пустой и строковый список
 - null аргументы отвергнуты
+- Пользовательский IComparable даёт правильный результат и не более12 сравнений на1024 элементах
 
 <a id="12-13"></a>
 ## 12-13. Чтение коллекции базового типа
@@ -635,7 +654,7 @@ public static class Task13
 
 **Ход решения**
 
-Пока Count меньше ёмкости, старейшая ячейка имеет индекс 0. После заполнения next указывает на старейшее значение, которое заменится следующим. Перебор (start+i)%capacity восстанавливает порядок. Независимый массив снимка не даёт изменять буфер извне. Неиспользованные ячейки не попадают в результат.
+Пока Count меньше ёмкости, старейшая ячейка имеет индекс 0. После заполнения next указывает на старейшее значение, которое заменится следующим. Перебор (start+i)%capacity восстанавливает порядок. Сумму индексов вычисляем в long, чтобы большая положительная capacity не приводила к переполнению int до остатка. Независимый массив снимка не даёт изменять буфер извне. Неиспользованные ячейки не попадают в результат.
 
 **Частая ошибка**
 
@@ -659,7 +678,7 @@ public static class Task14
         public T[] Snapshot()
         {
             var result = new T[Count]; int start = Count == data.Length ? next : 0;
-            for (int i = 0; i < Count; i++) result[i] = data[(start + i) % data.Length]; return result;
+            for (int i = 0; i < Count; i++) result[i] = data[(int)(((long)start + i) % data.Length)]; return result;
         }
     }
     public static void Run()

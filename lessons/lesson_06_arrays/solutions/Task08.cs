@@ -18,5 +18,10 @@ public static class Task08
         Check.SequenceEqual(new[] { 4 }, MergeSorted(Array.Empty<int>(), new[] { 4 }));
         Check.SequenceEqual(Array.Empty<int>(), MergeSorted(Array.Empty<int>(), Array.Empty<int>()));
         Check.SequenceEqual(new[] { -4, -2, 1, 5 }, MergeSorted(new[] { -2, 1, 5 }, new[] { -4 }));
+        int[] shared = { 1, 2, 2 };
+        int[] merged = MergeSorted(shared, shared);
+        Check.SequenceEqual(new[] { 1, 1, 2, 2, 2, 2 }, merged);
+        merged[0] = 99;
+        Check.SequenceEqual(new[] { 1, 2, 2 }, shared);
     }
 }

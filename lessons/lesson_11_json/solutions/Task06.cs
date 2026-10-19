@@ -38,5 +38,13 @@ public static class Task06
             Check.Throws<DirectoryNotFoundException>(() => Load(Path.Combine(dir, "absent-directory", "file.json")));
         }
         finally { Directory.Delete(dir, true); }
+        // Independently exercise the promised corrupt-file cases in a fresh directory.
+        var more = Path.Combine(Path.GetTempPath(), "csharp-json-review-" + Guid.NewGuid()); Directory.CreateDirectory(more);
+        try
+        {
+            var p = Path.Combine(more, "data.json");
+            foreach (var json in new[] { "", "null", "{\"Volume\":-1}" }) { File.WriteAllText(p, json); Check.Throws<JsonException>(() => Load(p)); }
+        }
+        finally { Directory.Delete(more, true); }
     }
 }

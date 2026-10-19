@@ -4,10 +4,13 @@
 2. Редактируйте источник условия и разбора в lessons/lesson_*/tasks.json.
 3. Редактируйте реализацию в solutions/TaskNN.cs и связанный пример, если он затронут.
 4. Добавьте различающий сценарий в Run. Для ошибок нужен тест, который падал до исправления.
-5. Выполните python tools/render_course.py --strict.
-6. Выполните pwsh -NoProfile -File tools/Verify.ps1.
-7. Выполните python tools/audit_course.py; просмотрите подозрительные пары по смыслу.
-8. Обновите решения аудита в docs/SEMANTIC_REVIEW.json для изменившихся кандидатов.
+5. Согласуйте предметный API в templates/Tasks.cs с условием, оставив решение незаполненным.
+6. Проверьте всю цепочку задания, обновите его TASK_REVIEW.json и привязку reviewed_sha256
+   по правилам [интеграции](docs/INTEGRATION.md). Пересчёт хеша не заменяет рецензию.
+7. Выполните python tools/render_course.py --strict и pwsh -NoProfile -File tools/Verify.ps1.
+8. Выполните python tools/audit_course.py; просмотрите подозрительные пары по смыслу.
+9. Обновите решения аудита в docs/SEMANTIC_REVIEW.json для изменившихся кандидатов.
+10. Выполните python tools/export_cards.py --verify-starters и проверьте разделение карточек.
 
 render_course.py генерирует оглавления, TASKS.md, SOLUTIONS.md с полными исходниками,
 диспетчеры и проектные файлы. Он никогда не генерирует и не перезаписывает solutions/TaskNN.cs.

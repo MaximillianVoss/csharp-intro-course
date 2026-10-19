@@ -23,5 +23,7 @@ public static class Task02
         foreach (var json in new[] { "null", "{", "{\"Unit\":\"K\"}", "{\"Value\":1001,\"Unit\":\"C\"}", "{\"Value\":\"1\",\"Unit\":\"C\"}" })
             Check.Throws<JsonException>(() => Read(json));
         Check.Throws<ArgumentNullException>(() => Read(null!));
+        Check.Throws<JsonException>(() => Read("{\"Value\":-1000.01,\"Unit\":\"C\"}"));
+        Check.Throws<JsonException>(() => Read("[]"));
     }
 }

@@ -21,5 +21,9 @@ public static class Task02
         Check.True(rectangle.TryResize(4, 5)); Check.Equal(20m, rectangle.Area);
         Check.True(rectangle.TryResize(0, 3)); Check.Equal(0m, rectangle.Area);
         Check.True(!rectangle.TryResize(1_000_001, 1));
+        Check.True(!rectangle.TryResize(-1, 5)); Check.True(!rectangle.TryResize(1, 1_000_001));
+        Check.True(!rectangle.TryResize(decimal.MaxValue, 1));
+        Check.Equal(0m, rectangle.Width); Check.Equal(3m, rectangle.Height);
+        Check.True(rectangle.TryResize(1_000_000, 1_000_000)); Check.Equal(1_000_000_000_000m, rectangle.Area);
     }
 }

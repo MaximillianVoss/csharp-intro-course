@@ -3,7 +3,7 @@
 Сначала решите задачу самостоятельно. Ответы находятся в отдельном SOLUTIONS.md.
 Уровни: 1 — базовый, 2 — прикладной, 3 — повышенный.
 Код пишите в templates/Tasks.cs; каждый TaskNN.Run — независимое рабочее место.
-Методы из условия можно объявить внутри класса TaskNN.
+В TaskNN уже даны предметные сигнатуры; заполните методы и свой Run, сохранив контракт.
 В задачах на чтение и тестирование запишите объяснение и воспроизводимый эксперимент.
 
 | ID | Уровень | Формат | Задача |
@@ -82,7 +82,7 @@ static T Head<T>(T[] items)
 
 **Пример и ожидаемое поведение**
 
-Head(new[]{42,1}) → 42; Head(new string?[]{null}) → null; [] → InvalidOperationException.
+`Head(new[]{42,1})` → `42`; `Head(new string?[]{null})` → `null`; `[]` → `InvalidOperationException`.
 
 <a id="12-05"></a>
 ## 12-05. Поиск сущности с ограничением
@@ -183,7 +183,7 @@ List<Cat> cats = new() { new Cat("Мур") };
 IReadOnlyList<Animal> view = cats; // A
 List<Animal> writable = cats;    // B
 ```
-Animal хранит readonly string Name, Cat наследует Animal. Реализуйте string[] Names(IReadOnlyList&lt;Animal&gt; animals), возвращающий имена в порядке списка. null список — ArgumentNullException, null элемент — ArgumentException. Создайте тест, передающий List&lt;Cat&gt; прямо в Names. Не используйте Cast, dynamic и копирование списка для обхода недопустимой строки B.
+Animal хранит readonly string Name, Cat наследует Animal. Реализуйте string[] Names(IReadOnlyList&lt;Animal&gt; animals), возвращающий имена в порядке списка. null список — ArgumentNullException, null элемент — ArgumentException. Создайте тест, передающий List&lt;Cat&gt; прямо в Names. Не используйте Cast, dynamic и копирование списка для принудительного обхода правил типов. Корректность присваиваний A/B объясните отдельно.
 
 **Пример и ожидаемое поведение**
 

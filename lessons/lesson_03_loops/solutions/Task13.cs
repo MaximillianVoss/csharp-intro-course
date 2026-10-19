@@ -33,5 +33,12 @@ public static class Task13
         Check.Equal("-2147483648", Maximum(minimum));
         using var mixed = new StringReader("1\n10\nx\n0\n");
         Check.Equal("10", Maximum(mixed));
+
+        // Review 2026-10-19: maximum preserves reader ownership
+        Check.Equal<string?>(null, minimum.ReadLine());
+
+        // Review 2026-10-19: zero maximum is present data
+        using var zeroMaximum = new StringReader("bad\n0\n-2\n");
+        Check.Equal("0", Maximum(zeroMaximum));
     }
 }

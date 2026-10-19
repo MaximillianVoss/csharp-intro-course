@@ -16,5 +16,7 @@ public static class Task10
         using StringReader none = new("a\nb"); Check.True(FirstLongLine(none, 2) is null);
         using StringReader empty = new(""); Check.True(FirstLongLine(empty, 0) is null);
         using StringReader invalid = new("stay"); Check.Throws<ArgumentOutOfRangeException>(() => FirstLongLine(invalid, -1)); Check.Equal("stay", invalid.ReadLine());
+        using StringReader emoji = new("🙂\ntail"); Check.Equal("🙂", FirstLongLine(emoji, 1)); Check.Equal("tail", emoji.ReadLine());
+        using StringReader exactEmoji = new("🙂\nabc"); Check.Equal("abc", FirstLongLine(exactEmoji, 2));
     }
 }

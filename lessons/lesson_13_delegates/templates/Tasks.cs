@@ -1,13 +1,19 @@
-namespace Course.Lesson13;
+// Авторский предметный каркас. Модели и API заданы; алгоритмы и проверки предстоит написать.
 
+namespace Course.Lesson13;
 // 13-01. Один вызов преобразования
 // Условие: ../TASKS.md, раздел 13-01.
 public static class Task01
 {
+    public static int Apply(int value, Func<int, int> operation)
+    {
+        throw new NotImplementedException();
+    }
+
     public static void Run()
     {
-        // TODO: выполните условие и добавьте проверки. Ответов здесь нет.
-        throw new NotImplementedException("Задача 13-01 ещё не решена.");
+        // TODO: Используйте счётчик и заранее созданное исключение, чтобы проверить вызов ровно один раз.
+        throw new NotImplementedException();
     }
 }
 
@@ -15,10 +21,15 @@ public static class Task01
 // Условие: ../TASKS.md, раздел 13-02.
 public static class Task02
 {
+    public static Func<T, T> Compose<T>(Func<T, T> first, Func<T, T> second)
+    {
+        throw new NotImplementedException();
+    }
+
     public static void Run()
     {
-        // TODO: выполните условие и добавьте проверки. Ответов здесь нет.
-        throw new NotImplementedException("Задача 13-02 ещё не решена.");
+        // TODO: Подберите операции, для которых перестановка меняет результат; проверьте время первого вызова.
+        throw new NotImplementedException();
     }
 }
 
@@ -26,10 +37,15 @@ public static class Task02
 // Условие: ../TASKS.md, раздел 13-03.
 public static class Task03
 {
+    public static int[] Observe()
+    {
+        throw new NotImplementedException();
+    }
+
     public static void Run()
     {
-        // TODO: выполните условие и добавьте проверки. Ответов здесь нет.
-        throw new NotImplementedException("Задача 13-03 ещё не решена.");
+        // TODO: Запишите прогноз до выполнения и сравните захват переменной с отдельно сохранённым значением.
+        throw new NotImplementedException();
     }
 }
 
@@ -37,10 +53,15 @@ public static class Task03
 // Условие: ../TASKS.md, раздел 13-04.
 public static class Task04
 {
+    public static Func<int>[] Build(int count)
+    {
+        throw new NotImplementedException();
+    }
+
     public static void Run()
     {
-        // TODO: выполните условие и добавьте проверки. Ответов здесь нет.
-        throw new NotImplementedException("Задача 13-04 ещё не решена.");
+        // TODO: Вызывайте полученные делегаты после цикла; сравните с буквальным ошибочным вариантом.
+        throw new NotImplementedException();
     }
 }
 
@@ -48,10 +69,15 @@ public static class Task04
 // Условие: ../TASKS.md, раздел 13-05.
 public static class Task05
 {
+    public static Predicate<int> InRange(int minimum, int maximum)
+    {
+        throw new NotImplementedException();
+    }
+
     public static void Run()
     {
-        // TODO: выполните условие и добавьте проверки. Ответов здесь нет.
-        throw new NotImplementedException("Задача 13-05 ещё не решена.");
+        // TODO: Проверьте соседние значения, точечный диапазон и независимость двух созданных предикатов.
+        throw new NotImplementedException();
     }
 }
 
@@ -59,10 +85,15 @@ public static class Task05
 // Условие: ../TASKS.md, раздел 13-06.
 public static class Task06
 {
+    public static T[] Filter<T>(IEnumerable<T> source, Predicate<T> accept)
+    {
+        throw new NotImplementedException();
+    }
+
     public static void Run()
     {
-        // TODO: выполните условие и добавьте проверки. Ответов здесь нет.
-        throw new NotImplementedException("Задача 13-06 ещё не решена.");
+        // TODO: Наблюдайте число вызовов, продвижение источника и его освобождение при ошибке предиката.
+        throw new NotImplementedException();
     }
 }
 
@@ -70,10 +101,15 @@ public static class Task06
 // Условие: ../TASKS.md, раздел 13-07.
 public static class Task07
 {
+    public static string[] SortNames(string[] names)
+    {
+        throw new NotImplementedException();
+    }
+
     public static void Run()
     {
-        // TODO: выполните условие и добавьте проверки. Ответов здесь нет.
-        throw new NotImplementedException("Задача 13-07 ещё не решена.");
+        // TODO: Проверьте обе ступени сравнения и независимость от текущей культуры, сохранив исходный массив.
+        throw new NotImplementedException();
     }
 }
 
@@ -81,10 +117,15 @@ public static class Task07
 // Условие: ../TASKS.md, раздел 13-08.
 public static class Task08
 {
+    public static long Accumulate(IReadOnlyList<int> values, Action<long> report)
+    {
+        throw new NotImplementedException();
+    }
+
     public static void Run()
     {
-        // TODO: выполните условие и добавьте проверки. Ответов здесь нет.
-        throw new NotImplementedException("Задача 13-08 ещё не решена.");
+        // TODO: Запишите все уведомления и проверьте, какое состояние видит callback после каждого элемента.
+        throw new NotImplementedException();
     }
 }
 
@@ -92,10 +133,15 @@ public static class Task08
 // Условие: ../TASKS.md, раздел 13-09.
 public static class Task09
 {
+    public static string Process(string text, Func<string, string> normalize, Action<string> log)
+    {
+        throw new NotImplementedException();
+    }
+
     public static void Run()
     {
-        // TODO: выполните условие и добавьте проверки. Ответов здесь нет.
-        throw new NotImplementedException("Задача 13-09 ещё не решена.");
+        // TODO: Используйте общий журнал порядка и проверяйте отсутствие эффектов при неверной конфигурации.
+        throw new NotImplementedException();
     }
 }
 
@@ -103,10 +149,15 @@ public static class Task09
 // Условие: ../TASKS.md, раздел 13-10.
 public static class Task10
 {
+    public static int CountPassing(int[] values, Predicate<int> accept)
+    {
+        throw new NotImplementedException();
+    }
+
     public static void Run()
     {
-        // TODO: выполните условие и добавьте проверки. Ответов здесь нет.
-        throw new NotImplementedException("Задача 13-10 ещё не решена.");
+        // TODO: Напишите проверку, различающую реализации даже при одинаковом итоговом количестве.
+        throw new NotImplementedException();
     }
 }
 
@@ -114,10 +165,15 @@ public static class Task10
 // Условие: ../TASKS.md, раздел 13-11.
 public static class Task11
 {
+    public static List<Exception> InvokeAll(Action[] handlers)
+    {
+        throw new NotImplementedException();
+    }
+
     public static void Run()
     {
-        // TODO: выполните условие и добавьте проверки. Ответов здесь нет.
-        throw new NotImplementedException("Задача 13-11 ещё не решена.");
+        // TODO: Сравните стандартный multicast с отдельным вызовом каждого обработчика и проверьте порядок ошибок.
+        throw new NotImplementedException();
     }
 }
 
@@ -125,10 +181,39 @@ public static class Task11
 // Условие: ../TASKS.md, раздел 13-12.
 public static class Task12
 {
+    public sealed class Counter
+    {
+        public Counter(int threshold)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int Value { get; private set; }
+
+        // TODO: Организуйте хранение подписок; допустимо заменить эти заглушки обычным event.
+        public event Action<int>? Reached
+        {
+            add
+            {
+                throw new NotImplementedException();
+            }
+
+            remove
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public void Add(int delta)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public static void Run()
     {
-        // TODO: выполните условие и добавьте проверки. Ответов здесь нет.
-        throw new NotImplementedException("Задача 13-12 ещё не решена.");
+        // TODO: Проверьте переход, повторное пересечение и то значение Counter, которое наблюдает подписчик.
+        throw new NotImplementedException();
     }
 }
 
@@ -136,10 +221,15 @@ public static class Task12
 // Условие: ../TASKS.md, раздел 13-13.
 public static class Task13
 {
+    public static Func<int, int> Memoize(Func<int, int> compute)
+    {
+        throw new NotImplementedException();
+    }
+
     public static void Run()
     {
-        // TODO: выполните условие и добавьте проверки. Ответов здесь нет.
-        throw new NotImplementedException("Задача 13-13 ещё не решена.");
+        // TODO: Используйте счётчики для успеха, нуля, исключения и двух независимых экземпляров кэша.
+        throw new NotImplementedException();
     }
 }
 
@@ -147,10 +237,15 @@ public static class Task13
 // Условие: ../TASKS.md, раздел 13-14.
 public static class Task14
 {
+    public static Predicate<T> All<T>(params Predicate<T>[] rules)
+    {
+        throw new NotImplementedException();
+    }
+
     public static void Run()
     {
-        // TODO: выполните условие и добавьте проверки. Ответов здесь нет.
-        throw new NotImplementedException("Задача 13-14 ещё не решена.");
+        // TODO: Отдельно проверьте порядок вызовов и влияние замены ячейки исходного массива после создания правила.
+        throw new NotImplementedException();
     }
 }
 
@@ -158,9 +253,22 @@ public static class Task14
 // Условие: ../TASKS.md, раздел 13-15.
 public static class Task15
 {
+    public sealed class CommandRouter
+    {
+        public void Register(string name, Action<IReadOnlyList<string>> handler)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Execute(string name, IReadOnlyList<string> args)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public static void Run()
     {
-        // TODO: выполните условие и добавьте проверки. Ответов здесь нет.
-        throw new NotImplementedException("Задача 13-15 ещё не решена.");
+        // TODO: Проверьте регистрацию, поиск другого регистра и сохранение старого обработчика при повторе.
+        throw new NotImplementedException();
     }
 }

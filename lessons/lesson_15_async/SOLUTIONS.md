@@ -56,7 +56,7 @@ public static class Task01
 
 **Ход решения**
 
-Read до ожидания Write мог бы увидеть старый или неполный файл. Оба await фиксируют требуемый порядок. Явный ThrowIfCancellationRequested перед первым I/O делает политику предварительной отмены однозначной. UTF-8 сохраняет разные письменности. Временный каталог ограничивает побочные эффекты теста.
+Read до ожидания Write мог бы увидеть старый или неполный файл. Оба await фиксируют требуемый порядок. Явный ThrowIfCancellationRequested перед первым I/O делает политику предварительной отмены однозначной. UTF-8 сохраняет разные письменности. Временный каталог ограничивает побочные эффекты теста. UTF8Encoding(false, true) отвергает непарный суррогат, а преобразование GetBytes до первого I/O делает это до открытия файла. Такая проверка нужна, чтобы неверная строка не уничтожила уже сохранённые данные. Чтение байтов с последующим GetString не удаляет начальный U+FEFF как файловую сигнатуру BOM: одинаковой кодировки в ReadAllTextAsync недостаточно для точного восстановления этой строки.
 
 **Частая ошибка**
 
@@ -76,7 +76,12 @@ public static class Task02
     public static async Task<string> RoundTripAsync(string path, string text, CancellationToken token = default)
     {
         if (string.IsNullOrWhiteSpace(path)) throw new ArgumentException("Path."); ArgumentNullException.ThrowIfNull(text); token.ThrowIfCancellationRequested();
-        await File.WriteAllTextAsync(path, text, Encoding.UTF8, token); return await File.ReadAllTextAsync(path, Encoding.UTF8, token);
+        var encoding = new UTF8Encoding(false, true);
+        byte[] bytes;
+        try { bytes = encoding.GetBytes(text); }
+        catch (EncoderFallbackException error) { throw new ArgumentException("Unpaired surrogate in text.", nameof(text), error); }
+        await File.WriteAllBytesAsync(path, bytes, token);
+        return encoding.GetString(await File.ReadAllBytesAsync(path, token));
     }
     public static async Task Run()
     {
@@ -87,6 +92,15 @@ public static class Task02
             var absent = Path.Combine(dir, "cancelled.txt"); using var cts = new CancellationTokenSource(); cts.Cancel();
             await Check.ThrowsAsync<OperationCanceledException>(() => RoundTripAsync(absent, "x", cts.Token)); Check.True(!File.Exists(absent));
             await Check.ThrowsAsync<ArgumentException>(() => RoundTripAsync(" ", "x")); await Check.ThrowsAsync<ArgumentNullException>(() => RoundTripAsync(path, null!));
+            Check.Equal("\r\n\uD83D\uDE00\0", await RoundTripAsync(path, "\r\n\uD83D\uDE00\0"));
+            foreach (var text in new[] { "\uFEFFabc", "\uFEFF\uFEFFabc", "\uFEFF", "\uFEFF\uFEFF\uD83D\uDE00" })
+                Check.Equal(text, await RoundTripAsync(path, text));
+            var before = await File.ReadAllBytesAsync(path);
+            await Check.ThrowsAsync<ArgumentException>(() => RoundTripAsync(path, "\uD800"));
+            Check.SequenceEqual(before, await File.ReadAllBytesAsync(path));
+            var invalidPath = Path.Combine(dir, "invalid-unicode.txt");
+            await Check.ThrowsAsync<ArgumentException>(() => RoundTripAsync(invalidPath, "\uDC00"));
+            Check.True(!File.Exists(invalidPath));
         }
         finally { Directory.Delete(dir, true); }
     }
@@ -99,6 +113,8 @@ public static class Task02
 - Пустой текст
 - Предварительная отмена не создаёт файл
 - Путь и null text отклонены
+- CRLF, emoji и NUL точно восстанавливаются; непарные суррогаты не создают и не изменяют файл
+- Один и несколько начальных U+FEFF сохраняются как данные, включая строку из одного такого символа
 
 <a id="15-03"></a>
 ## 15-03. До и после незавершённого await
@@ -414,12 +430,24 @@ public static class Task09
         public override long Length => throw new NotSupportedException();
         public override long Seek(long offset, SeekOrigin loc) => throw new NotSupportedException();
     }
+    private sealed class ShortReads : MemoryStream
+    {
+        public ShortReads(byte[] bytes) : base(bytes) { }
+        public int Calls { get; private set; }
+        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
+        {
+            Calls++;
+            return base.ReadAsync(buffer[..Math.Min(1, buffer.Length)], cancellationToken);
+        }
+    }
     public static async Task Run()
     {
         using var stream = new MemoryStream(new byte[7]); stream.Position = 2; Check.Equal(5L, await CountBytesAsync(stream)); Check.True(stream.CanRead); Check.Equal(0L, await CountBytesAsync(stream));
         using var noSeek = new NoSeek(new byte[9]); Check.Equal(9L, await CountBytesAsync(noSeek));
         using var cancelled = new MemoryStream(new byte[2]); await Check.ThrowsAsync<OperationCanceledException>(() => CountBytesAsync(cancelled, new CancellationToken(true))); Check.Equal(0L, cancelled.Position);
         await Check.ThrowsAsync<ArgumentNullException>(() => CountBytesAsync(null!));
+        using var shortReads = new ShortReads(new byte[5]);
+        Check.Equal(5L, await CountBytesAsync(shortReads)); Check.Equal(6, shortReads.Calls); Check.True(shortReads.CanRead);
     }
 }
 ```
@@ -430,6 +458,7 @@ public static class Task09
 - EOF и пустота
 - Поток остаётся открыт
 - Непозиционируемый поток и отмена
+- Короткие чтения по одному байту до EOF не завершают цикл раньше времени
 
 <a id="15-10"></a>
 ## 15-10. Тест жизненного цикла сохранения
@@ -466,6 +495,9 @@ public static class Task10
         var badGate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously); int early = 0; var bad = Broken(() => badGate.Task, () => early++); Check.True(bad.IsCompleted); Check.Equal(1, early); badGate.SetResult(); await badGate.Task;
         await Check.ThrowsAsync<IOException>(() => SaveThenNotifyAsync(() => Task.FromException(new IOException()), () => notices++)); Check.Equal(1, notices);
         int saves = 0; await Check.ThrowsAsync<ArgumentNullException>(() => SaveThenNotifyAsync(() => { saves++; return Task.CompletedTask; }, null!)); Check.Equal(0, saves);
+        var error = new FormatException("notify failure");
+        var observed = await Check.ThrowsAsync<FormatException>(() => SaveThenNotifyAsync(() => { saves++; return Task.CompletedTask; }, () => throw error));
+        Check.True(ReferenceEquals(error, observed)); Check.Equal(1, saves);
     }
 }
 ```
@@ -476,6 +508,7 @@ public static class Task10
 - Неверный вариант реально обнаружен
 - Ошибка сохранения подавляет notify
 - Проверка зависимостей до работы
+- Ошибка notify сохраняет исходный экземпляр исключения и не повторяет save
 
 <a id="15-11"></a>
 ## 15-11. Ограниченное число операций
@@ -484,7 +517,7 @@ public static class Task10
 
 **Ход решения**
 
-WaitAsync должен быть до try, чтобы Release выполнялся только после захвата слота. Внутри try ожидаем work; finally возвращает слот при любом завершении. WhenAll удерживает метод до конца всех обёрток, поэтому semaphore не уничтожается раньше времени. Тест закрывает первые слоты управляемыми gate и проверяет фактические запуски, не измеряя секунды.
+WaitAsync должен быть до try, чтобы Release выполнялся только после захвата слота. Внутри try ожидаем work; finally возвращает слот при любом завершении. WhenAll удерживает метод до конца всех обёрток, поэтому semaphore не уничтожается раньше времени. Тест закрывает первые слоты управляемыми gate и проверяет фактические запуски, не измеряя секунды. Отмена и выдача освободившегося слота могут состязаться: успешный WaitAsync не гарантирует, что token ещё не отменён. Проверка токена после захвата находится внутри try, поэтому отмена не запускает следующий work и не теряет уже полученный слот.
 
 **Частая ошибка**
 
@@ -505,7 +538,7 @@ public static class Task11
     {
         ArgumentNullException.ThrowIfNull(values); ArgumentNullException.ThrowIfNull(work); if (maximum < 1 || maximum > 100) throw new ArgumentOutOfRangeException(nameof(maximum)); if (values.Length > 1000) throw new ArgumentOutOfRangeException(nameof(values)); token.ThrowIfCancellationRequested();
         using var semaphore = new SemaphoreSlim(maximum);
-        async Task<int> One(int value) { await semaphore.WaitAsync(token); try { return await work(value); } finally { semaphore.Release(); } }
+        async Task<int> One(int value) { await semaphore.WaitAsync(token); try { token.ThrowIfCancellationRequested(); return await work(value); } finally { semaphore.Release(); } }
         return await Task.WhenAll(values.Select(One));
     }
     public static async Task Run()
@@ -517,6 +550,14 @@ public static class Task11
         int afterFault = 0; await Check.ThrowsAsync<IOException>(() => MapBoundedAsync(new[] { 1, 2 }, 1, value => { afterFault++; return value == 1 ? Task.FromException<int>(new IOException()) : Task.FromResult(2); })); Check.Equal(2, afterFault);
         int cancelledCalls = 0; await Check.ThrowsAsync<OperationCanceledException>(() => MapBoundedAsync(new[] { 1 }, 1, x => { cancelledCalls++; return Task.FromResult(x); }, new CancellationToken(true))); Check.Equal(0, cancelledCalls);
         await Check.ThrowsAsync<ArgumentOutOfRangeException>(() => MapBoundedAsync(Array.Empty<int>(), 0, Task.FromResult));
+        using var during = new CancellationTokenSource();
+        var active = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously); int duringStarts = 0;
+        var cancelling = MapBoundedAsync(new[] { 1, 2 }, 1, _ => { Interlocked.Increment(ref duringStarts); return active.Task; }, during.Token);
+        during.Cancel(); Check.True(!cancelling.IsCompleted); Check.Equal(1, Volatile.Read(ref duringStarts));
+        active.SetResult(1); await Check.ThrowsAsync<OperationCanceledException>(() => cancelling); Check.Equal(1, Volatile.Read(ref duringStarts));
+        var survivor = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var failedButWaiting = MapBoundedAsync(new[] { 1, 2 }, 2, value => value == 1 ? Task.FromException<int>(new IOException()) : survivor.Task);
+        Check.True(!failedButWaiting.IsCompleted); survivor.SetResult(2); await Check.ThrowsAsync<IOException>(() => failedButWaiting);
     }
 }
 ```
@@ -527,6 +568,8 @@ public static class Task11
 - Результаты сохраняют исходный порядок
 - Ошибка освобождает слот для следующего
 - Предварительная отмена и неверные параметры
+- Отмена ожидания слота не запускает ожидающий work и не завершает метод до уже запущенного work
+- Ошибка одной операции не завершает метод до остальных созданных операций
 
 <a id="15-12"></a>
 ## 15-12. Ограниченные повторные попытки
@@ -719,6 +762,26 @@ public static class Task15
         await Check.ThrowsAsync<IOException>(() => ImportAsync(failure, (item, _) => { if (item.Id == 2) throw new IOException(); saved.Add(item.Id); return Task.CompletedTask; })); Check.SequenceEqual(new[] { 1 }, saved);
         using var empty = Json("[]"); Check.Equal(0, await ImportAsync(empty, (_, _) => Task.CompletedTask));
         using var cancel = Json("[]"); await Check.ThrowsAsync<OperationCanceledException>(() => ImportAsync(cancel, (_, _) => Task.CompletedTask, new CancellationToken(true))); Check.Equal(0L, cancel.Position);
+        using var ordered = Json("[{\"Id\":1,\"Name\":\"A\"},{\"Id\":2,\"Name\":\"B\"}]");
+        var firstStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var finishFirst = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously); int sequentialCalls = 0;
+        var sequential = ImportAsync(ordered, (item, _) =>
+        {
+            Interlocked.Increment(ref sequentialCalls);
+            if (item.Id == 1) { firstStarted.SetResult(); return finishFirst.Task; }
+            return Task.CompletedTask;
+        });
+        await firstStarted.Task; Check.Equal(1, Volatile.Read(ref sequentialCalls)); Check.True(!sequential.IsCompleted);
+        finishFirst.SetResult(); Check.Equal(2, await sequential); Check.Equal(2, Volatile.Read(ref sequentialCalls));
+        using var afterLast = Json("[{\"Id\":1,\"Name\":\"A\"}]"); using var afterLastToken = new CancellationTokenSource();
+        int finalSaves = 0;
+        await Check.ThrowsAsync<OperationCanceledException>(() => ImportAsync(afterLast, (_, token) =>
+        {
+            Check.Equal(afterLastToken.Token, token); finalSaves++; afterLastToken.Cancel(); return Task.CompletedTask;
+        }, afterLastToken.Token));
+        Check.Equal(1, finalSaves); Check.True(afterLast.CanRead);
+        using var malformedName = Json("[{\"Id\":1,\"Name\":\"A\"},{\"Id\":2,\"Name\":\"\\uD800\"}]"); int invalidSaves = 0;
+        await Check.ThrowsAsync<JsonException>(() => ImportAsync(malformedName, (_, _) => { invalidSaves++; return Task.CompletedTask; })); Check.Equal(0, invalidSaves);
     }
 }
 ```
@@ -729,3 +792,5 @@ public static class Task15
 - Дубликат и неверная последняя запись без save
 - Ошибка save прекращает дальнейшие
 - Отмена, пустой снимок и незакрытый source
+- Второй save не начинается до завершения первого; отмена после последнего save наблюдается
+- Неверный Unicode поздней записи не допускает ни одного save

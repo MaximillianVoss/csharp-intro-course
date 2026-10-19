@@ -13,7 +13,11 @@ public static class Task09
             {
                 using StreamWriter writer = new(path, append: true, encoding: encoding); writer.WriteLine(message);
             }
-            return File.ReadAllLines(path, encoding);
+            using StreamReader reader = new(path, encoding, detectEncodingFromByteOrderMarks: false);
+            List<string> result = new();
+            string? line;
+            while ((line = reader.ReadLine()) is not null) result.Add(line);
+            return result.ToArray();
         }
         finally { Directory.Delete(directory, true); }
     }
@@ -22,5 +26,8 @@ public static class Task09
         Check.SequenceEqual(new[] { "первый", "", "третий" }, AppendAndRead(new[] { "первый", "", "третий" }));
         Check.SequenceEqual(Array.Empty<string>(), AppendAndRead(Array.Empty<string>()));
         Check.SequenceEqual(new[] { "один" }, AppendAndRead(new[] { "один" }));
+        Check.SequenceEqual(new[] { "", "" }, AppendAndRead(new[] { "", "" }));
+        Check.SequenceEqual(new[] { "\uFEFFabc", "\uFEFF", "" }, AppendAndRead(new[] { "\uFEFFabc", "\uFEFF", "" }));
+        Check.SequenceEqual(new[] { "", "\uFEFFabc" }, AppendAndRead(new[] { "", "\uFEFFabc" }));
     }
 }

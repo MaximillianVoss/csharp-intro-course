@@ -50,5 +50,14 @@ public static class Task15
         Check.Equal(false, IsKey(new string('a', 21)));
         Check.Equal(false, TryAssignment("mode", out key, out value));
         Check.Equal(false, TryAssignment(null, out key, out value));
+
+        // Review 2026-10-19: value grammar stays free text
+        Check.True(TryAssignment("key=  a  b  ", out key, out value));
+        Check.Equal("a  b", value);
+        Check.True(TryAssignment("key=\"quoted\"", out key, out value));
+        Check.Equal("\"quoted\"", value);
+        Check.Equal(false, TryAssignment("=value", out key, out value));
+        Check.Equal("", key);
+        Check.Equal("", value);
     }
 }

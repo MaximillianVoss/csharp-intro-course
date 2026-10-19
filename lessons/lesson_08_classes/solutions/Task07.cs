@@ -25,5 +25,10 @@ public static class Task07
         Check.True(!cart.TryAdd(null, 1, 1)); Check.True(!cart.TryAdd(" ", 1, 1));
         Check.True(!cart.TryAdd("B", 1, 0)); Check.Equal(2, cart.Count);
         Check.True(cart.TryAdd("free", 0, 1)); Check.Equal(7.50m, cart.Total);
+        Check.True(!cart.TryAdd("bad-price", -1, 1)); Check.True(!cart.TryAdd("bad-quantity", 1, 1001)); Check.Equal(3, cart.Count);
+        Cart full = new(); bool allAccepted = true;
+        for (int i = 0; i < 1000; i++) if (!full.TryAdd("A", 1, 1)) allAccepted = false;
+        Check.True(allAccepted); Check.Equal(1000, full.Count); Check.Equal(1000m, full.Total);
+        Check.True(!full.TryAdd("B", 2, 1)); Check.Equal(1000, full.Count); Check.Equal(1000m, full.Total);
     }
 }

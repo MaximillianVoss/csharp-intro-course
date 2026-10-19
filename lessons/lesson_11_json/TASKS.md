@@ -3,7 +3,7 @@
 Сначала решите задачу самостоятельно. Ответы находятся в отдельном SOLUTIONS.md.
 Уровни: 1 — базовый, 2 — прикладной, 3 — повышенный.
 Код пишите в templates/Tasks.cs; каждый TaskNN.Run — независимое рабочее место.
-Методы из условия можно объявить внутри класса TaskNN.
+В TaskNN уже даны предметные сигнатуры; заполните методы и свой Run, сохранив контракт.
 В задачах на чтение и тестирование запишите объяснение и воспроизводимый эксперимент.
 
 | ID | Уровень | Формат | Задача |
@@ -29,7 +29,7 @@
 
 Уровень 1 · Реализация · Навык: Сериализация свойств DTO
 
-Реализуйте string Serialize(Card card), где Card содержит свойства string Name и int Count. Имя непустое после Trim, Count &gt;= 0; само имя сохраняйте без обрезки. null card вызывает ArgumentNullException, неверные свойства — ArgumentException. Верните компактный JSON с именами Name и Count. Порядок полей несущественен; управляющие символы должны корректно экранироваться.
+Реализуйте string Serialize(Card card), где Card содержит свойства string Name и int Count. Имя непустое после Trim, Count &gt;= 0; Name должен иметь корректную UTF-16-последовательность без непарных суррогатов; само имя сохраняйте без обрезки. null card вызывает ArgumentNullException, неверные свойства — ArgumentException. Верните компактный JSON с именами Name и Count. Порядок полей несущественен; управляющие символы должны корректно экранироваться.
 
 **Пример и ожидаемое поведение**
 
@@ -73,7 +73,7 @@ public sealed class Settings
 
 Уровень 1 · Поиск ошибки · Навык: JsonElement зависит от владеющего JsonDocument
 
-Исправьте JsonElement ReadDetached(string json), сохранив сигнатуру и принимая любой корректный JSON-корень. После возврата вызывающий должен безопасно читать все вложенные значения. Исходный код:
+Исправьте JsonElement ReadDetached(string json), сохранив сигнатуру и принимая любой корректный JSON-корень с корректными Unicode-строками и именами свойств. Непарный Unicode escape в строке или имени отклоняйте JsonException. После возврата вызывающий должен безопасно читать все вложенные значения. Исходный код:
 ```csharp
 static JsonElement ReadDetached(string json)
 {
@@ -94,7 +94,7 @@ ReadDetached для {"Name":"Ada"} → после возврата доступ�
 
 Уровень 1 · Реализация · Навык: Трёхсостояние JSON-свойства
 
-Реализуйте string Label(string json). Корень обязан быть объектом. Если свойства label нет, верните "нет"; если оно JSON null — "пусто"; если строка — её точное значение, включая пустую строку. Любой иной тип label, неверный корень или синтаксис — JsonException. null аргумент — ArgumentNullException. Остальные поля игнорируются. JsonDocument освобождайте до возврата.
+Реализуйте string Label(string json). Корень обязан быть объектом. Если свойства label нет, верните "нет"; если оно JSON null — "пусто"; если строка — её точное значение, включая пустую строку. Непарный Unicode escape в label, любой иной тип label, неверный корень или синтаксис — JsonException. null аргумент — ArgumentNullException. Остальные поля игнорируются. JsonDocument освобождайте до возврата.
 
 **Пример и ожидаемое поведение**
 
@@ -105,7 +105,7 @@ ReadDetached для {"Name":"Ada"} → после возврата доступ�
 
 Уровень 2 · Прикладная задача · Навык: JSON и контролируемое файловое хранение
 
-Создайте Settings с int Volume (0..100). Реализуйте void Save(string path, Settings settings) и Settings Load(string path). Save пишет JSON с отступами; неверная громкость — ArgumentException, null объект — ArgumentNullException. Load для отсутствующего файла при существующем каталоге возвращает новый Settings с Volume=50; для существующего пустого/испорченного файла, null-корня или неверной громкости — JsonException. Остальные файловые ошибки, включая отсутствие каталога, распространяются. null/пустой путь — ArgumentException. Тесты работают только в уникальном временном каталоге и удаляют его в finally.
+Создайте Settings с int Volume (0..100). Реализуйте void Save(string path, Settings settings) и Settings Load(string path). Save пишет JSON с отступами; неверная громкость — ArgumentException, null объект — ArgumentNullException. Load для отсутствующего файла при существующем каталоге возвращает новый Settings с Volume=50; для существующего пустого/испорченного файла, null-корня или неверной громкости — JsonException. Остальные файловые ошибки, включая отсутствие каталога, распространяются. null/пустой/пробельный путь — ArgumentException. Тесты работают только в уникальном временном каталоге и удаляют его в finally.
 
 **Пример и ожидаемое поведение**
 
@@ -164,7 +164,7 @@ static string BuildMessage(string text) => "{\"text\":\"" + text + "\"}";
 
 Уровень 3 · Реализация · Навык: Явная совместимость формата
 
-Реализуйте Config Read(string json), возвращающий Config(string Name,int Retries). Формат v1: {"version":1,"label":"..."}, Retries=3. Формат v2: {"version":2,"name":"...","retries":целое 0..5}. Указанные поля обязательны, имена непустые после Trim; сохраняйте исходное имя. Лишние поля разрешены. Отсутствие/неверный тип/version вне 1..2/null-корень — JsonException. null аргумент — ArgumentNullException. Не пытайтесь угадать версию по наличию label.
+Реализуйте Config Read(string json), возвращающий Config(string Name,int Retries). Формат v1: {"version":1,"label":"..."}, Retries=3. Формат v2: {"version":2,"name":"...","retries":целое 0..5}. Указанные поля обязательны, имена непустые после Trim; сохраняйте исходное имя. Лишние поля разрешены. Непарный Unicode escape в имени, отсутствие/неверный тип/version вне 1..2/null-корень — JsonException. null аргумент — ArgumentNullException. Не пытайтесь угадать версию по наличию label.
 
 **Пример и ожидаемое поведение**
 
@@ -197,7 +197,7 @@ JSON "done" → Done; JSON " done " и "Pending, Done" → JsonException; Write(
 
 Уровень 3 · Реализация · Навык: Отличие отсутствующего поля от сброса
 
-Реализуйте Profile Patch(Profile original,string json), где immutable Profile — record(string Name,string? Bio). Исходное Name непустое. JSON-объект может содержать только name и bio, каждый не более одного раза. Отсутствующее поле сохраняется; name обязано быть непустой строкой; bio — строка или null (сброс). Неизвестное/повторное поле, неверный тип, пустое name или неверный корень — JsonException. Исходный record не меняйте. null original/json — ArgumentNullException; неверная исходная модель — ArgumentException.
+Реализуйте Profile Patch(Profile original,string json), где immutable Profile — record(string Name,string? Bio). Исходное Name непустое/непробельное. JSON-объект может содержать только name и bio, каждый не более одного раза. Отсутствующее поле сохраняется; name обязано быть непустой строкой; bio — строка или null (сброс). Непарный Unicode escape в ключе/значении, неизвестное/повторное поле, неверный тип, пустое name или неверный корень — JsonException. Исходный record не меняйте. null original/json — ArgumentNullException; неверная исходная модель — ArgumentException.
 
 **Пример и ожидаемое поведение**
 

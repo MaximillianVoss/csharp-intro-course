@@ -13,5 +13,11 @@ public static class Task04
         Check.Near(0,Percent(0,1)); Check.Near(25,Percent(1,4));
         Check.Throws<ArgumentOutOfRangeException>(()=>Percent(1,0));
         Check.Throws<ArgumentOutOfRangeException>(()=>Percent(3,2));
+        Check.Throws<ArgumentOutOfRangeException>(()=>Percent(-1,2));
+        Check.Throws<ArgumentOutOfRangeException>(()=>Percent(0,-1));
+        Func<int,int,double> truncated=(done,total)=>100*done/total;
+        Func<int,int,double> overflowed=(done,total)=>unchecked(100*done)/total;
+        Check.True(Math.Abs(truncated(1,3)-Percent(1,3))>0.1);
+        Check.True(overflowed(int.MaxValue,int.MaxValue)!=Percent(int.MaxValue,int.MaxValue));
     }
 }

@@ -18,5 +18,18 @@ public static class Task14
         Check.Throws<ArgumentException>(()=>Apply(stock,[("other",1)]));
         Check.Throws<ArgumentException>(()=>Apply(stock,[("tea",5),("tea",6)]));Check.Equal(2,stock["tea"]);
         Apply(stock,[("tea",5),("milk",0)]);Check.Equal(5,stock["tea"]);Check.Equal(0,stock["milk"]);Apply(stock,[]);
+        var snapshot=stock.OrderBy(p=>p.Key,StringComparer.Ordinal).ToArray();
+        foreach(var invalid in new (string Product,int Quantity)[][] {
+            [("tea",1),("milk",101)],[("tea",1),(null!,2)],[("tea",1),("",2)] })
+        {
+            Check.Throws<ArgumentException>(()=>Apply(stock,invalid));
+            Check.SequenceEqual(snapshot,stock.OrderBy(p=>p.Key,StringComparer.Ordinal));
+        }
+        var large=Enumerable.Range(0,101).ToDictionary(i=>"p"+i,_=>0,StringComparer.Ordinal);
+        var tooLong=large.Keys.Select(key=>(Product:key,Quantity:1)).ToArray();
+        Check.Throws<ArgumentException>(()=>Apply(large,tooLong));
+        Check.True(large.Values.All(n=>n==0));
+        Apply(large,tooLong.Take(100).ToArray());
+        Check.Equal(100,large.Values.Count(n=>n==1));
     }
 }

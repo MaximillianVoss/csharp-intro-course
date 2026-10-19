@@ -129,6 +129,11 @@ public static class Task03
             ("65536",false,0),("+80",false,0),(" 80",false,0),("８０",false,0),
             ("123456",false,0),("",false,0),(null,false,0) };
         foreach (var row in cases) { Check.Equal(row.Success,TryPort(row.Text,out int port)); Check.Equal(row.Port,port); }
+        foreach (var row in new (string Text,bool Success,int Port)[] {
+            ("00001",true,1),("00000",false,0),("000001",false,0),("80 ",false,0),("8a0",false,0) })
+        {
+            Check.Equal(row.Success,TryPort(row.Text,out int port)); Check.Equal(row.Port,port);
+        }
     }
 }
 ```
@@ -139,6 +144,8 @@ public static class Task03
 - Выход за верхнюю границу
 - Знак, пробел, Unicode-цифры, null
 - На отказе out всегда 0
+- 00001 допустимо, но000001 отклоняется по длине; out на отказе0
+- 80 с пробелом справа и8a0 отклоняются
 
 <a id="16-04"></a>
 ## 16-04. Регрессия переполнения процента
@@ -171,6 +178,12 @@ public static class Task04
         Check.Near(0,Percent(0,1)); Check.Near(25,Percent(1,4));
         Check.Throws<ArgumentOutOfRangeException>(()=>Percent(1,0));
         Check.Throws<ArgumentOutOfRangeException>(()=>Percent(3,2));
+        Check.Throws<ArgumentOutOfRangeException>(()=>Percent(-1,2));
+        Check.Throws<ArgumentOutOfRangeException>(()=>Percent(0,-1));
+        Func<int,int,double> truncated=(done,total)=>100*done/total;
+        Func<int,int,double> overflowed=(done,total)=>unchecked(100*done)/total;
+        Check.True(Math.Abs(truncated(1,3)-Percent(1,3))>0.1);
+        Check.True(overflowed(int.MaxValue,int.MaxValue)!=Percent(int.MaxValue,int.MaxValue));
     }
 }
 ```
@@ -181,6 +194,8 @@ public static class Task04
 - Верхний предел int
 - Ноль выполненных
 - Нулевой total и done&gt;total
+- Отрицательные done иtotal
+- Два исполняемых ошибочных варианта отдельно показывают усечение и переполнение
 
 <a id="16-05"></a>
 ## 16-05. Сообщение после сохранения
@@ -189,7 +204,7 @@ public static class Task04
 
 **Ход решения**
 
-TextWriter позволяет наблюдать вывод без глобальной подмены Console. Счётчик в callback доказывает, что повтора записи не было. В ошибочном сценарии проверяем сразу три свойства: тип ошибки, отсутствие ложного подтверждения, ровно одну попытку. Такой тест проверяет контракт взаимодействия, а не конкретный текст исходника.
+TextWriter позволяет наблюдать вывод без глобальной подмены Console. Счётчик в callback доказывает, что повтора записи не было. В ошибочном сценарии проверяем сразу три свойства: тип ошибки, отсутствие ложного подтверждения, ровно одну попытку. Такой тест проверяет контракт взаимодействия, а не конкретный текст исходника. Проверка обеих зависимостей до первого эффекта исключает сохранение при заведомо непригодной конфигурации. Отказ writer означает, что запись уже могла состояться: бездумный retry повторил бы эффект. Тест отдельно различает отказ сохранения и отказ подтверждения.
 
 **Частая ошибка**
 
@@ -202,14 +217,36 @@ namespace Course.Lesson16;
 
 public static class Task05
 {
-    public static void Commit(Action save,TextWriter output) { save(); output.WriteLine("Сохранено"); }
+    public static void Commit(Action save,TextWriter output)
+    {
+        ArgumentNullException.ThrowIfNull(save);
+        ArgumentNullException.ThrowIfNull(output);
+        save();
+        output.WriteLine("Сохранено");
+    }
+    private sealed class FailingWriter : TextWriter
+    {
+        public override System.Text.Encoding Encoding => System.Text.Encoding.UTF8;
+        public override void WriteLine(string? value) => throw new IOException("output");
+    }
     public static void Run()
     {
         int calls=0; using var success=new StringWriter();
+        Check.Throws<ArgumentNullException>(()=>Commit(()=>calls++,null!));
+        Check.Equal(0,calls);
+        Check.Throws<ArgumentNullException>(()=>Commit(null!,success));
+        Check.Equal("",success.ToString());
         Commit(()=>calls++,success); Check.Equal(1,calls); Check.Equal("Сохранено"+Environment.NewLine,success.ToString());
+        success.Write("tail"); Check.True(success.ToString().EndsWith("tail",StringComparison.Ordinal));
         using var failure=new StringWriter(); calls=0;
         Check.Throws<IOException>(()=>Commit(()=>{calls++;throw new IOException("disk");},failure));
         Check.Equal(1,calls); Check.Equal("",failure.ToString());
+        calls=0;
+        Check.Throws<FormatException>(()=>Commit(()=>{calls++;throw new FormatException("data");},failure));
+        Check.Equal(1,calls); Check.Equal("",failure.ToString());
+        using var outputFailure=new FailingWriter(); calls=0;
+        Check.Throws<IOException>(()=>Commit(()=>calls++,outputFailure));
+        Check.Equal(1,calls);
     }
 }
 ```
@@ -219,6 +256,10 @@ public static class Task05
 - Успешный callback вызывается один раз
 - Отказ доходит до вызывающего кода
 - При отказе нет сообщения об успехе
+- null output не запускает save; null save не пишет вывод
+- Произвольная ошибка callback не маскируется
+- Ошибка writer после одного save не вызывает повтор
+- Writer остаётся открыт
 
 <a id="16-06"></a>
 ## 16-06. Часы как явная зависимость
@@ -334,6 +375,11 @@ public static class Task08
         Check.True(!IsValidSort([2,1,2],[1,2])); Check.True(!IsValidSort([1,4],[2,3]));
         Check.True(!IsValidSort([2,1],[2,1]));
         Check.True(IsValidSort([int.MaxValue,int.MinValue],[int.MinValue,int.MaxValue]));
+        Check.True(!IsValidSort([1,1,2],[1,2,2]));
+        int[] original=[3,1,3,2],result=[1,2,3,3];
+        int[] originalCopy=(int[])original.Clone(),resultCopy=(int[])result.Clone();
+        Check.True(IsValidSort(original,result));
+        Check.SequenceEqual(originalCopy,original); Check.SequenceEqual(resultCopy,result);
     }
 }
 ```
@@ -345,6 +391,8 @@ public static class Task08
 - Подмена при той же сумме
 - Неправильный порядок
 - int.MinValue и int.MaxValue
+- Одинаковое множество при разной кратности1/2 не принимается
+- Оба входных массива неизменны
 
 <a id="16-09"></a>
 ## 16-09. Переводы строк в сравнении вывода
@@ -391,7 +439,7 @@ public static class Task09
 
 **Ход решения**
 
-Грамматику разбираем раньше выполнения приложения. Флаги seenLimit/seenReverse отделены от значений по умолчанию: иначе явный --limit 10 нельзя отличить от отсутствия опции. Значение должно состоять из ASCII-цифр и затем проходить диапазон. Расход времени O(n), память O(1) кроме строки аргумента.
+Грамматику разбираем раньше выполнения приложения. seenLimit отделён от значения limit: явный --limit 10 нельзя перепутать с отсутствием опции. Для --reverse значение false может смениться только на true, поэтому само reverse одновременно отмечает уже встреченный флаг. Это не две независимые переменные seenReverse/reverse. Число состоит из ASCII-цифр и проходит диапазон; ведущие нули не меняют его. Время O(суммарной длины аргументов), дополнительная память O(1).
 
 **Частая ошибка**
 
@@ -428,8 +476,12 @@ public static class Task10
         Check.Equal(new Options(3,true),Parse(["--reverse","--limit","3"]));
         Check.Equal(new Options(1,true),Parse(["--limit","1","--reverse"]));
         Check.Equal(100,Parse(["--limit","100"]).Limit);
+        Check.Equal(1,Parse(["--limit",new string('0',100)+"1"]).Limit);
+        Check.Equal(new Options(10,true),Parse(["--reverse"]));
         string[][] wrong=[["--reverse","--reverse"],["--limit"],["--limit","0"],["--limit","101"],["--limit","+2"],["other"],["--limit","10","--limit","2"]];
         foreach(var row in wrong)Check.Throws<ArgumentException>(()=>Parse(row));
+        foreach(string value in new[]{""," 2","2 ","２","2147483648","--reverse"})
+            Check.Throws<ArgumentException>(()=>Parse(["--limit",value]));
     }
 }
 ```
@@ -440,6 +492,7 @@ public static class Task10
 - Значения по умолчанию
 - Повтор, неизвестная опция и пропущенное значение
 - Границы 1/100 и недопустимые 0/101/+2
+- Ведущие нули, включая длинную строку; отдельный --reverse; пустое N, пробелы, Unicode-цифра, переполнение и другая опция вместо N.
 
 <a id="16-11"></a>
 ## 16-11. Поток вывода вместо Console
@@ -463,6 +516,8 @@ public static class Task11
 {
     public static void WriteReport(IReadOnlyDictionary<string,int> rows,TextWriter writer)
     {
+        ArgumentNullException.ThrowIfNull(rows);
+        ArgumentNullException.ThrowIfNull(writer);
         foreach(var row in rows.OrderBy(p=>p.Key,StringComparer.Ordinal))writer.WriteLine($"{row.Key}={row.Value}");
     }
     public static void Run()
@@ -472,6 +527,17 @@ public static class Task11
         Check.Equal("a=1\nb=2\n",writer.ToString()); writer.Write("tail");
         Check.True(writer.ToString().EndsWith("tail",StringComparison.Ordinal));
         using var empty=new StringWriter(); WriteReport(new Dictionary<string,int>(),empty); Check.Equal("",empty.ToString());
+        Check.Throws<ArgumentNullException>(()=>WriteReport(null!,empty));
+        Check.Throws<ArgumentNullException>(()=>WriteReport(new Dictionary<string,int>(),null!));
+        var culture=System.Globalization.CultureInfo.CurrentCulture;
+        try
+        {
+            System.Globalization.CultureInfo.CurrentCulture=new("tr-TR");
+            using var ordinal=new StringWriter(){NewLine="\n"};
+            WriteReport(new Dictionary<string,int>{{"ı",4},{"İ",3},{"i",2},{"I",1}},ordinal);
+            Check.Equal("I=1\ni=2\nİ=3\nı=4\n",ordinal.ToString());
+        }
+        finally{System.Globalization.CultureInfo.CurrentCulture=culture;}
     }
 }
 ```
@@ -481,6 +547,8 @@ public static class Task11
 - Сортировка a перед b
 - Пустой словарь без строки-заглушки
 - Поток остаётся пригодным для дальнейшей записи
+- Ordinal-порядок I/i/İ/ı сохраняется при tr-TR
+- Обе null-зависимости отклоняются
 
 <a id="16-12"></a>
 ## 16-12. Модель очереди и ошибочный стек
@@ -557,6 +625,10 @@ public static class Task13
         Check.True(!ReadFlag("{\"enabled\":false}"));Check.True(ReadFlag("{\"ENABLED\":true}"));
         foreach(string json in new[]{"{}","null","{\"enabled\":null}"})Check.Throws<InvalidDataException>(()=>ReadFlag(json));
         Check.Throws<System.Text.Json.JsonException>(()=>ReadFlag("{\"enabled\":\"yes\"}"));
+        Check.Throws<ArgumentNullException>(()=>ReadFlag(null!));
+        foreach(string json in new[]{"{broken","[]","true","{\"enabled\":1}"})
+            Check.Throws<System.Text.Json.JsonException>(()=>ReadFlag(json));
+        Check.True(ReadFlag("{\"extra\":{\"any\":[]},\"EnAbLeD\":true}"));
     }
 }
 ```
@@ -567,6 +639,9 @@ public static class Task13
 - Отсутствующее и null поле
 - JSON null
 - Неверный тип флага
+- Массив/логическое значение вместо объекта и повреждённыйJSON
+- null-ссылка отличается от JSON null
+- Неизвестный вложенный объект не мешает чтению флага
 
 <a id="16-14"></a>
 ## 16-14. Пакет обновлений без частичного применения
@@ -604,6 +679,19 @@ public static class Task14
         Check.Throws<ArgumentException>(()=>Apply(stock,[("other",1)]));
         Check.Throws<ArgumentException>(()=>Apply(stock,[("tea",5),("tea",6)]));Check.Equal(2,stock["tea"]);
         Apply(stock,[("tea",5),("milk",0)]);Check.Equal(5,stock["tea"]);Check.Equal(0,stock["milk"]);Apply(stock,[]);
+        var snapshot=stock.OrderBy(p=>p.Key,StringComparer.Ordinal).ToArray();
+        foreach(var invalid in new (string Product,int Quantity)[][] {
+            [("tea",1),("milk",101)],[("tea",1),(null!,2)],[("tea",1),("",2)] })
+        {
+            Check.Throws<ArgumentException>(()=>Apply(stock,invalid));
+            Check.SequenceEqual(snapshot,stock.OrderBy(p=>p.Key,StringComparer.Ordinal));
+        }
+        var large=Enumerable.Range(0,101).ToDictionary(i=>"p"+i,_=>0,StringComparer.Ordinal);
+        var tooLong=large.Keys.Select(key=>(Product:key,Quantity:1)).ToArray();
+        Check.Throws<ArgumentException>(()=>Apply(large,tooLong));
+        Check.True(large.Values.All(n=>n==0));
+        Apply(large,tooLong.Take(100).ToArray());
+        Check.Equal(100,large.Values.Count(n=>n==1));
     }
 }
 ```
@@ -614,6 +702,8 @@ public static class Task14
 - Неизвестный продукт и повтор
 - Успешный пакет
 - Пустой пакет
+- Недопустимые101/null/пустой ключ во второй позиции сохраняют весь снимок
+- 101 уникальное обновление отклоняется до записи;100 уникальных принимаются
 
 <a id="16-15"></a>
 ## 16-15. Приёмка собранного приложения

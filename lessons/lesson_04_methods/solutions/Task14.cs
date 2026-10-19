@@ -48,5 +48,14 @@ public static class Task14
         Refusal(12, 30, -1);
         Refusal(12, 30, 1441);
         Refusal(12, 30, int.MaxValue);
+
+        // Review 2026-10-19: last minute and extreme invalid state
+        hours = 23;
+        minutes = 59;
+        Check.True(TryAdvanceClock(ref hours, ref minutes, 1));
+        Check.Equal(0, hours);
+        Check.Equal(0, minutes);
+        Refusal(int.MinValue, 30, 0);
+        Refusal(23, int.MaxValue, 0);
     }
 }

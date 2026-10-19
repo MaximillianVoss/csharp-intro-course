@@ -33,5 +33,12 @@ public static class Task15
         Check.Equal("locked", TryCode(emptyLine, 1));
         using var numeric = new StringReader("420\n");
         Check.Equal("locked", TryCode(numeric, 1));
+
+        // Review 2026-10-19: exact attempt boundary and immediate EOF
+        using var noLines = new StringReader("");
+        Check.Equal("eof", TryCode(noLines, 3));
+        using var lastAttempt = new StringReader("bad\nalso-bad\n0420\nuntouched\n");
+        Check.Equal("ok:3", TryCode(lastAttempt, 3));
+        Check.Equal("untouched", lastAttempt.ReadLine());
     }
 }

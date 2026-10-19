@@ -11,5 +11,7 @@ public static class Task01
         int calls = 0; Check.Equal(5, Apply(4, x => { calls++; return x + 1; })); Check.Equal(1, calls);
         Check.Throws<FormatException>(() => Apply(0, _ => throw new FormatException("bad")));
         Check.Throws<ArgumentNullException>(() => Apply(0, null!));
+        var failure = new FormatException("same instance"); int faultCalls = 0;
+        var observed = Check.Throws<FormatException>(() => Apply(1, _ => { faultCalls++; throw failure; })); Check.True(ReferenceEquals(failure, observed)); Check.Equal(1, faultCalls);
     }
 }

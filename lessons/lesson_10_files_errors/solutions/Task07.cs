@@ -16,7 +16,8 @@ public static class Task07
         try
         {
             Check.Equal(Path.Combine(root, "report-1.txt"), ResolveChild(root, "report-1.txt"));
-            foreach (string? invalid in new string?[] { "../report.txt", "a\\b", "C:other", "..", ".", null, " ", new string('a', 101) })
+            Check.Equal(Path.Combine(root, new string('a', 100)), ResolveChild(root, new string('a', 100)));
+            foreach (string? invalid in new string?[] { "../report.txt", "a\\b", "C:other", "..", ".", null, "", " ", new string('a', 101) })
                 Check.Throws<ArgumentException>(() => ResolveChild(root, invalid));
         }
         finally { Directory.Delete(root, true); }

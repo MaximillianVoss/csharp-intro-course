@@ -19,5 +19,8 @@ public static class Task01
         using StringReader tooLarge = new("65536"); Check.Throws<ArgumentOutOfRangeException>(() => ReadPort(tooLarge));
         using StringReader lower = new("1"); Check.Equal(1, ReadPort(lower));
         using StringReader upper = new("65535"); Check.Equal(65535, ReadPort(upper));
+        using StringReader blank = new("\n"); Check.Throws<FormatException>(() => ReadPort(blank));
+        using StringReader tail = new("8080\ntail"); Check.Equal(8080, ReadPort(tail)); Check.Equal("tail", tail.ReadLine());
+        using StringReader badTail = new("bad\ntail"); Check.Throws<FormatException>(() => ReadPort(badTail)); Check.Equal("tail", badTail.ReadLine());
     }
 }

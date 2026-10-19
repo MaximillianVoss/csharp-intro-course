@@ -296,6 +296,11 @@ public static class Task06
         Check.Equal(false, SameCommand(" start ", "start"));
         Check.Equal(false, SameCommand("starter", "start"));
         Check.True(SameCommand("stop", "stop"));
+
+        // Review 2026-10-19: ordinal Latin I contrasts
+        Check.True(SameCommand("I", "i"));
+        Check.Equal(false, SameCommand("ı", "i"));
+        Check.Equal(false, SameCommand("İ", "i"));
     }
 }
 ```
@@ -307,6 +312,7 @@ public static class Task06
 - Пробелы
 - Иная команда
 - Равенство без изменений
+- ASCII I/i и оба турецких контраста проверяют конкретный смысл OrdinalIgnoreCase
 
 <a id="05-07"></a>
 ## 05-07. Разделитель остался в результате
@@ -546,6 +552,14 @@ public static class Task10
         Check.Equal(false, TryUnquote(null, out value));
         Check.Equal(false, TryUnquote("abc", out value));
         Check.Equal("", value);
+
+        // Review 2026-10-19: whole quoted field boundaries
+        Check.True(TryUnquote("\"a\nb\"", out value));
+        Check.Equal("a\nb", value);
+        Check.Equal(false, TryUnquote(" \"a\"", out value));
+        Check.Equal("", value);
+        Check.Equal(false, TryUnquote("\"", out value));
+        Check.Equal("", value);
     }
 }
 ```
@@ -558,6 +572,8 @@ public static class Task10
 - Три и четыре кавычки
 - Null и отсутствие внешних кавычек
 - Отказ очищает out
+- Перевод строки внутри поля сохраняется
+- Пробел снаружи кавычек и одиночная кавычка отвергаются с пустым out
 
 <a id="05-11"></a>
 ## 05-11. Различающий тест для первого скаляра
@@ -706,6 +722,10 @@ public static class Task13
         Check.Equal(false, SameLabel("a", "a "));
         Check.Equal(false, SameLabel("①", "1"));
         Check.True(SameLabel("", ""));
+
+        // Review 2026-10-19: normalization is not deaccenting or confusable folding
+        Check.Equal(false, SameLabel("e", "é"));
+        Check.Equal(false, SameLabel("A", "А"));
     }
 }
 ```
@@ -717,6 +737,8 @@ public static class Task13
 - Различие пробелов
 - Совместимый знак не приравнен
 - Пустые строки
+- Акцент не удаляется
+- Визуально похожая кириллическая А не приравнивается к латинской A
 
 <a id="05-14"></a>
 ## 05-14. Число в явно выбранной культуре
@@ -767,6 +789,12 @@ public static class Task14
         Check.Equal(false, TryAmount(null, "ru-RU", out value));
         Check.Equal(false, TryAmount("1000001", "en-US", out value));
         Check.Equal(0m, value);
+
+        // Review 2026-10-19: exponent and grouping remain forbidden
+        Check.Equal(false, TryAmount("1e2", "en-US", out value));
+        Check.Equal(0m, value);
+        Check.Equal(false, TryAmount("1 000", "ru-RU", out value));
+        Check.Equal(0m, value);
     }
 }
 ```
@@ -780,6 +808,8 @@ public static class Task14
 - Группировка запрещена
 - Null
 - Выход за диапазон с out=0
+- Экспонента запрещена с out=0
+- Внутренняя группировка пробелом не разрешена русской культурой без AllowThousands
 
 <a id="05-15"></a>
 ## 05-15. Разбор присваивания с проверкой ключа
@@ -849,6 +879,15 @@ public static class Task15
         Check.Equal(false, IsKey(new string('a', 21)));
         Check.Equal(false, TryAssignment("mode", out key, out value));
         Check.Equal(false, TryAssignment(null, out key, out value));
+
+        // Review 2026-10-19: value grammar stays free text
+        Check.True(TryAssignment("key=  a  b  ", out key, out value));
+        Check.Equal("a  b", value);
+        Check.True(TryAssignment("key=\"quoted\"", out key, out value));
+        Check.Equal("\"quoted\"", value);
+        Check.Equal(false, TryAssignment("=value", out key, out value));
+        Check.Equal("", key);
+        Check.Equal("", value);
     }
 }
 ```
@@ -862,3 +901,6 @@ public static class Task15
 - Длина ключа 20 и 21
 - Нет разделителя и EOF
 - Оба out очищены при отказе
+- Внутренние пробелы значения сохраняются
+- Кавычки значения не интерпретируются
+- Пустой ключ отвергается с очисткой обоих out

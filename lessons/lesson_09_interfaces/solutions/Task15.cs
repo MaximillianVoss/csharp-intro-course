@@ -24,7 +24,11 @@ public static class Task15
         public FixedRecipients(string[] values) { this.values = values; }
         public string[] Get() { Calls++; return (string[])values.Clone(); }
     }
-    private sealed class GreetingTemplate : IMessageTemplate { public string Build(string recipient) => "Привет, " + recipient; }
+    private sealed class GreetingTemplate : IMessageTemplate
+    {
+        public int Calls { get; private set; }
+        public string Build(string recipient) { Calls++; return "Привет, " + recipient; }
+    }
     private sealed class RecordingChannel : IChannel
     {
         public List<string> Attempts { get; } = new();
@@ -33,8 +37,8 @@ public static class Task15
     public static void Run()
     {
         FixedRecipients recipients = new(new[] { "a", "b", "a" }); RecordingChannel channel = new();
-        DeliverySummary result = new NotificationService(recipients, new GreetingTemplate(), channel).SendAll();
-        Check.Equal(new DeliverySummary(3, 2), result); Check.Equal(1, recipients.Calls);
+        GreetingTemplate template = new(); DeliverySummary result = new NotificationService(recipients, template, channel).SendAll();
+        Check.Equal(new DeliverySummary(3, 2), result); Check.Equal(1, recipients.Calls); Check.Equal(3, template.Calls);
         Check.SequenceEqual(new[] { "a|Привет, a", "b|Привет, b", "a|Привет, a" }, channel.Attempts);
         Check.Equal(new DeliverySummary(0, 0), new NotificationService(new FixedRecipients(Array.Empty<string>()), new GreetingTemplate(), new RecordingChannel()).SendAll());
     }

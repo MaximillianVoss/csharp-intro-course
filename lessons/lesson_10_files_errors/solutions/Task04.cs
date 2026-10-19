@@ -11,13 +11,15 @@ public static class Task04
             string path = Path.Combine(directory, "text.txt");
             System.Text.UTF8Encoding encoding = new(false, true);
             File.WriteAllText(path, text, encoding);
-            return File.ReadAllText(path, encoding);
+            return encoding.GetString(File.ReadAllBytes(path));
         }
         finally { Directory.Delete(directory, true); }
     }
     public static void Run()
     {
         Check.Equal("Привет\r\nC#\n🙂", RoundTrip("Привет\r\nC#\n🙂")); Check.Equal("", RoundTrip(""));
+        Check.Equal("\uFEFFabc", RoundTrip("\uFEFFabc"));
+        Check.Equal("\uFEFF\uFEFF", RoundTrip("\uFEFF\uFEFF"));
         string directory = Path.Combine(Path.GetTempPath(), "csharp-course-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(directory);
         try

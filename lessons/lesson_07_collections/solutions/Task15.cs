@@ -31,5 +31,7 @@ public static class Task15
         Check.Equal(0, ShortestPath(new bool[1, 1], 0, 0, 0, 0));
         Check.Equal(-1, ShortestPath(new[,] { { true, false } }, 0, 0, 0, 1));
         Check.True(map[0, 1] && !map[1, 1]);
+        Check.Equal(-1, ShortestPath(new[,] { { false, true } }, 0, 0, 0, 1));
+        Check.Equal(4, ShortestPath(new bool[2, 4], 0, 0, 1, 3));
     }
 }

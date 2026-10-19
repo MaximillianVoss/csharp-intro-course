@@ -42,5 +42,13 @@ public static class Task10
         Check.Equal(false, TryUnquote(null, out value));
         Check.Equal(false, TryUnquote("abc", out value));
         Check.Equal("", value);
+
+        // Review 2026-10-19: whole quoted field boundaries
+        Check.True(TryUnquote("\"a\nb\"", out value));
+        Check.Equal("a\nb", value);
+        Check.Equal(false, TryUnquote(" \"a\"", out value));
+        Check.Equal("", value);
+        Check.Equal(false, TryUnquote("\"", out value));
+        Check.Equal("", value);
     }
 }

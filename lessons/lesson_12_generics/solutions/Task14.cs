@@ -13,7 +13,7 @@ public static class Task14
         public T[] Snapshot()
         {
             var result = new T[Count]; int start = Count == data.Length ? next : 0;
-            for (int i = 0; i < Count; i++) result[i] = data[(start + i) % data.Length]; return result;
+            for (int i = 0; i < Count; i++) result[i] = data[(int)(((long)start + i) % data.Length)]; return result;
         }
     }
     public static void Run()

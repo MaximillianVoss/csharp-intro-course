@@ -3,7 +3,7 @@
 Сначала решите задачу самостоятельно. Ответы находятся в отдельном SOLUTIONS.md.
 Уровни: 1 — базовый, 2 — прикладной, 3 — повышенный.
 Код пишите в templates/Tasks.cs; каждый TaskNN.Run — независимое рабочее место.
-Методы из условия можно объявить внутри класса TaskNN.
+В TaskNN уже даны предметные сигнатуры; заполните методы и свой Run, сохранив контракт.
 В задачах на чтение и тестирование запишите объяснение и воспроизводимый эксперимент.
 
 | ID | Уровень | Формат | Задача |
@@ -59,7 +59,7 @@ Printer parent = derived;
 
 **Пример и ожидаемое поведение**
 
-["base description","fancy render","fancy description"].
+Replay возвращает string[3] в порядке parent.Describe(), parent.Render(), derived.Describe(); конкретные строки предскажите до выполнения.
 
 <a id="09-03"></a>
 ## 09-03. Налоговая политика как зависимость
@@ -135,7 +135,7 @@ Animal animal = new BrokenDog();
 ```csharp
 public interface INameStore { string Read(); void Write(string value); }
 // BuildHeading требует INameStore, хотя никогда не пишет.
-```
+``` Создайте также public sealed class ReadOnlyName(string value), реализующий только IReadName и возвращающий переданное значение; допустим обычный эквивалентный конструктор.
 
 **Пример и ожидаемое поведение**
 

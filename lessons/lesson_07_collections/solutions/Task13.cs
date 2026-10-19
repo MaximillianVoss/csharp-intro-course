@@ -23,5 +23,14 @@ public static class Task13
         Check.Equal(0, ReplayEditor(new[] { "undo", "redo" }));
         Check.Equal(0, ReplayEditor(new[] { "set 1", "set 2", "undo", "undo" }));
         Check.Equal(4, ReplayEditor(new[] { "set 4", "set 4", "undo" }));
+        Check.Equal(1, ReplayEditor(new[] { "set 1", "set 2", "undo", "set 1", "redo" }));
+        System.Globalization.CultureInfo previous = System.Globalization.CultureInfo.CurrentCulture;
+        try
+        {
+            System.Globalization.CultureInfo unusual = (System.Globalization.CultureInfo)System.Globalization.CultureInfo.InvariantCulture.Clone();
+            unusual.NumberFormat.NegativeSign = "minus"; System.Globalization.CultureInfo.CurrentCulture = unusual;
+            Check.Equal(int.MinValue, ReplayEditor(new[] { "set -2147483648" }));
+        }
+        finally { System.Globalization.CultureInfo.CurrentCulture = previous; }
     }
 }

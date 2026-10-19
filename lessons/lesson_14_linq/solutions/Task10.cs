@@ -17,5 +17,7 @@ public static class Task10
         var ada = new User("Ada"); Check.True(ReferenceEquals(ada, FindUnique(new[] { ada }, "ADA"))); Check.Equal<User?>(null, FindUnique(new[] { ada }, "Bob"));
         var duplicate = new[] { ada, new User("ADA") }; Check.Throws<InvalidOperationException>(() => FindUnique(duplicate, "ada")); Check.True(ReferenceEquals(ada, Broken(duplicate, "ada")));
         Check.Equal<User?>(null, FindUnique(Array.Empty<User>(), "")); Check.Throws<ArgumentException>(() => FindUnique(new User[] { null! }, "x"));
+        Check.Throws<ArgumentException>(() => FindUnique(new[] { ada, new User(null!) }, "Ada"));
+        Check.Throws<ArgumentNullException>(() => FindUnique(new[] { ada }, null!));
     }
 }

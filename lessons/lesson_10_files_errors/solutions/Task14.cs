@@ -19,6 +19,10 @@ public static class Task14
             byte[] corrupt = { 0xC3, 0x28 }; File.WriteAllBytes(path, corrupt);
             Check.Throws<System.Text.DecoderFallbackException>(() => ReadStrictUtf8(path));
             string wrong = System.Text.Encoding.UTF8.GetString(corrupt); Check.True(wrong.Contains('\uFFFD'));
+            File.WriteAllBytes(path, new byte[] { 0xC3 }); Check.Throws<System.Text.DecoderFallbackException>(() => ReadStrictUtf8(path));
+            File.WriteAllBytes(path, new byte[] { 0xFF, 0xFE, 0x41, 0x00 }); Check.Throws<System.Text.DecoderFallbackException>(() => ReadStrictUtf8(path));
+            File.WriteAllBytes(path, new byte[] { 0xEF, 0xBB, 0xBF }); Check.Equal("", ReadStrictUtf8(path));
+            File.WriteAllBytes(path, new byte[] { 0x41, 0xEF, 0xBB, 0xBF }); Check.Equal("A\uFEFF", ReadStrictUtf8(path));
         }
         finally { Directory.Delete(directory, true); }
     }
